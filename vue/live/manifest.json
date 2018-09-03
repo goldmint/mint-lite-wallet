@@ -1,0 +1,13 @@
+{
+	"name": "Sumus Wallet",
+	"description" : "Goldmint blockchain light wallet",
+	"version": "0.5.0",
+	"manifest_version": 2,
+	"browser_action": {
+		"default_popup": "chrome/index.html",
+		"default_icon": "chrome/icon.png"
+	},
+	"permissions": [
+	  "storage"
+	]
+}
