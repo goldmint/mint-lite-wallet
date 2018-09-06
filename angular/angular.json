@@ -27,6 +27,8 @@
               "src/assets/icon.png"
             ],
             "styles": [
+              "node_modules/bootstrap/scss/bootstrap.scss",
+              "src/assets/styles/main.scss",
               "src/styles.scss"
             ],
             "scripts": [

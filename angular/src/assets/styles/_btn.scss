@@ -1,0 +1,68 @@
+.btn-primary {
+  background-color: $gold-color;
+  border-color: $gold-color;
+  color: $main-color;
+}
+
+.btn {
+  font-size: 1.125rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 0.875rem 1.25rem;
+  min-height: 57px;
+  min-width: 150px;
+  cursor: pointer;
+  display: inline-block;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  border: 1px solid transparent;
+  line-height: 1.5;
+  border-radius: 0;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+}
+
+.btn-sm {
+  font-size: 0.875rem;
+  line-height: 1rem;
+  letter-spacing: 0;
+  text-transform: none;
+  padding: 0.625rem 0.875rem;
+  min-height: 38px;
+  min-width: 75px;
+}
+
+.btn-primary:hover {
+  color: $btn-color;
+  background-color: $gold-color-light;
+  border-color: $gold-color-light;
+}
+
+.btn-primary.disabled, .btn-primary:disabled {
+  color: $btn-color;
+  background-color: $gold-color;
+  border-color: $gold-color;
+  cursor: not-allowed;
+}
+
+.btn-primary:focus, .btn-primary.focus {
+  box-shadow: 0 0 0 0.2rem rgba(233, 203, 107, 0.5);
+}
+
+.btn-primary:not(:disabled):not(.disabled):active:focus, .btn-primary:not(:disabled):not(.disabled).active:focus, .show > .btn-primary.dropdown-toggle:focus {
+  box-shadow: 0 0 0 0.2rem rgba(233, 203, 107, 0.5);
+}
+
+.btn-primary:not([disabled]):not(.disabled):active, .btn-primary:not([disabled]):not(.disabled).active {
+  color: white;
+}
+
+.btn-primary:not(:disabled):not(.disabled):active, .btn-primary:not(:disabled):not(.disabled).active, .show > .btn-primary.dropdown-toggle {
+  background-color: $gold-color-light;
+  border-color: $gold-color-light;
+}

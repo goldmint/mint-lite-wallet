@@ -1,0 +1,57 @@
+<div id="header" class="d-flex justify-content-between p-3">
+    <div (click)="clearStorage()">Wallet</div>
+    <div class="pointer" (click)="openSettingModal()">
+        <svg class="icon-gold" width="25" height="25">
+            <use xlink:href="#burger" *ngIf="!isOpenSettingModal"></use>
+            <use xlink:href="#close" *ngIf="isOpenSettingModal"></use>
+        </svg>
+    </div>
+</div>
+
+<div class="p-3">
+    <router-outlet></router-outlet>
+</div>
+
+<div class="setting-modal p-3" *ngIf="isOpenSettingModal">
+    <div class="setting-top">
+        <div>My accounts</div>
+        <div class="setting-logout-btn" (click)="logOut()">Log Out</div>
+    </div>
+
+    <div class="setting-account-list-container">
+        <div class="setting-account-list">
+            <ul>
+                <li *ngFor="let w of storageData.wallets; index as i" (click)="chooseAccount(i)">{{ w.name }}</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="setting-actions">
+        <div class="d-flex align-items-center pointer" (click)="createAccount()">
+            <svg class="icon-gold" width="15" height="15">
+                <use xlink:href="#amount-plus"></use>
+            </svg>
+            <span class="ml-2">Create Account</span>
+        </div>
+        <div class="d-flex align-items-center pointer mt-2">
+            <svg class="icon-gold" width="15" height="15">
+                <use xlink:href="#import"></use>
+            </svg>
+            <span class="ml-2">Import Account</span>
+        </div>
+
+        <div class="d-flex align-items-center pointer mt-2" (click)="clearStorage()">
+            <svg class="icon-gold" width="15" height="15">
+                <use xlink:href="#import"></use>
+            </svg>
+            <span class="ml-2">Clear storage</span>
+        </div>
+
+        <div class="d-flex align-items-center pointer mt-2" (click)="getItem()">
+            <svg class="icon-gold" width="15" height="15">
+                <use xlink:href="#import"></use>
+            </svg>
+            <span class="ml-2">Show</span>
+        </div>
+    </div>
+</div>

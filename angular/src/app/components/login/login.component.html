@@ -1,0 +1,33 @@
+<h4 class="mb-3">Welcome back!</h4>
+
+<form #loginForm="ngForm" (ngSubmit)="submit()">
+    <div class="row">
+        <div class="col-12">
+            <div class="form-group">
+                <input type="password" class="form-control" placeholder='Password' name="password-field"
+                       #password="ngModel"
+                       [ngClass]="{'is-invalid': (password.invalid && password.dirty) || invalidPass}"
+                       [(ngModel)]="userPassword"
+                       (ngModelChange)="invalidPass = false"
+                       required
+                       minlength="6"
+                >
+                <div class="invalid-feedback invalid-feedback--abs" *ngIf="password?.errors?.required">
+                    Field is required
+                </div>
+                <div class="invalid-feedback invalid-feedback--abs" *ngIf="password?.errors?.minlength">
+                    Minimum password length is 6 symbols
+                </div>
+                <div class="invalid-feedback invalid-feedback--abs" *ngIf="!password?.errors && invalidPass">
+                    Invalid password
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 text-center mt-3">
+            <button type="submit" class="btn btn-sm btn-primary w-100" [disabled]="loginForm.invalid || invalidPass">
+                Log In
+            </button>
+        </div>
+    </div>
+</form>
