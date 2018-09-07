@@ -1,9 +1,9 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {ChromeStorageService} from "../../services/chrome-storage.service";
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ChromeStorageService} from "../../../services/chrome-storage.service";
 import {Router} from "@angular/router";
-import {GenerateWalletService} from "../../services/generate-wallet.service";
+import {GenerateWalletService} from "../../../services/generate-wallet.service";
 import * as CryptoJS from 'crypto-js';
-import {Wallet} from "../../interfaces/wallet";
+import {Wallet} from "../../../interfaces/wallet";
 
 @Component({
   selector: 'app-login',
@@ -33,7 +33,13 @@ export class LoginComponent implements OnInit {
   }
 
   submit() {
-    const decrypted = CryptoJS.AES.decrypt(this.wallets[0].privateKey, this.userPassword).toString(CryptoJS.enc.Utf8);
+    let decrypted;
+    try {
+      decrypted = CryptoJS.AES.decrypt(this.wallets[0].privateKey, this.userPassword).toString(CryptoJS.enc.Utf8);
+    } catch (e) {
+      alert('Error')
+      return;
+    }
     if (decrypted) {
       this.chromeStorage.save('identify', this.userPassword);
       this.router.navigate(['/home/account']);

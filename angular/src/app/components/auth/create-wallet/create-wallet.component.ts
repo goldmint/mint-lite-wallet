@@ -1,6 +1,6 @@
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import * as CryptoJS from 'crypto-js';
-import {ChromeStorageService} from "../../services/chrome-storage.service";
+import {ChromeStorageService} from "../../../services/chrome-storage.service";
 import {Router} from "@angular/router";
 
 @Component({

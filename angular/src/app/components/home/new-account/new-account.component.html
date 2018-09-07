@@ -1,0 +1,111 @@
+<div class="mt-3">
+    <h4 class="mb-3">New account</h4>
+
+    <div class="col-auto btn-group p-0 mn-tabs w-100">
+        <label class="btn btn-primary btn-sm active wrap w-50"
+               name="limitsSwitchModel.type"
+               [(ngModel)]="switchModel.type"
+               btnRadio="create">Create</label>
+        <label class="btn btn-primary btn-sm active wrap w-50"
+               name="limitsSwitchModel.type"
+               [(ngModel)]="switchModel.type"
+               btnRadio="import">Import</label>
+    </div>
+
+    <div *ngIf="switchModel.type === 'create'">
+        <div class="mt-4">
+            <form #form="ngForm">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder='Account name' name="password-field"
+                                   #name="ngModel"
+                                   [ngClass]="{'is-invalid': name.invalid && name.dirty}"
+                                   [(ngModel)]="accountName"
+                                   required>
+                            <div class="invalid-feedback invalid-feedback--abs" *ngIf="name?.errors?.required">
+                                Field is required
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 text-center mt-3">
+                        <div class="d-flex">
+                            <button type="button" class="btn btn-sm btn-primary w-50 mr-1" routerLink="/home/account">Cancel</button>
+                            <button type="button" class="btn btn-sm btn-primary w-50 ml-1" (click)="create()" [disabled]="!accountName.length || loading">
+                                Create
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+    <div *ngIf="switchModel.type === 'import'">
+        <div class="mt-4">
+            <form #importForm="ngForm">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label for="select-type">Select Type</label>
+                            <select class="form-control custom-select" id="select-type" name="options" [(ngModel)]="selectOption">
+                                <option value='key'>Private Key</option>
+                                <option value='json'>Encrypted json</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-12" *ngIf="selectOption === selectOptionList[0]">
+                        <div class="form-group">
+                            <label for="private-key">Input your private key</label>
+                            <input type="password" class="form-control" id="private-key" placeholder='Private key' name="account-name"
+                                   #key="ngModel"
+                                   [ngClass]="{'is-invalid': key.invalid && key.dirty}"
+                                   [(ngModel)]="privateKey"
+                                   required>
+                            <div class="invalid-feedback invalid-feedback--abs" *ngIf="key?.errors?.required">
+                                Field is required
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12" *ngIf="selectOption === selectOptionList[1]">
+                        <div class="form-group hidden">
+                            <label for="json-file">Select your encrypted json file</label>
+                            <input type="file" name="json-file" id="json-file" (change)="onChangeFile($event)">
+                        </div>
+                    </div>
+
+                    <div class="col-12" *ngIf="selectOption === selectOptionList[1]">
+                        <div class="form-group">
+                            <input type="password" class="form-control" id="password" placeholder='Password' name="password"
+                                   #pass="ngModel"
+                                   [ngClass]="{'is-invalid': pass.invalid && pass.dirty}"
+                                   [(ngModel)]="password"
+                                   (ngModelChange)="isInvalidFile = false"
+                                   required>
+                            <div class="invalid-feedback invalid-feedback--abs" *ngIf="pass?.errors?.required">
+                                Field is required
+                            </div>
+                            <div class="invalid-feedback invalid-feedback--abs d-block" *ngIf="isInvalidFile">
+                                Invalid file
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 text-center mt-3">
+                        <div class="d-flex">
+                            <button type="button" class="btn btn-sm btn-primary w-50 mr-1" routerLink="/home/account">Cancel</button>
+                            <button type="button" class="btn btn-sm btn-primary w-50 ml-1" *ngIf="selectOption === selectOptionList[0]"
+                                    (click)="importKey()" [disabled]="!privateKey">Import</button>
+                            <button type="button" class="btn btn-sm btn-primary w-50 ml-1" *ngIf="selectOption === selectOptionList[1]"
+                                    (click)="importFile()" [disabled]="selectedFile === null || password.length < 6">Import</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>

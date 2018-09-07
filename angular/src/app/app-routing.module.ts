@@ -1,11 +1,13 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import {HomeComponent} from "./components/home/home.component";
-import {LoginComponent} from "./components/login/login.component";
-import {AccountComponent} from "./components/account/account.component";
-import {NewAccountComponent} from "./components/new-account/new-account.component";
+import {LoginComponent} from "./components/auth/login/login.component";
+import {AccountComponent} from "./components/home/account/account.component";
+import {NewAccountComponent} from "./components/home/new-account/new-account.component";
 import {AuthComponent} from "./components/auth/auth.component";
-import {CreateWalletComponent} from "./components/create-wallet/create-wallet.component";
+import {CreateWalletComponent} from "./components/auth/create-wallet/create-wallet.component";
+import {DetailsAccountComponent} from "./components/home/details-account/details-account.component";
+import {ExportAccountComponent} from "./components/home/export-account/export-account.component";
 
 const routes: Routes = [
   {
@@ -17,7 +19,9 @@ const routes: Routes = [
   {
     path: 'home', component: HomeComponent, children: [
       { path: 'account', component: AccountComponent },
-      { path: 'new-account', component: NewAccountComponent }
+      { path: 'new-account/:id', component: NewAccountComponent },
+      { path: 'account-details', component: DetailsAccountComponent },
+      { path: 'export-account', component: ExportAccountComponent }
     ]
   }
 ];

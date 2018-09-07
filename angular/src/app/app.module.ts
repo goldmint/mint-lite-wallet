@@ -5,17 +5,25 @@ import { AppComponent } from './app.component';
 import { FooterComponent } from './blocks/footer/footer.component';
 import {AppRoutingModule} from "./app-routing.module";
 import { HomeComponent } from './components/home/home.component';
-import { LoginComponent } from './components/login/login.component';
+import { LoginComponent } from './components/auth/login/login.component';
 import { SpriteComponent } from './common/sprite/sprite.component';
 import {ChromeStorageService} from "./services/chrome-storage.service";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {GenerateWalletService} from "./services/generate-wallet.service";
-import { AccountComponent } from './components/account/account.component';
-import {NewAccountComponent} from "./components/new-account/new-account.component";
-import { CreateWalletComponent } from './components/create-wallet/create-wallet.component';
+import { AccountComponent } from './components/home/account/account.component';
+import {NewAccountComponent} from "./components/home/new-account/new-account.component";
+import { CreateWalletComponent } from './components/auth/create-wallet/create-wallet.component';
 import { AuthComponent } from './components/auth/auth.component';
 import {DetectChangesDirective} from "./directives/detect-changes.directive";
 import {CommonService} from "./services/common.service";
+import { DetailsAccountComponent } from './components/home/details-account/details-account.component';
+
+import {
+  ButtonsModule
+} from 'ngx-bootstrap';
+import { ExportAccountComponent } from './components/home/export-account/export-account.component';
+import {ApiService} from "./services/api.service";
+import {HttpClientModule} from "@angular/common/http";
 
 @NgModule({
   declarations: [
@@ -28,18 +36,23 @@ import {CommonService} from "./services/common.service";
     NewAccountComponent,
     CreateWalletComponent,
     AuthComponent,
-    DetectChangesDirective
+    DetectChangesDirective,
+    DetailsAccountComponent,
+    ExportAccountComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
+    HttpClientModule,
     ReactiveFormsModule,
-    AppRoutingModule
+    AppRoutingModule,
+    ButtonsModule.forRoot()
   ],
   providers: [
     ChromeStorageService,
     GenerateWalletService,
-    CommonService
+    CommonService,
+    ApiService
   ],
   bootstrap: [AppComponent]
 })

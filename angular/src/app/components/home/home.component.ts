@@ -21,11 +21,11 @@ export class HomeComponent implements OnInit {
     private chromeStorage: ChromeStorageService,
     private commonService: CommonService,
     private router: Router,
-    private ref: ChangeDetectorRef,
+    private ref: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    this.getStorageData();
+    // this.getStorageData();
   }
 
   getStorageData() {
@@ -48,6 +48,24 @@ export class HomeComponent implements OnInit {
     this.ref.detectChanges();
   }
 
+  goToAccountDetails() {
+    this.router.navigate(['/home/account-details']);
+    this.isOpenSettingModal = false;
+    this.ref.detectChanges();
+  }
+
+  goToImportAccount() {
+    this.router.navigate(['/home/new-account/import']);
+    this.isOpenSettingModal = false;
+    this.ref.detectChanges();
+  }
+
+  goToExportAccount() {
+    this.router.navigate(['/home/export-account']);
+    this.isOpenSettingModal = false;
+    this.ref.detectChanges();
+  }
+
   logOut() {
     this.chromeStorage.remove('identify');
     this.router.navigate(['/login']);
@@ -62,7 +80,7 @@ export class HomeComponent implements OnInit {
   }
 
   createAccount() {
-    this.router.navigate(['/home/new-account']);
+    this.router.navigate(['/home/new-account/create']);
     this.isOpenSettingModal = false;
     this.ref.detectChanges();
   }

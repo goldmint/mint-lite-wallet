@@ -15,7 +15,7 @@ export class ChromeStorageService {
 
   public load(key) {
     this.chrome.storage.local.get(key, (result) => {
-      alert(JSON.stringify(result))
+      alert(result)
       return result;
     });
   }

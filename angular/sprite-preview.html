@@ -22,7 +22,9 @@ They might well be outsourced to an external stylesheet of course.
 	.svg-amount-plus-dims { width: 8px; height: 8px; }
 	.svg-burger-dims { width: 34px; height: 28px; }
 	.svg-close-dims { width: 24px; height: 24px; }
+	.svg-export-dims { width: 16px; height: 15px; }
 	.svg-import-dims { width: 16px; height: 15px; }
+	.svg-information-dims { width: 330px; height: 330px; }
 </style>
 <!--
 ====================================================================================================
@@ -48,7 +50,9 @@ for further details on how to create this embeddable sprite variant.
 		<symbol viewBox="0 0 8 8" id="amount-plus"><use fill="currentColor" transform="translate(0 3)" xlink:href="#aprefix__path0_fill"/><use fill="currentColor" transform="rotate(90 2.5 2.5)" xlink:href="#aprefix__path0_fill"/><defs><path id="aprefix__path0_fill" d="M0 0h8v2H0V0z"/></defs></symbol>
 		<symbol viewBox="0 0 34 28" id="burger"><use fill="currentColor" xlink:href="#bprefix__path0_fill"/><use fill="currentColor" transform="translate(0 12)" xlink:href="#bprefix__path0_fill"/><use fill="currentColor" transform="translate(0 24)" xlink:href="#bprefix__path0_fill"/><defs><path id="bprefix__path0_fill" d="M0 0h34v4H0V0z"/></defs></symbol>
 		<symbol viewBox="0 0 24 24" id="close"><use fill="currentColor" transform="translate(-1 6)" xlink:href="#cprefix__path0_fill"/><defs><path id="cprefix__path0_fill" d="M24.72 14.992L15.65 5.92l9.072-9.072-2.448-2.496-9.12 9.168c-2.976-3.072-6-6.096-9.024-9.168L1.68-3.152l9.072 9.072-9.072 9.072 2.448 2.496 9.024-9.12c3.072 3.024 6.048 6.048 9.12 9.12l2.448-2.496z"/></defs></symbol>
-		<symbol viewBox="0 0 16 15" id="import"><use fill="currentColor" transform="translate(0 13)" xlink:href="#dprefix__path0_fill"/><use fill="currentColor" transform="rotate(-90 6 -1)" xlink:href="#dprefix__path1_fill"/><use fill="currentColor" transform="translate(3 5)" xlink:href="#dprefix__path2_fill"/><defs><path id="dprefix__path0_fill" d="M16 0H0v2h16V0z"/><path id="dprefix__path1_fill" d="M5 0H0v2h5V0z"/><path id="dprefix__path2_fill" d="M5 6l5-6H0l5 6z"/></defs></symbol>
+		<symbol viewBox="0 0 16 15" id="export"><use fill="currentColor" transform="translate(0 13)" xlink:href="#dprefix__path0_fill"/><use fill="currentColor" transform="rotate(90 1.5 7.5)" xlink:href="#dprefix__path1_fill"/><use fill="currentColor" transform="rotate(180 6.5 3)" xlink:href="#dprefix__path2_fill"/><defs><path id="dprefix__path0_fill" d="M16 0H0v2h16V0z"/><path id="dprefix__path1_fill" d="M5 0H0v2h5V0z"/><path id="dprefix__path2_fill" d="M5 6l5-6H0l5 6z"/></defs></symbol>
+		<symbol viewBox="0 0 16 15" id="import"><use fill="currentColor" transform="translate(0 13)" xlink:href="#eprefix__path0_fill"/><use fill="currentColor" transform="rotate(-90 6 -1)" xlink:href="#eprefix__path1_fill"/><use fill="currentColor" transform="translate(3 5)" xlink:href="#eprefix__path2_fill"/><defs><path id="eprefix__path0_fill" d="M16 0H0v2h16V0z"/><path id="eprefix__path1_fill" d="M5 0H0v2h5V0z"/><path id="eprefix__path2_fill" d="M5 6l5-6H0l5 6z"/></defs></symbol>
+		<symbol viewBox="0 0 330 330" id="information"><path d="M165 0C74.019 0 0 74.02 0 165.001 0 255.982 74.019 330 165 330s165-74.018 165-164.999S255.981 0 165 0zm0 300c-74.44 0-135-60.56-135-134.999S90.56 30 165 30s135 60.562 135 135.001C300 239.44 239.439 300 165 300z"/><path d="M164.998 70c-11.026 0-19.996 8.976-19.996 20.009 0 11.023 8.97 19.991 19.996 19.991 11.026 0 19.996-8.968 19.996-19.991 0-11.033-8.97-20.009-19.996-20.009zM165 140c-8.284 0-15 6.716-15 15v90c0 8.284 6.716 15 15 15 8.284 0 15-6.716 15-15v-90c0-8.284-6.716-15-15-15z"/></symbol>
 </svg>
 
 <!--
@@ -111,6 +115,17 @@ embedded above. They may be styled via CSS.
 					</div>
 					<h2>close</h2>
 				</li>
+				<li title="export">
+					<div class="icon-box">
+						
+						<!-- export -->
+						<svg class="svg-export-dims">
+							<use xlink:href="#export"></use>
+						</svg>
+						
+					</div>
+					<h2>export</h2>
+				</li>
 				<li title="import">
 					<div class="icon-box">
 						
@@ -121,6 +136,17 @@ embedded above. They may be styled via CSS.
 						
 					</div>
 					<h2>import</h2>
+				</li>
+				<li title="information">
+					<div class="icon-box">
+						
+						<!-- information -->
+						<svg class="svg-information-dims">
+							<use xlink:href="#information"></use>
+						</svg>
+						
+					</div>
+					<h2>information</h2>
 				</li>
 			</ul>
 
@@ -149,7 +175,7 @@ SVG sprite. They may be styled via CSS. (IE 9-11 with polyfill only)
 
 		</section>
 		<footer>
-			<p>Generated at Wed, 05 Sep 2018 12:44:05 GMT by <a href="https://github.com/jkphl/svg-sprite" target="_blank">svg-sprite</a>.</p>
+			<p>Generated at Thu, 06 Sep 2018 13:28:41 GMT by <a href="https://github.com/jkphl/svg-sprite" target="_blank">svg-sprite</a>.</p>
 		</footer>
 	</body>
 </html>

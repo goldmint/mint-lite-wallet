@@ -66,3 +66,21 @@
   background-color: $gold-color-light;
   border-color: $gold-color-light;
 }
+
+.btn-group .btn-primary:not([disabled]):not(.disabled).active {
+  background-color: #e9cb6b;
+  border-color: #e9cb6b;
+  color: #1c1c1c;
+}
+.btn-group .btn + .btn:not([disabled]):not(.disabled) {
+  border-left: none;
+}
+
+.btn-group .btn-primary:not([disabled]):not(.disabled) {
+  background-color: #fff;
+  border: 2px solid #e9cb6b;
+  color: #1c1c1c;
+}
+.btn-group .btn + .btn {
+  margin-left: 0;
+}

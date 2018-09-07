@@ -1,7 +1,9 @@
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {CommonService} from "../../services/common.service";
-import {Wallet} from "../../interfaces/wallet";
-import {StorageData} from "../../interfaces/storage-data";
+import {StorageData} from "../../../interfaces/storage-data";
+import {Wallet} from "../../../interfaces/wallet";
+import {CommonService} from "../../../services/common.service";
+import {ApiService} from "../../../services/api.service";
+import {combineLatest} from "rxjs/index";
 
 @Component({
   selector: 'app-account',
@@ -18,15 +20,25 @@ export class AccountComponent implements OnInit {
 
   constructor(
     private ref: ChangeDetectorRef,
-    private commonService: CommonService
+    private commonService: CommonService,
+    private apiService: ApiService
   ) { }
 
   ngOnInit() {
-    this.getStorageData();
+    // this.getStorageData();
 
     this.commonService.chooseAccount$.subscribe(() => {
       this.getStorageData();
     });
+
+    this.getBalanceAndTx('cCwdg3yMwyJXZvADQXBjiiiPt7vUmbTvoSwmooUkAcSGqh8J3');
+  }
+
+  getBalanceAndTx(publicKey: string) {
+    const combined = this.apiService.getTxByAddress(publicKey, 0, 10, "date").pipe(combineLatest(
+      this.apiService.getWalletBalance(publicKey)
+    ));
+    combined.subscribe((data: any) => {});
   }
 
   getStorageData() {
