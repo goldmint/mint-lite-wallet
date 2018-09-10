@@ -20,10 +20,6 @@ app-root {
   color: #ccc;
 }
 
-#main-content {
-
-}
-
 #footer {
   color: $main-color;
   font-size: .8rem;
@@ -37,6 +33,15 @@ app-root {
   fill: $gold-color;
 }
 
+a {
+  color: inherit;
+
+  &:hover {
+    text-decoration: none;
+    color: inherit;
+  }
+}
+
 .pointer {
   cursor: pointer;
 }
@@ -48,4 +53,8 @@ app-root {
 
 .hidden {
   overflow: hidden;
+}
+
+.bd-top {
+  border-top: 2px solid $gold-color;
 }

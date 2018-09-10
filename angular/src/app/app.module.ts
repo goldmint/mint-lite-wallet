@@ -19,11 +19,14 @@ import {CommonService} from "./services/common.service";
 import { DetailsAccountComponent } from './components/home/details-account/details-account.component';
 
 import {
-  ButtonsModule
+  ButtonsModule, ModalModule, TooltipModule
 } from 'ngx-bootstrap';
 import { ExportAccountComponent } from './components/home/export-account/export-account.component';
 import {ApiService} from "./services/api.service";
-import {HttpClientModule} from "@angular/common/http";
+import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
+import {MessageBoxService} from "./services/message-box.service";
+import {MessageBoxComponent} from "./common/message-box/message-box.component";
+import {APIHttpInterceptor} from "./common/interceptor/api-http.interceptor";
 
 @NgModule({
   declarations: [
@@ -38,7 +41,8 @@ import {HttpClientModule} from "@angular/common/http";
     AuthComponent,
     DetectChangesDirective,
     DetailsAccountComponent,
-    ExportAccountComponent
+    ExportAccountComponent,
+    MessageBoxComponent
   ],
   imports: [
     BrowserModule,
@@ -46,13 +50,24 @@ import {HttpClientModule} from "@angular/common/http";
     HttpClientModule,
     ReactiveFormsModule,
     AppRoutingModule,
-    ButtonsModule.forRoot()
+    ButtonsModule.forRoot(),
+    TooltipModule.forRoot(),
+    ModalModule.forRoot()
   ],
   providers: [
     ChromeStorageService,
     GenerateWalletService,
     CommonService,
-    ApiService
+    ApiService,
+    MessageBoxService,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: APIHttpInterceptor,
+      multi: true
+    }
+  ],
+  entryComponents: [
+    MessageBoxComponent
   ],
   bootstrap: [AppComponent]
 })

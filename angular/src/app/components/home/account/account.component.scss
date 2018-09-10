@@ -1,4 +1,24 @@
+@import "../../../../assets/styles/variables";
+
 .account-public-key {
   font-size: .75rem;
   color: #aeaeae;
+}
+
+.trs-item {
+  font-size: 14px;
+  padding: 5px 0;
+
+  &:hover {
+    background: $color-gray-0;
+    cursor: pointer;
+  }
+
+  &-date {
+    color: $color-gray-2;
+  }
+}
+.no-tx {
+  font-size: 14px;
+  color: $color-gray-2;
 }

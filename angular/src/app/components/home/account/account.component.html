@@ -2,9 +2,40 @@
     <!--<div>{{ currentWallet?.name }}</div>-->
     <!--<div class="account-public-key">{{ publicKey }}</div>-->
 <!--</div>-->
+<div class="progress-linear progress-linear--tiny" *ngIf="!isDataLoaded">
+    <div class="container"></div>
+</div>
+
 
 <div class="text-center">
     <div>Account 1</div>
-    <div class="account-public-key">1111</div>
+    <div class="account-public-key pointer" tooltip="Copy to clipboard" (click)="copyText(currentWallet.publicKey)">1111</div>
 </div>
 
+<div class="mt-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>MNT: {{ balance.mnt }}</div>
+        <button type="button" class="btn btn-sm btn-primary">Send</button>
+    </div>
+    <div class="d-flex justify-content-between align-items-center">
+        <div>GOLD: {{ balance.gold }}</div>
+        <button type="button" class="btn btn-sm btn-primary">Send</button>
+    </div>
+</div>
+
+<div class="mt-4 bd-top">
+    <div class="my-2">Latest transactions</div>
+    <div *ngIf="transactionList.length && isDataLoaded; else noTx">
+        <div *ngFor="let t of transactionList" class="trs-item" (click)="showTxDetails()">
+            <a [href]="detailsLink + t.uniqueId" target="_blank">
+                <span class="trs-item-date">{{ t.timeStamp | date: 'MMM d, y, HH:mm:ss' }}</span>
+                - {{ t.tokensCount }} <span *ngIf="t.tokenType === 'utility'; else commodity"> MNT</span>
+                <ng-template #commodity> GOLD</ng-template>
+            </a>
+        </div>
+    </div>
+
+    <ng-template #noTx>
+        <div class="no-tx">No transactions</div>
+    </ng-template>
+</div>
