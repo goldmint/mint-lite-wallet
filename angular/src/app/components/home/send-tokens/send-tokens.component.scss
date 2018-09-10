@@ -1,0 +1,12 @@
+@import "../../../../assets/styles/variables";
+
+.confirm-item {
+  font-size: 14px;
+  color: $color-gray-2;
+}
+
+.sent-tx-id {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  cursor: pointer;
+}

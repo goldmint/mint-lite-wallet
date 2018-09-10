@@ -18,6 +18,7 @@ app-root {
 #header {
   background: #212121;
   color: #ccc;
+  height: 57px;
 }
 
 #footer {
@@ -57,4 +58,8 @@ a {
 
 .bd-top {
   border-top: 2px solid $gold-color;
+}
+
+.bd-bottom {
+  border-bottom: 2px solid $gold-color;
 }

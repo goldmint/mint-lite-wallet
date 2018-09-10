@@ -18,11 +18,10 @@
     <div *ngIf="currentView === view[1]">
         <div class="mb-3">
             <label for="private">Private Key</label>
-            <input type="text" class="form-control" id="private" *ngIf="!privateKey"
+            <input type="password" class="form-control" id="private" *ngIf="!privateKey"
                    [(ngModel)]="password"
                    [ngClass]="{'is-invalid': privateKey === ''}"
-                   placeholder="Type Your Password"
-            >
+                   placeholder="Type Your Password">
             <input type="text" class="form-control" id="private" *ngIf="privateKey" [value]="privateKey" readonly>
         </div>
         <div class="mb-3">

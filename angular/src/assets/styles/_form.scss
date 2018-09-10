@@ -38,10 +38,6 @@ select.form-control:not([size]):not([multiple]) {
   padding-right: 30px;
 }
 
-//$custom-select-disabled-color: $border-color;
-//$custom-select-disabled-indicator: str-replace(url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 20'%3E%3Cpath fill='#{$gold-color}' d='M5.5 0l4.763 8.25H.737L5.5 0z'/%3E%3Cpath fill='#{$gold-color}' d='M5.5 0l4.763 8.25H.737L5.5 0z' transform='rotate(180 5.5 10)' /%3E%3C/svg%3E"), "#", "%23");
-
-
 .custom-select {
   display: inline-block;
   width: 100%;
@@ -50,11 +46,16 @@ select.form-control:not([size]):not([multiple]) {
   line-height: 1.5;
   color: #495057;
   vertical-align: middle;
-  //background: #fff $custom-select-disabled-indicator no-repeat right 7px center !important;
-  background-size: 11px 20px;
   border: 2px solid $border-color;
   border-radius: 0;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
+  background: #fff url(../icons/select.svg) calc(100% - 9px) center no-repeat;
+  background-size: 11px 20px;
+}
+
+.custom-select.black {
+  background: $black url(../icons/select.svg) calc(100% - 9px) center no-repeat;
+  background-size: 11px 20px;
 }

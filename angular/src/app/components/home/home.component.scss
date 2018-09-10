@@ -1,3 +1,5 @@
+@import "../../../assets/styles/variables";
+
 .setting-modal {
   color: #fff;
   position: absolute;
@@ -12,7 +14,7 @@
 .setting-top {
   display: flex;
   justify-content: space-between;
-  border-bottom: 1px solid #e9cb6b;
+  border-bottom: 1px solid $gold-color;
   padding-bottom: 10px;
 }
 
@@ -26,7 +28,7 @@
 
 .setting-account-list {
   margin-top: 10px;
-  border-bottom: 1px solid #e9cb6b;
+  border-bottom: 1px solid $gold-color;
   max-height: 150px;
   overflow-x: auto;
   margin-right: -20px;
@@ -44,4 +46,13 @@
 
 .setting-actions {
   margin-top: 10px;
+}
+
+.header-select-account-cont {
+  max-width: 180px;
+}
+
+.header-select-account {
+  color: #fff;
+  cursor: pointer;
 }

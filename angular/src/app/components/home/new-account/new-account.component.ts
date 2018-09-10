@@ -61,7 +61,7 @@ export class NewAccountComponent implements OnInit, OnDestroy {
 
   create() {
     // const keys = this.generateWallet.createWallet(this.identify);
-    this.addAccount('0x7546d7012da51d09f5021cf6a9bc0d0124a1253m', 'Hello', this.accountName);
+    this.addAccount('AcdEdTdwy6PkqVuC1Q3DGtZrsSn68uaoqVUnELP594QHrtNNk', 'Hello', this.accountName);
   }
 
   addAccount(publicKey: string, privateKey: string, name: string) {

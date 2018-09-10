@@ -1,0 +1,129 @@
+<div class="progress-linear progress-linear--tiny" *ngIf="loading">
+    <div class="container"></div>
+</div>
+
+<div class="mt-2">
+    <div *ngIf="currentPage === page[0]">
+        <h4 class="mb-2">Send tokens</h4>
+        <form #form="ngForm">
+            <div class="row">
+                <div class="col-12">
+                    <div class="form-group">
+                        <label class="mb-0" for="from">From</label>
+                        <input type="text" class="form-control" id="from" placeholder='Main account' name="from"
+                               #from="ngModel"
+                               [ngClass]="{'is-invalid': from.invalid && from.dirty}"
+                               [(ngModel)]="sendData.from"
+                               required
+                               readonly>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="form-group">
+                        <label class="mb-0" for="to">To</label>
+                        <input type="text" class="form-control" id="to" placeholder='Sumus wallet address' name="to"
+                               #to="ngModel"
+                               [ngClass]="{'is-invalid': (to.invalid && to.dirty) || isAddressMatch}"
+                               [(ngModel)]="sendData.to"
+                               (ngModelChange)="checkAddressMatch()"
+                               [disabled]="loading"
+                               sumusAddress
+                               required>
+                        <div class="invalid-feedback invalid-feedback--abs" *ngIf="to?.errors?.required">
+                            Field is required
+                        </div>
+                        <div class="invalid-feedback invalid-feedback--abs" *ngIf="!to?.errors?.required && to?.errors?.sumus">
+                            Invalid address
+                        </div>
+                        <div class="invalid-feedback invalid-feedback--abs" *ngIf="!to?.errors && isAddressMatch">
+                            Addresses are the same
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="form-group">
+                        <label class="mb-0" for="token">Token</label>
+                        <select class="form-control custom-select mb-0" id="token" name="token" (change)="checkAmount()" [(ngModel)]="sendData.token" [disabled]="loading">
+                            <option value='gold'>GOLD</option>
+                            <option value='mnt'>MNT</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="form-group">
+                        <label class="mb-0" for="amount">Amount</label>
+                        <input type="number" class="form-control" id="amount" placeholder='Amount' name="amount"
+                               #amount="ngModel"
+                               [ngClass]="{'is-invalid': (amount.invalid || invalidBalance) && amount.dirty}"
+                               [(ngModel)]="sendData.amount"
+                               (ngModelChange)="checkAmount()"
+                               [disabled]="loading"
+                               required
+                               autocomplete="off">
+                        <div class="invalid-feedback invalid-feedback--abs" *ngIf="amount?.errors?.required">
+                            Field is required
+                        </div>
+                        <div class="invalid-feedback invalid-feedback--abs" *ngIf="!amount?.errors?.required && invalidBalance">
+                            Insufficient funds
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 text-center mt-3">
+                    <div class="d-flex">
+                        <button type="button" class="btn btn-sm btn-primary w-50 mr-1" routerLink="/home/account">Cancel</button>
+                        <button type="button" class="btn btn-sm btn-primary w-50 ml-1" (click)="currentPage = page[1]" [disabled]="form.invalid || loading || invalidBalance || isAddressMatch">Send</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div *ngIf="currentPage === page[1]">
+        <h4 class="mb-3">Confirm transaction</h4>
+        <div class="bd-top bd-bottom py-2">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="confirm-item">
+                    {{ '27SDWfMkZogDPpf4ouBq1413VBJhBHHREpwuns3qaaqtiAGEfs' | reduction }}
+                </div>
+                <div>
+                    <svg class="icon-gold" width="25" height="25">
+                        <use xlink:href="#next"></use>
+                    </svg>
+                </div>
+                <div class="confirm-item">
+                    {{ '27SDWfMkZogDPpf4ouBq1413VBJhBHHREpwuns3qaaqtiAGEfs' | reduction }}
+                </div>
+            </div>
+            <div class="text-center mt-2">
+                {{ sendData.amount }} {{ sendData.token | uppercase }} ($ -)
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-2">
+            <div>Commission: </div>
+            <div>-</div>
+        </div>
+
+        <div class="d-flex mt-4">
+            <button type="button" class="btn btn-sm btn-primary w-50 mr-1" (click)="currentPage = page[0]">Cancel</button>
+            <button type="button" class="btn btn-sm btn-primary w-50 ml-1" (click)="currentPage = page[2]">Confirm</button>
+        </div>
+    </div>
+
+    <div *ngIf="currentPage === page[2]">
+        <h4 class="mb-3">Transaction is sent</h4>
+        <div>Your transaction id is:
+            <div class="sent-tx-id mt-1" tooltip="Copy to clipboard" (click)="copyText(txId)">{{ txId }}</div>
+        </div>
+
+        <div class="d-flex mt-4">
+            <button type="button" class="btn btn-sm btn-primary w-100" (click)="currentPage = page[2]">
+                <a [href]="detailsLink + txId" target="_blank">Check status</a>
+            </button>
+        </div>
+    </div>
+</div>

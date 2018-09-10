@@ -31,8 +31,10 @@
 
                     <div class="col-12 text-center mt-3">
                         <div class="d-flex">
-                            <button type="button" class="btn btn-sm btn-primary w-50 mr-1" routerLink="/home/account">Cancel</button>
-                            <button type="button" class="btn btn-sm btn-primary w-50 ml-1" (click)="create()" [disabled]="!accountName.length || loading">
+                            <button type="button" class="btn btn-sm btn-primary w-50 mr-1" *ngIf="wallets?.length"
+                                    routerLink="/home/account">Cancel</button>
+                            <button type="button" class="btn btn-sm btn-primary w-50 ml-1" [ngClass]="{'w-100 ml-0': !wallets?.length}"
+                                    (click)="create()" [disabled]="!accountName.length || loading">
                                 Create
                             </button>
                         </div>
@@ -63,9 +65,13 @@
                                    #key="ngModel"
                                    [ngClass]="{'is-invalid': key.invalid && key.dirty}"
                                    [(ngModel)]="privateKey"
+                                   sumusAddress
                                    required>
                             <div class="invalid-feedback invalid-feedback--abs" *ngIf="key?.errors?.required">
                                 Field is required
+                            </div>
+                            <div class="invalid-feedback invalid-feedback--abs" *ngIf="!key?.errors?.required && key?.errors?.sumus">
+                                Invalid address
                             </div>
                         </div>
                     </div>
@@ -96,11 +102,12 @@
 
                     <div class="col-12 text-center mt-3">
                         <div class="d-flex">
-                            <button type="button" class="btn btn-sm btn-primary w-50 mr-1" routerLink="/home/account">Cancel</button>
+                            <button type="button" class="btn btn-sm btn-primary w-50 mr-1" *ngIf="wallets?.length" routerLink="/home/account">Cancel</button>
+
                             <button type="button" class="btn btn-sm btn-primary w-50 ml-1" *ngIf="selectOption === selectOptionList[0]"
-                                    (click)="importKey()" [disabled]="!privateKey">Import</button>
+                                    [ngClass]="{'w-100 ml-0': !wallets?.length}" (click)="importKey()" [disabled]="importForm?.invalid">Import</button>
                             <button type="button" class="btn btn-sm btn-primary w-50 ml-1" *ngIf="selectOption === selectOptionList[1]"
-                                    (click)="importFile()" [disabled]="selectedFile === null || password.length < 6">Import</button>
+                                    [ngClass]="{'w-100 ml-0': !wallets?.length}" (click)="importFile()" [disabled]="selectedFile === null || password.length < 6">Import</button>
                         </div>
                     </div>
                 </div>

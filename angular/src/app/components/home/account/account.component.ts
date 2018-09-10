@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {StorageData} from "../../../interfaces/storage-data";
 import {Wallet} from "../../../interfaces/wallet";
 import {CommonService} from "../../../services/common.service";
@@ -6,26 +6,28 @@ import {ApiService} from "../../../services/api.service";
 import {combineLatest} from "rxjs/internal/operators";
 import {TransactionList} from "../../../interfaces/transaction-list";
 import {environment} from "../../../../environments/environment";
+import {Subscription} from "rxjs/index";
 
 @Component({
   selector: 'app-account',
   templateUrl: './account.component.html',
   styleUrls: ['./account.component.scss']
 })
-export class AccountComponent implements OnInit {
+export class AccountComponent implements OnInit, OnDestroy {
 
   public detailsLink: string = environment.detailsTxInfoLink;
   public storageData: StorageData;
   public currentWallet: Wallet;
-  public publicKey: string;
   public balance = {
     mnt: 0,
     gold: 0
   };
   public isDataLoaded: boolean = false;
+  public loading: boolean = false;
   public transactionList: TransactionList[] = [];
 
   private chrome = window['chrome'];
+  private sub1: Subscription;
 
   constructor(
     private ref: ChangeDetectorRef,
@@ -34,16 +36,17 @@ export class AccountComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    // this.getStorageData();
+    this.getStorageData();
 
-    this.commonService.chooseAccount$.subscribe(() => {
+    this.sub1 = this.commonService.chooseAccount$.subscribe(() => {
       this.getStorageData();
     });
 
-    this.getBalanceAndTx('cCwdg3yMwyJXZvADQXBjiiiPt7vUmbTvoSwmooUkAcSGqh8J3');
+    // this.getBalanceAndTx('cCwdg3yMwyJXZvADQXBjiiiPt7vUmbTvoSwmooUkAcSGqh8J3');
   }
 
   getBalanceAndTx(publicKey: string) {
+    this.loading = true;
     const combined = this.apiService.getTxByAddress(publicKey, 0, 4, "date").pipe(combineLatest(
       this.apiService.getWalletBalance(publicKey)
     ));
@@ -57,6 +60,7 @@ export class AccountComponent implements OnInit {
       this.balance.gold = data[1]['data'].goldAmount;
 
       this.isDataLoaded = true;
+      this.loading = false;
       this.ref.detectChanges();
     });
   }
@@ -65,26 +69,16 @@ export class AccountComponent implements OnInit {
     this.chrome.storage.local.get(null, (result) => {
       this.storageData = result;
       this.currentWallet = this.storageData.wallets[this.storageData.currentWallet];
-      this.showPublicKey();
+      this.getBalanceAndTx(this.currentWallet.publicKey);
       this.ref.detectChanges();
     });
   }
 
-  showPublicKey() {
-    this.publicKey = this.currentWallet.publicKey.slice(0, 6) + '....' + this.currentWallet.publicKey.slice(-4)
+  copyText(val: string){
+    this.commonService.copyText(val);
   }
 
-  copyText(val: string){
-    let selBox = document.createElement('textarea');
-    selBox.style.position = 'fixed';
-    selBox.style.left = '0';
-    selBox.style.top = '0';
-    selBox.style.opacity = '0';
-    selBox.value = val;
-    document.body.appendChild(selBox);
-    selBox.focus();
-    selBox.select();
-    document.execCommand('copy');
-    document.body.removeChild(selBox);
+  ngOnDestroy() {
+    this.sub1 && this.sub1.unsubscribe();
   }
 }

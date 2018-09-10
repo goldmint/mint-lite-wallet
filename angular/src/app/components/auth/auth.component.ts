@@ -26,7 +26,7 @@ export class AuthComponent implements OnInit {
       if (this.result['identify']) {
         this.router.navigate(['/home/account']);
       } else {
-        this.result['wallets'] ? this.router.navigate(['/login']) : this.router.navigate(['/create-wallet'])
+        this.result['wallets'] ? this.router.navigate(['/login']) : this.router.navigate(['/new-account/create'])
       }
     }, 100);
   }

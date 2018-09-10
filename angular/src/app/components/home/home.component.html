@@ -1,5 +1,18 @@
-<div id="header" class="d-flex justify-content-between p-3">
-    <div (click)="clearStorage()">Wallet</div>
+<div id="header" class="d-flex justify-content-between align-items-center px-3">
+    <div (click)="clearStorage()">
+        <svg class="icon-gold" width="25" height="25">
+            <use xlink:href="#logo"></use>
+        </svg>
+    </div>
+
+    <div class="header-select-account-cont">
+        <div class="form-group mb-0">
+            <select class="form-control custom-select black mb-0 header-select-account" [(ngModel)]="selectedAccount" (change)="chooseAccount()">
+                <option *ngFor="let w of storageData?.wallets; index as i" [value]="i" (click)="chooseAccount()">{{ w?.name }}</option>
+            </select>
+        </div>
+    </div>
+
     <div class="pointer" (click)="openSettingModal()">
         <svg class="icon-gold" width="25" height="25">
             <use xlink:href="#burger" *ngIf="!isOpenSettingModal"></use>
@@ -13,19 +26,6 @@
 </div>
 
 <div class="setting-modal p-3" *ngIf="isOpenSettingModal">
-    <div class="setting-top">
-        <div>My accounts</div>
-        <div class="setting-logout-btn" (click)="logOut()">Log Out</div>
-    </div>
-
-    <div class="setting-account-list-container">
-        <div class="setting-account-list">
-            <ul>
-                <li *ngFor="let w of storageData.wallets; index as i" (click)="chooseAccount(i)">{{ w.name }}</li>
-            </ul>
-        </div>
-    </div>
-
     <div class="setting-actions">
         <div class="d-flex align-items-center pointer" (click)="createAccount()">
             <svg class="icon-gold" width="15" height="15">
@@ -67,6 +67,13 @@
                 <use xlink:href="#import"></use>
             </svg>
             <span class="ml-2">Show</span>
+        </div>
+
+        <div class="d-flex align-items-center pointer mt-2" (click)="logOut()">
+            <svg class="icon-gold" width="15" height="15">
+                <use xlink:href="#logout"></use>
+            </svg>
+            <span class="ml-2">Log Out</span>
         </div>
     </div>
 </div>

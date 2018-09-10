@@ -28,7 +28,7 @@ export class CreateWalletComponent implements OnInit {
     const data = {
       id: 1,
       name: this.accountName,
-      publicKey: '0x7546d7012da51d09f5021cf6a9bc0d0124a1253f',
+      publicKey: '27SDWfMkZogDPpf4ouBq1413VBJhBHHREpwuns3qaaqtiAGEfs',
       privateKey: encryptedKey
     };
 

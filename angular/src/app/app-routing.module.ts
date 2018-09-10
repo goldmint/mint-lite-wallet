@@ -8,12 +8,14 @@ import {AuthComponent} from "./components/auth/auth.component";
 import {CreateWalletComponent} from "./components/auth/create-wallet/create-wallet.component";
 import {DetailsAccountComponent} from "./components/home/details-account/details-account.component";
 import {ExportAccountComponent} from "./components/home/export-account/export-account.component";
+import {SendTokensComponent} from "./components/home/send-tokens/send-tokens.component";
 
 const routes: Routes = [
   {
     path: '', component: AuthComponent, children: [
       { path: 'login', component: LoginComponent },
-      { path: 'create-wallet', component: CreateWalletComponent },
+      // { path: 'create-wallet', component: CreateWalletComponent },
+      { path: 'new-account/:id', component: NewAccountComponent },
     ]
   },
   {
@@ -21,7 +23,8 @@ const routes: Routes = [
       { path: 'account', component: AccountComponent },
       { path: 'new-account/:id', component: NewAccountComponent },
       { path: 'account-details', component: DetailsAccountComponent },
-      { path: 'export-account', component: ExportAccountComponent }
+      { path: 'export-account', component: ExportAccountComponent },
+      { path: 'send-tokens/:id', component: SendTokensComponent }
     ]
   }
 ];

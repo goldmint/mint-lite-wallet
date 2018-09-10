@@ -14,7 +14,6 @@ import { AccountComponent } from './components/home/account/account.component';
 import {NewAccountComponent} from "./components/home/new-account/new-account.component";
 import { CreateWalletComponent } from './components/auth/create-wallet/create-wallet.component';
 import { AuthComponent } from './components/auth/auth.component';
-import {DetectChangesDirective} from "./directives/detect-changes.directive";
 import {CommonService} from "./services/common.service";
 import { DetailsAccountComponent } from './components/home/details-account/details-account.component';
 
@@ -27,6 +26,9 @@ import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {MessageBoxService} from "./services/message-box.service";
 import {MessageBoxComponent} from "./common/message-box/message-box.component";
 import {APIHttpInterceptor} from "./common/interceptor/api-http.interceptor";
+import {SendTokensComponent} from "./components/home/send-tokens/send-tokens.component";
+import {SumusAddressValidator} from "./directives/check-sumus.directive";
+import {AccountReductionPipe} from "./pipes/account-reduction.pipe";
 
 @NgModule({
   declarations: [
@@ -39,10 +41,12 @@ import {APIHttpInterceptor} from "./common/interceptor/api-http.interceptor";
     NewAccountComponent,
     CreateWalletComponent,
     AuthComponent,
-    DetectChangesDirective,
     DetailsAccountComponent,
     ExportAccountComponent,
-    MessageBoxComponent
+    MessageBoxComponent,
+    SendTokensComponent,
+    SumusAddressValidator,
+    AccountReductionPipe
   ],
   imports: [
     BrowserModule,

@@ -3,6 +3,7 @@ import {ChromeStorageService} from "../../services/chrome-storage.service";
 import {Router} from "@angular/router";
 import {CommonService} from "../../services/common.service";
 import {StorageData} from "../../interfaces/storage-data";
+import {Subscription} from "rxjs/index";
 
 
 @Component({
@@ -14,8 +15,10 @@ export class HomeComponent implements OnInit {
 
   public isOpenSettingModal: boolean = false;
   public storageData: StorageData;
+  public selectedAccount: number;
 
   private chrome = window['chrome'];
+  private sub1: Subscription;
 
   constructor(
     private chromeStorage: ChromeStorageService,
@@ -25,12 +28,17 @@ export class HomeComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // this.getStorageData();
+    this.getStorageData();
+
+    this.sub1 = this.commonService.chooseAccount$.subscribe(() => {
+      this.getStorageData();
+    });
   }
 
   getStorageData() {
     this.chrome.storage.local.get(null, (result) => {
       this.storageData = result;
+      this.selectedAccount = this.storageData.currentWallet;
       this.ref.detectChanges();
     });
   }
@@ -40,10 +48,8 @@ export class HomeComponent implements OnInit {
     this.getStorageData();
   }
 
-  chooseAccount(i) {
-    this.chromeStorage.save('currentWallet', i);
-    this.isOpenSettingModal = false;
-    this.router.navigate(['/home/account']);
+  chooseAccount() {
+    this.chromeStorage.save('currentWallet', this.selectedAccount);
     this.commonService.chooseAccount$.next(true);
     this.ref.detectChanges();
   }
@@ -83,6 +89,10 @@ export class HomeComponent implements OnInit {
     this.router.navigate(['/home/new-account/create']);
     this.isOpenSettingModal = false;
     this.ref.detectChanges();
+  }
+
+  ngOnDestroy() {
+    this.sub1 && this.sub1.unsubscribe();
   }
 
 }
