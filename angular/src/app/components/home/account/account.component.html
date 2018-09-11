@@ -2,9 +2,21 @@
     <div class="container"></div>
 </div>
 
-<div class="text-center">
-    <div>{{ currentWallet?.name }}</div>
-    <div class="account-public-key pointer" tooltip="Copy to clipboard" (click)="copyText(currentWallet?.publicKey)">{{ currentWallet?.publicKey | reduction }}</div>
+<div class="d-flex justify-content-between">
+    <div class="account-info-empty-el"></div>
+
+    <div>
+        <div class="hidden">{{ currentWallet?.name }}</div>
+        <div class="account-public-key pointer" tooltip="Copy to clipboard" (click)="copyText(currentWallet?.publicKey)">
+            {{ currentWallet?.publicKey | reduction }}
+        </div>
+    </div>
+
+    <div class="open-tab-btn" tooltip="Open in tab" placement="left" (click)="openInTab()">
+        <svg width="20" height="20">
+            <use xlink:href="#out"></use>
+        </svg>
+    </div>
 </div>
 
 <div class="mt-3">

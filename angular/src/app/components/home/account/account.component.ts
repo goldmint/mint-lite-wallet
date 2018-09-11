@@ -76,6 +76,10 @@ export class AccountComponent implements OnInit, OnDestroy {
     this.commonService.copyText(val);
   }
 
+  openInTab() {
+    this.chrome.tabs.create({'url': this.chrome.extension.getURL('index.html')}, () => {});
+  }
+
   ngOnDestroy() {
     this.sub1 && this.sub1.unsubscribe();
   }

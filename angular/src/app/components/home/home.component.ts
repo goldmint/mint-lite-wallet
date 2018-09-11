@@ -3,7 +3,7 @@ import {ChromeStorageService} from "../../services/chrome-storage.service";
 import {Router} from "@angular/router";
 import {CommonService} from "../../services/common.service";
 import {StorageData} from "../../interfaces/storage-data";
-import {Subscription} from "rxjs/index";
+import {Subject, Subscription} from "rxjs/index";
 
 
 @Component({
@@ -73,8 +73,10 @@ export class HomeComponent implements OnInit {
   }
 
   logOut() {
-    this.chrome.runtime.sendMessage({logout: true});
-    this.router.navigate(['/login']);
+    this.chrome.runtime.sendMessage({logout: true})
+    setTimeout(() => {
+      this.router.navigate(['/login'])
+    }, 200);
   }
 
   getItem() {

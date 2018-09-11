@@ -14,5 +14,3 @@ if (isFirefox) {
         storageAction(request);
     });
 }
-
-

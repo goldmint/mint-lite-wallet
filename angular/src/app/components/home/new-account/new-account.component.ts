@@ -129,8 +129,8 @@ export class NewAccountComponent implements OnInit, OnDestroy {
               return;
             }
           });
-
-          this.addAccount(this.keyStoreFile.publicKey, this.keyStoreFile.privateKey, this.accountName);
+          const encryptedKey = CryptoJS.AES.encrypt(this.keyStoreFile.privateKey, this.password).toString();
+          this.addAccount(this.keyStoreFile.publicKey, encryptedKey, this.accountName);
         }
       })(reader);
       reader.readAsText(this.selectedFile);
