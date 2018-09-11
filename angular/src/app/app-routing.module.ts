@@ -5,7 +5,6 @@ import {LoginComponent} from "./components/auth/login/login.component";
 import {AccountComponent} from "./components/home/account/account.component";
 import {NewAccountComponent} from "./components/home/new-account/new-account.component";
 import {AuthComponent} from "./components/auth/auth.component";
-import {CreateWalletComponent} from "./components/auth/create-wallet/create-wallet.component";
 import {DetailsAccountComponent} from "./components/home/details-account/details-account.component";
 import {ExportAccountComponent} from "./components/home/export-account/export-account.component";
 import {SendTokensComponent} from "./components/home/send-tokens/send-tokens.component";
@@ -14,7 +13,6 @@ const routes: Routes = [
   {
     path: '', component: AuthComponent, children: [
       { path: 'login', component: LoginComponent },
-      // { path: 'create-wallet', component: CreateWalletComponent },
       { path: 'new-account/:id', component: NewAccountComponent },
     ]
   },

@@ -73,7 +73,7 @@ export class HomeComponent implements OnInit {
   }
 
   logOut() {
-    this.chromeStorage.remove('identify');
+    this.chrome.runtime.sendMessage({logout: true});
     this.router.navigate(['/login']);
   }
 

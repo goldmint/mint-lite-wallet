@@ -9,6 +9,7 @@ import {ChromeStorageService} from "../../services/chrome-storage.service";
 })
 export class AuthComponent implements OnInit {
 
+  private loggedIn;
   private chrome = window['chrome'];
   private result;
 
@@ -18,17 +19,21 @@ export class AuthComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.chrome.runtime.getBackgroundPage(page => {
+      this.loggedIn = page.sessionStorage.identify;
+    });
+
     this.chrome.storage.local.get(null, (result) => {
       this.result = result;
     });
 
     setTimeout(() => {
-      if (this.result['identify']) {
+      if (this.loggedIn) {
         this.router.navigate(['/home/account']);
       } else {
         this.result['wallets'] ? this.router.navigate(['/login']) : this.router.navigate(['/new-account/create'])
       }
-    }, 100);
+    }, 200);
   }
 
   clearStorage() {

@@ -4,6 +4,7 @@ import {Router} from "@angular/router";
 import {GenerateWalletService} from "../../../services/generate-wallet.service";
 import * as CryptoJS from 'crypto-js';
 import {Wallet} from "../../../interfaces/wallet";
+import {MessageBoxService} from "../../../services/message-box.service";
 
 @Component({
   selector: 'app-login',
@@ -22,7 +23,8 @@ export class LoginComponent implements OnInit {
     private chromeStorage: ChromeStorageService,
     private generateWallet: GenerateWalletService,
     private router: Router,
-    private ref: ChangeDetectorRef
+    private ref: ChangeDetectorRef,
+    private messageBox: MessageBoxService
   ) { }
 
   ngOnInit() {
@@ -37,11 +39,14 @@ export class LoginComponent implements OnInit {
     try {
       decrypted = CryptoJS.AES.decrypt(this.wallets[0].privateKey, this.userPassword).toString(CryptoJS.enc.Utf8);
     } catch (e) {
-      alert('Error')
+      this.messageBox.alert('Something went wrong');
       return;
     }
     if (decrypted) {
-      this.chromeStorage.save('identify', this.userPassword);
+      // this.chromeStorage.save('identify', this.userPassword);
+
+      this.chrome.runtime.sendMessage({identify: this.userPassword});
+
       this.router.navigate(['/home/account']);
     } else {
       this.invalidPass = true;

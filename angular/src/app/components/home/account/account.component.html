@@ -4,7 +4,7 @@
 
 <div class="text-center">
     <div>{{ currentWallet?.name }}</div>
-    <div class="account-public-key pointer" tooltip="Copy to clipboard" (click)="copyText(currentWallet.publicKey)">{{ currentWallet.publicKey | reduction }}</div>
+    <div class="account-public-key pointer" tooltip="Copy to clipboard" (click)="copyText(currentWallet?.publicKey)">{{ currentWallet?.publicKey | reduction }}</div>
 </div>
 
 <div class="mt-3">

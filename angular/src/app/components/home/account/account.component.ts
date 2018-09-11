@@ -41,8 +41,6 @@ export class AccountComponent implements OnInit, OnDestroy {
     this.sub1 = this.commonService.chooseAccount$.subscribe(() => {
       this.getStorageData();
     });
-
-    // this.getBalanceAndTx('cCwdg3yMwyJXZvADQXBjiiiPt7vUmbTvoSwmooUkAcSGqh8J3');
   }
 
   getBalanceAndTx(publicKey: string) {

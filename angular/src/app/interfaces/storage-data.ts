@@ -1,7 +1,7 @@
 import {Wallet} from "./wallet";
 
 export interface StorageData {
-  identify: string,
+  // identify: string,
   currentWallet: number,
   wallets: Wallet[]
 }

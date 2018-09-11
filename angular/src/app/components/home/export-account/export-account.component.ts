@@ -1,6 +1,7 @@
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {Wallet} from "../../../interfaces/wallet";
 import * as CryptoJS from 'crypto-js';
+import {MessageBoxService} from "../../../services/message-box.service";
 
 @Component({
   selector: 'app-export-account',
@@ -17,13 +18,17 @@ export class ExportAccountComponent implements OnInit {
 
   constructor(
     private ref: ChangeDetectorRef,
+    private messageBox: MessageBoxService
   ) { }
 
   ngOnInit() {
     this.chrome.storage.local.get(null, (result) => {
       this.wallets = result.wallets;
-      this.identify = result.identify;
       this.ref.detectChanges();
+    });
+
+    this.chrome.runtime.getBackgroundPage(page => {
+      this.identify = page.sessionStorage.identify;
     });
   }
 
@@ -33,7 +38,7 @@ export class ExportAccountComponent implements OnInit {
     try {
       privateDecryptedKey = CryptoJS.AES.decrypt(wallet.privateKey, this.identify).toString(CryptoJS.enc.Utf8);
     } catch (e) {
-      alert('Error');
+      this.messageBox.alert('Something went wrong');
       return;
     };
     const data = {

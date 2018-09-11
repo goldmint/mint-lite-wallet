@@ -12,7 +12,6 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {GenerateWalletService} from "./services/generate-wallet.service";
 import { AccountComponent } from './components/home/account/account.component';
 import {NewAccountComponent} from "./components/home/new-account/new-account.component";
-import { CreateWalletComponent } from './components/auth/create-wallet/create-wallet.component';
 import { AuthComponent } from './components/auth/auth.component';
 import {CommonService} from "./services/common.service";
 import { DetailsAccountComponent } from './components/home/details-account/details-account.component';
@@ -39,7 +38,6 @@ import {AccountReductionPipe} from "./pipes/account-reduction.pipe";
     SpriteComponent,
     AccountComponent,
     NewAccountComponent,
-    CreateWalletComponent,
     AuthComponent,
     DetailsAccountComponent,
     ExportAccountComponent,
