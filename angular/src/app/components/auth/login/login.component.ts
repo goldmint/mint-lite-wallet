@@ -43,10 +43,7 @@ export class LoginComponent implements OnInit {
       return;
     }
     if (decrypted) {
-      // this.chromeStorage.save('identify', this.userPassword);
-
       this.chrome.runtime.sendMessage({identify: this.userPassword});
-
       this.router.navigate(['/home/account']);
     } else {
       this.invalidPass = true;

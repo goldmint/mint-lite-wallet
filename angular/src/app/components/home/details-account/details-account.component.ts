@@ -64,5 +64,4 @@ export class DetailsAccountComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.sub1 && this.sub1.unsubscribe();
   }
-
 }
