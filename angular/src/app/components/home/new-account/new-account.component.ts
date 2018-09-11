@@ -15,7 +15,8 @@ export class NewAccountComponent implements OnInit, OnDestroy {
 
   public loading: boolean = false;
   public accountName: string = '';
-  public wallets: Wallet[];
+  public newPassword: string = '';
+  public wallets: Wallet[] = [];
   public switchModel: {
     type: 'create'|'import'
   };
@@ -25,6 +26,7 @@ export class NewAccountComponent implements OnInit, OnDestroy {
   public selectedFile: any = null;
   public password: string = '';
   public isInvalidFile: boolean = false;
+  public isEmptyWallet: boolean = false;
 
   private keyStoreFile: any;
   private identify: string;
@@ -47,12 +49,21 @@ export class NewAccountComponent implements OnInit, OnDestroy {
     });
 
     this.chrome.storage.local.get(null, (result) => {
-      this.wallets = result.wallets;
-      this.identify = result.identify;
-
-      this.accountName = 'Account ' + (this.wallets.length + 1);
+      // add account
+      if (result.wallets) {
+        this.identify = result.identify;
+        this.wallets = result.wallets;
+        this.accountName = 'Account ' + (this.wallets.length + 1);
+      } else { // new account
+        this.accountName = 'Account 1';
+        this.isEmptyWallet = true;
+      }
       this.ref.detectChanges();
     });
+  }
+
+  detect() {
+    this.ref.detectChanges();
   }
 
   onChangeFile(event) {
@@ -65,7 +76,9 @@ export class NewAccountComponent implements OnInit, OnDestroy {
   }
 
   addAccount(publicKey: string, privateKey: string, name: string) {
-    const encryptedKey = CryptoJS.AES.encrypt(privateKey, this.identify).toString();
+    const password = this.isEmptyWallet ? this.newPassword : this.identify;
+
+    const encryptedKey = CryptoJS.AES.encrypt(privateKey, password).toString();
     const data = {
       id: this.wallets.length + 1,
       name: name,
@@ -73,6 +86,8 @@ export class NewAccountComponent implements OnInit, OnDestroy {
       privateKey: encryptedKey
     };
     this.wallets.push(data);
+
+    this.isEmptyWallet && this.chromeStorage.save('identify', this.newPassword);
 
     this.chromeStorage.save('wallets', this.wallets);
     this.chromeStorage.save('currentWallet', this.wallets.length - 1);
@@ -104,7 +119,7 @@ export class NewAccountComponent implements OnInit, OnDestroy {
             if (item.publicKey === this.keyStoreFile.publicKey) {
               this.chromeStorage.save('currentWallet', i);
               this.router.navigate(['/home/account']);
-              return
+              return;
             }
           });
 

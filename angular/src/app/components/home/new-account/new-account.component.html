@@ -18,7 +18,7 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="form-group">
-                            <input type="text" class="form-control" placeholder='Account name' name="password-field"
+                            <input type="text" class="form-control" placeholder='Account name' name="account-name"
                                    #name="ngModel"
                                    [ngClass]="{'is-invalid': name.invalid && name.dirty}"
                                    [(ngModel)]="accountName"
@@ -29,12 +29,30 @@
                         </div>
                     </div>
 
+                    <div class="col-12" *ngIf="isEmptyWallet">
+                        <div class="form-group">
+                            <input type="password" class="form-control" placeholder='Password' name="new-password"
+                                   #newPass="ngModel"
+                                   [ngClass]="{'is-invalid': newPass.invalid && newPass.dirty}"
+                                   [(ngModel)]="newPassword"
+                                   (ngModelChange)="detect()"
+                                   required
+                                   minlength="6">
+                            <div class="invalid-feedback invalid-feedback--abs" *ngIf="newPass?.errors?.required">
+                                Field is required
+                            </div>
+                            <div class="invalid-feedback invalid-feedback--abs" *ngIf="newPass?.errors?.minlength">
+                                Minimum password length is 6 symbols
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="col-12 text-center mt-3">
                         <div class="d-flex">
-                            <button type="button" class="btn btn-sm btn-primary w-50 mr-1" *ngIf="wallets?.length"
+                            <button type="button" class="btn btn-sm btn-primary w-50 mr-1" *ngIf="!isEmptyWallet"
                                     routerLink="/home/account">Cancel</button>
-                            <button type="button" class="btn btn-sm btn-primary w-50 ml-1" [ngClass]="{'w-100 ml-0': !wallets?.length}"
-                                    (click)="create()" [disabled]="!accountName.length || loading">
+                            <button type="button" class="btn btn-sm btn-primary w-50 ml-1" [ngClass]="{'w-100 ml-0': isEmptyWallet}"
+                                    (click)="create()" [disabled]="(isEmptyWallet && form?.invalid) || (!isEmptyWallet && !accountName) || loading">
                                 Create
                             </button>
                         </div>
@@ -102,12 +120,12 @@
 
                     <div class="col-12 text-center mt-3">
                         <div class="d-flex">
-                            <button type="button" class="btn btn-sm btn-primary w-50 mr-1" *ngIf="wallets?.length" routerLink="/home/account">Cancel</button>
+                            <button type="button" class="btn btn-sm btn-primary w-50 mr-1" *ngIf="!isEmptyWallet" routerLink="/home/account">Cancel</button>
 
                             <button type="button" class="btn btn-sm btn-primary w-50 ml-1" *ngIf="selectOption === selectOptionList[0]"
-                                    [ngClass]="{'w-100 ml-0': !wallets?.length}" (click)="importKey()" [disabled]="importForm?.invalid">Import</button>
+                                    [ngClass]="{'w-100 ml-0': isEmptyWallet}" (click)="importKey()" [disabled]="importForm?.invalid">Import</button>
                             <button type="button" class="btn btn-sm btn-primary w-50 ml-1" *ngIf="selectOption === selectOptionList[1]"
-                                    [ngClass]="{'w-100 ml-0': !wallets?.length}" (click)="importFile()" [disabled]="selectedFile === null || password.length < 6">Import</button>
+                                    [ngClass]="{'w-100 ml-0': isEmptyWallet}" (click)="importFile()" [disabled]="selectedFile === null || password.length < 6">Import</button>
                         </div>
                     </div>
                 </div>
