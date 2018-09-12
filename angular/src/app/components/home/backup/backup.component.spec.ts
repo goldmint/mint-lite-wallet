@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ExportAccountComponent } from './export-account.component';
+import { BackupComponent } from './backup.component';
 
-describe('ExportAccountComponent', () => {
-  let component: ExportAccountComponent;
-  let fixture: ComponentFixture<ExportAccountComponent>;
+describe('BackupComponent', () => {
+  let component: BackupComponent;
+  let fixture: ComponentFixture<BackupComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ExportAccountComponent ]
+      declarations: [ BackupComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ExportAccountComponent);
+    fixture = TestBed.createComponent(BackupComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

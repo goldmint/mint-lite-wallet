@@ -4,6 +4,7 @@ import {Subject} from "rxjs/index";
 @Injectable()
 export class CommonService {
 
+  public isLoggedIn: boolean = false;
   public chooseAccount$ = new Subject();
 
   constructor() { }

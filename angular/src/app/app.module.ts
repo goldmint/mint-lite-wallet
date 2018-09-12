@@ -19,7 +19,6 @@ import { DetailsAccountComponent } from './components/home/details-account/detai
 import {
   ButtonsModule, ModalModule, TooltipModule
 } from 'ngx-bootstrap';
-import { ExportAccountComponent } from './components/home/export-account/export-account.component';
 import {ApiService} from "./services/api.service";
 import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {MessageBoxService} from "./services/message-box.service";
@@ -28,6 +27,8 @@ import {APIHttpInterceptor} from "./common/interceptor/api-http.interceptor";
 import {SendTokensComponent} from "./components/home/send-tokens/send-tokens.component";
 import {SumusAddressValidator} from "./directives/check-sumus.directive";
 import {AccountReductionPipe} from "./pipes/account-reduction.pipe";
+import { BackupComponent } from './components/home/backup/backup.component';
+import {AuthGuard} from "./services/auth.guard";
 
 @NgModule({
   declarations: [
@@ -40,11 +41,11 @@ import {AccountReductionPipe} from "./pipes/account-reduction.pipe";
     NewAccountComponent,
     AuthComponent,
     DetailsAccountComponent,
-    ExportAccountComponent,
     MessageBoxComponent,
     SendTokensComponent,
     SumusAddressValidator,
-    AccountReductionPipe
+    AccountReductionPipe,
+    BackupComponent
   ],
   imports: [
     BrowserModule,
@@ -66,7 +67,8 @@ import {AccountReductionPipe} from "./pipes/account-reduction.pipe";
       provide: HTTP_INTERCEPTORS,
       useClass: APIHttpInterceptor,
       multi: true
-    }
+    },
+    AuthGuard
   ],
   entryComponents: [
     MessageBoxComponent

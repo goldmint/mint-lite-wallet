@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {Router} from "@angular/router";
 import {ChromeStorageService} from "../../services/chrome-storage.service";
+import {CommonService} from "../../services/common.service";
 
 @Component({
   selector: 'app-auth',
@@ -15,12 +16,14 @@ export class AuthComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private chromeStorage: ChromeStorageService
+    private chromeStorage: ChromeStorageService,
+    private commonService: CommonService
   ) { }
 
   ngOnInit() {
     this.chrome.runtime.getBackgroundPage(page => {
       this.loggedIn = page.sessionStorage.identify;
+      this.loggedIn && (this.commonService.isLoggedIn = true);
     });
 
     this.chrome.storage.local.get(null, (result) => {

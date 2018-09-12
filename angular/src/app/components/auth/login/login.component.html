@@ -8,27 +8,27 @@
     <form #loginForm="ngForm" (ngSubmit)="submit()">
         <div class="row">
             <div class="col-12">
-                <div class="form-group">
+                <div class="form-group position-relative">
                     <input type="password" class="form-control" placeholder='Password' name="password-field"
                            #password="ngModel"
                            [ngClass]="{'is-invalid': (password.invalid && password.dirty) || invalidPass}"
                            [(ngModel)]="userPassword"
                            (ngModelChange)="invalidPass = false"
                            required
-                           minlength="6">
-                    <div class="invalid-feedback invalid-feedback--abs" *ngIf="password?.errors?.required">
+                           >
+                    <div class="invalid-feedback" *ngIf="password?.errors?.required">
                         Field is required
                     </div>
-                    <div class="invalid-feedback invalid-feedback--abs" *ngIf="password?.errors?.minlength">
-                        Minimum password length is 6 symbols
+                    <div class="invalid-feedback" *ngIf="password?.errors?.pattern">
+                        Passwords must be at least 6 characters long and must contain at least one digit, one upper and one lower case letter
                     </div>
-                    <div class="invalid-feedback invalid-feedback--abs" *ngIf="!password?.errors && invalidPass">
-                        Invalid password
+                    <div class="invalid-feedback" *ngIf="!password?.errors && invalidPass">
+                        Incorrect password
                     </div>
                 </div>
             </div>
-
-            <div class="col-12 text-center mt-3">
+            <!--pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}$"-->
+            <div class="col-12 text-center mt-2">
                 <button type="submit" class="btn btn-sm btn-primary w-100" [disabled]="loginForm.invalid || invalidPass">
                     Log In
                 </button>

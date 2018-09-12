@@ -6,8 +6,9 @@ import {AccountComponent} from "./components/home/account/account.component";
 import {NewAccountComponent} from "./components/home/new-account/new-account.component";
 import {AuthComponent} from "./components/auth/auth.component";
 import {DetailsAccountComponent} from "./components/home/details-account/details-account.component";
-import {ExportAccountComponent} from "./components/home/export-account/export-account.component";
 import {SendTokensComponent} from "./components/home/send-tokens/send-tokens.component";
+import {BackupComponent} from "./components/home/backup/backup.component";
+import {AuthGuard} from "./services/auth.guard";
 
 const routes: Routes = [
   {
@@ -17,12 +18,12 @@ const routes: Routes = [
     ]
   },
   {
-    path: 'home', component: HomeComponent, children: [
+    path: 'home', component: HomeComponent, canActivate: [AuthGuard], children: [
       { path: 'account', component: AccountComponent },
       { path: 'new-account/:id', component: NewAccountComponent },
       { path: 'account-details', component: DetailsAccountComponent },
-      { path: 'export-account', component: ExportAccountComponent },
-      { path: 'send-tokens/:id', component: SendTokensComponent }
+      { path: 'send-tokens/:id', component: SendTokensComponent },
+      { path: 'backup', component: BackupComponent }
     ]
   }
 ];

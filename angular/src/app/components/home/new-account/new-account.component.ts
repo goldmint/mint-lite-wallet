@@ -21,15 +21,11 @@ export class NewAccountComponent implements OnInit, OnDestroy {
   public switchModel: {
     type: 'create'|'import'
   };
-  public selectOptionList = ['key', 'json']
-  public selectOption: string = 'key';
   public privateKey: string;
-  public selectedFile: any = null;
-  public password: string = '';
   public isInvalidFile: boolean = false;
   public isEmptyWallet: boolean = false;
 
-  private keyStoreFile: any;
+
   private identify: string;
   private sub1: Subscription;
   private chrome = window['chrome'];
@@ -55,6 +51,7 @@ export class NewAccountComponent implements OnInit, OnDestroy {
       if (result.wallets) {
         this.chrome.runtime.getBackgroundPage(page => {
           this.identify = page.sessionStorage.identify;
+          !this.identify && this.router.navigate(['/login']);
         });
 
         this.wallets = result.wallets;
@@ -69,10 +66,6 @@ export class NewAccountComponent implements OnInit, OnDestroy {
 
   detect() {
     this.ref.detectChanges();
-  }
-
-  onChangeFile(event) {
-    this.selectedFile = event.target.files.length > 0 ? event.target.files[0] : null;
   }
 
   create() {
@@ -100,45 +93,7 @@ export class NewAccountComponent implements OnInit, OnDestroy {
     this.router.navigate(['/home/account']);
   }
 
-  importKey() {
-
-  }
-
-  importFile() {
-    this.isInvalidFile = false;
-
-    if (this.selectedFile.size > 0 && this.selectedFile.type === "text/plain") {
-      var reader = new FileReader();
-      reader.onload = (reader => {
-        return () => {
-          const contents = reader.result;
-          try {
-            const decrypted  = CryptoJS.AES.decrypt(contents, this.password).toString(CryptoJS.enc.Utf8);
-            this.keyStoreFile = JSON.parse(decrypted);
-          } catch(e) {
-            this.isInvalidFile = true;
-            this.ref.detectChanges();
-            return;
-          }
-
-          this.wallets.forEach((item, i) => {
-            if (item.publicKey === this.keyStoreFile.publicKey) {
-              this.chromeStorage.save('currentWallet', i);
-              this.commonService.chooseAccount$.next(true);
-              this.router.navigate(['/home/account']);
-              return;
-            }
-          });
-          const encryptedKey = CryptoJS.AES.encrypt(this.keyStoreFile.privateKey, this.password).toString();
-          this.addAccount(this.keyStoreFile.publicKey, encryptedKey, this.accountName);
-        }
-      })(reader);
-      reader.readAsText(this.selectedFile);
-    } else {
-      this.isInvalidFile = true;
-      this.ref.detectChanges();
-    }
-  }
+  importKey() { }
 
   ngOnDestroy() {
     this.sub1 && this.sub1.unsubscribe();

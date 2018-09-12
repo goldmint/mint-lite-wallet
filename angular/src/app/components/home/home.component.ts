@@ -3,7 +3,7 @@ import {ChromeStorageService} from "../../services/chrome-storage.service";
 import {Router} from "@angular/router";
 import {CommonService} from "../../services/common.service";
 import {StorageData} from "../../interfaces/storage-data";
-import {Subject, Subscription} from "rxjs/index";
+import {Subscription} from "rxjs/index";
 
 
 @Component({
@@ -66,14 +66,15 @@ export class HomeComponent implements OnInit {
     this.ref.detectChanges();
   }
 
-  goToExportAccount() {
-    this.router.navigate(['/home/export-account']);
+  goToBackup() {
+    this.router.navigate(['/home/backup']);
     this.isOpenSettingModal = false;
     this.ref.detectChanges();
   }
 
   logOut() {
-    this.chrome.runtime.sendMessage({logout: true})
+    this.chrome.runtime.sendMessage({logout: true});
+    this.commonService.isLoggedIn = false;
     setTimeout(() => {
       this.router.navigate(['/login'])
     }, 200);

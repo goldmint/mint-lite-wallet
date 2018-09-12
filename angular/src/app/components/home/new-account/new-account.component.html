@@ -68,16 +68,6 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="form-group">
-                            <label for="select-type">Select Type</label>
-                            <select class="form-control custom-select" id="select-type" name="options" [(ngModel)]="selectOption">
-                                <option value='key'>Private Key</option>
-                                <option value='json'>Encrypted json</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="col-12" *ngIf="selectOption === selectOptionList[0]">
-                        <div class="form-group">
                             <label for="private-key">Input your private key</label>
                             <input type="password" class="form-control" id="private-key" placeholder='Private key' name="account-name"
                                    #key="ngModel"
@@ -89,31 +79,7 @@
                                 Field is required
                             </div>
                             <div class="invalid-feedback invalid-feedback--abs" *ngIf="!key?.errors?.required && key?.errors?.sumus">
-                                Invalid address
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12" *ngIf="selectOption === selectOptionList[1]">
-                        <div class="form-group hidden">
-                            <label for="json-file">Select your encrypted json file</label>
-                            <input type="file" name="json-file" id="json-file" (change)="onChangeFile($event)">
-                        </div>
-                    </div>
-
-                    <div class="col-12" *ngIf="selectOption === selectOptionList[1]">
-                        <div class="form-group">
-                            <input type="password" class="form-control" id="password" placeholder='Password' name="password"
-                                   #pass="ngModel"
-                                   [ngClass]="{'is-invalid': pass.invalid && pass.dirty}"
-                                   [(ngModel)]="password"
-                                   (ngModelChange)="isInvalidFile = false"
-                                   required>
-                            <div class="invalid-feedback invalid-feedback--abs" *ngIf="pass?.errors?.required">
-                                Field is required
-                            </div>
-                            <div class="invalid-feedback invalid-feedback--abs d-block" *ngIf="isInvalidFile">
-                                Invalid file
+                                Invalid key
                             </div>
                         </div>
                     </div>
@@ -122,10 +88,8 @@
                         <div class="d-flex">
                             <button type="button" class="btn btn-sm btn-primary w-50 mr-1" *ngIf="!isEmptyWallet" routerLink="/home/account">Cancel</button>
 
-                            <button type="button" class="btn btn-sm btn-primary w-50 ml-1" *ngIf="selectOption === selectOptionList[0]"
-                                    [ngClass]="{'w-100 ml-0': isEmptyWallet}" (click)="importKey()" [disabled]="importForm?.invalid">Import</button>
-                            <button type="button" class="btn btn-sm btn-primary w-50 ml-1" *ngIf="selectOption === selectOptionList[1]"
-                                    [ngClass]="{'w-100 ml-0': isEmptyWallet}" (click)="importFile()" [disabled]="selectedFile === null || password.length < 6">Import</button>
+                            <button type="button" class="btn btn-sm btn-primary w-50 ml-1" [ngClass]="{'w-100 ml-0': isEmptyWallet}"
+                                     (click)="importKey()" [disabled]="importForm?.invalid">Import</button>
                         </div>
                     </div>
                 </div>
