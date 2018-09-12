@@ -29,6 +29,7 @@ import {SumusAddressValidator} from "./directives/check-sumus.directive";
 import {AccountReductionPipe} from "./pipes/account-reduction.pipe";
 import { BackupComponent } from './components/home/backup/backup.component';
 import {AuthGuard} from "./services/auth.guard";
+import { NewWalletComponent } from './components/auth/new-wallet/new-wallet.component';
 
 @NgModule({
   declarations: [
@@ -45,7 +46,8 @@ import {AuthGuard} from "./services/auth.guard";
     SendTokensComponent,
     SumusAddressValidator,
     AccountReductionPipe,
-    BackupComponent
+    BackupComponent,
+    NewWalletComponent
   ],
   imports: [
     BrowserModule,

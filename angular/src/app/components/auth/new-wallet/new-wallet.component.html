@@ -1,50 +1,65 @@
 <div class="mt-3">
-    <h4 class="mb-3">Backup / Restore</h4>
+    <h4 class="mb-3">New account</h4>
 
     <div class="col-auto btn-group p-0 mn-tabs w-100">
         <label class="btn btn-primary btn-sm active wrap w-50"
                name="limitsSwitchModel.type"
                [(ngModel)]="switchModel.type"
-               btnRadio="backup">Backup</label>
+               btnRadio="create">Create</label>
         <label class="btn btn-primary btn-sm active wrap w-50"
                name="limitsSwitchModel.type"
                [(ngModel)]="switchModel.type"
                btnRadio="restore">Restore</label>
     </div>
 
-    <div *ngIf="switchModel.type === 'backup'">
+    <div *ngIf="switchModel.type === 'create'">
         <div class="mt-4">
-            <form #backupForm="ngForm">
+            <form #createForm="ngForm">
                 <div class="row">
                     <div class="col-12">
                         <div class="form-group">
-                            <input type="password" class="form-control" placeholder='Password' name="backup-password"
-                                   #backupPass="ngModel"
-                                   [ngClass]="{'is-invalid': (backupPass.invalid || incorrectBackupPass) && backupPass.dirty}"
-                                   [(ngModel)]="backupPassword"
-                                   (ngModelChange)="incorrectBackupPass = false"
+                            <input type="text" class="form-control" placeholder='Account name' name="account-name"
+                                   #name="ngModel"
+                                   [ngClass]="{'is-invalid': name.invalid && name.dirty}"
+                                   [(ngModel)]="accountName"
                                    required>
-                            <div class="invalid-feedback invalid-feedback--abs" *ngIf="backupPass?.errors?.required">
+                            <div class="invalid-feedback invalid-feedback--abs" *ngIf="name?.errors?.required">
                                 Field is required
                             </div>
-                            <div class="invalid-feedback invalid-feedback--abs" *ngIf="incorrectBackupPass">
-                                Incorrect password
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-group">
+                            <input type="password" class="form-control" placeholder='Password' name="new-password"
+                                   #newPass="ngModel"
+                                   [ngClass]="{'is-invalid': newPass.invalid && newPass.dirty}"
+                                   [(ngModel)]="newPassword"
+                                   (ngModelChange)="detect()"
+                                   required
+                                   pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}$">
+                            <div class="invalid-feedback" *ngIf="newPass?.errors?.required">
+                                Field is required
+                            </div>
+                            <div class="invalid-feedback" *ngIf="newPass?.errors?.pattern">
+                                Passwords must be at least 6 characters long and must contain at least one digit, one upper and one lower case letter
                             </div>
                         </div>
                     </div>
 
                     <div class="col-12 text-center mt-3">
                         <div class="d-flex">
-                            <button type="button" class="btn btn-sm btn-primary w-50 mr-1" routerLink="/home/account">Cancel</button>
-                            <button type="button" class="btn btn-sm btn-primary w-50 ml-1" (click)="backup()"
-                                    [disabled]="backupForm.invalid || incorrectBackupPass || backupPassword.length < 6">Backup</button>
+                            <button type="button" class="btn btn-sm btn-primary w-100"
+                                    (click)="create()" [disabled]="createForm?.invalid">
+                                Create
+                            </button>
                         </div>
                     </div>
                 </div>
             </form>
         </div>
-    </div>
 
+    </div>
     <div *ngIf="switchModel.type === 'restore'">
         <div class="mt-4">
             <form #restoreForm="ngForm">
@@ -62,7 +77,7 @@
                                    #restorePass="ngModel"
                                    [ngClass]="{'is-invalid': (restorePass.invalid || isInvalidFile || incorrectRestorePass) && restorePass.dirty}"
                                    [(ngModel)]="restorePassword"
-                                   (ngModelChange)="isInvalidFile = incorrectRestorePass = false"
+                                   (ngModelChange)="incorrectRestorePass = isInvalidFile = false"
                                    required>
                             <div class="invalid-feedback invalid-feedback--abs" *ngIf="restorePass?.errors?.required">
                                 Field is required
@@ -70,16 +85,15 @@
                             <div class="invalid-feedback invalid-feedback--abs d-block" *ngIf="isInvalidFile">
                                 Invalid file
                             </div>
-                            <div class="invalid-feedback invalid-feedback--abs" *ngIf="incorrectRestorePass">
-                                Incorrect password
+                            <div class="invalid-feedback invalid-feedback--abs d-block" *ngIf="incorrectRestorePass">
+                                Invalid file or incorrect password
                             </div>
                         </div>
                     </div>
 
                     <div class="col-12 text-center mt-3">
                         <div class="d-flex">
-                            <button type="button" class="btn btn-sm btn-primary w-50 mr-1" routerLink="/home/account">Cancel</button>
-                            <button type="button" class="btn btn-sm btn-primary w-50 ml-1" (click)="restore()"
+                            <button type="button" class="btn btn-sm btn-primary w-100" (click)="restore()"
                                     [disabled]="selectedFile === null || restorePassword.length < 6">Restore</button>
                         </div>
                     </div>
@@ -87,5 +101,5 @@
             </form>
         </div>
     </div>
-</div>
 
+</div>

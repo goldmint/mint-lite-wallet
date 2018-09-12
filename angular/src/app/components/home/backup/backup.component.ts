@@ -5,6 +5,7 @@ import {ChromeStorageService} from "../../../services/chrome-storage.service";
 import {Router} from "@angular/router";
 import {CommonService} from "../../../services/common.service";
 import {MessageBoxService} from "../../../services/message-box.service";
+import {GenerateWalletService} from "../../../services/generate-wallet.service";
 
 @Component({
   selector: 'app-backup',
@@ -22,15 +23,16 @@ export class BackupComponent implements OnInit {
   public backupPassword: string = '';
   public wallets: Wallet[] = [];
   public accountName: string = '';
-  private identify: string;
   public incorrectBackupPass: boolean = false;
   public incorrectRestorePass: boolean = false;
 
-  private keyStoreFile: any;
+  private identify: string;
+  private keyStoreFile: string[];
   private chrome = window['chrome'];
 
   constructor(
     private chromeStorage: ChromeStorageService,
+    private generateWallet: GenerateWalletService,
     private router: Router,
     private commonService: CommonService,
     private ref: ChangeDetectorRef,
@@ -42,7 +44,6 @@ export class BackupComponent implements OnInit {
       type: 'backup'
     };
 
-    // this.accountName = 'Account ' + (this.wallets.length + 1);
     this.chrome.storage.local.get(null, (result) => {
       this.chrome.runtime.getBackgroundPage(page => {
         this.identify = page.sessionStorage.identify;
@@ -56,60 +57,9 @@ export class BackupComponent implements OnInit {
     this.selectedFile = event.target.files.length > 0 ? event.target.files[0] : null;
   }
 
-  restore() {
-    this.isInvalidFile = false;
-    if (this.restorePassword !== this.identify) {
-      this.incorrectRestorePass = true;
-      this.ref.detectChanges();
-      return;
-    }
-
-    if (this.selectedFile.size > 0 && this.selectedFile.type === "text/plain") {
-      var reader = new FileReader();
-      reader.onload = (reader => {
-        return () => {
-          const contents = reader.result;
-          try {
-            const decrypted  = CryptoJS.AES.decrypt(contents, this.restorePassword).toString(CryptoJS.enc.Utf8);
-            this.keyStoreFile = JSON.parse(decrypted);
-          } catch(e) {
-            this.isInvalidFile = true;
-            this.ref.detectChanges();
-            return;
-          }
-
-          this.wallets.forEach((item, i) => {
-            if (item.publicKey === this.keyStoreFile.publicKey) {
-              this.chromeStorage.save('currentWallet', i);
-              this.commonService.chooseAccount$.next(true);
-              this.router.navigate(['/home/account']);
-              return;
-            }
-          });
-          const encryptedKey = CryptoJS.AES.encrypt(this.keyStoreFile.privateKey, this.restorePassword).toString();
-          this.addAccount(this.keyStoreFile.publicKey, encryptedKey, this.accountName);
-        }
-      })(reader);
-      reader.readAsText(this.selectedFile);
-    } else {
-      this.isInvalidFile = true;
-      this.ref.detectChanges();
-    }
-  }
-
-  addAccount(publicKey: string, privateKey: string, name: string) {
-    // const encryptedKey = CryptoJS.AES.encrypt(privateKey, this.identify).toString(); // TODO for test
-    const data = {
-      id: this.wallets.length + 1,
-      name: name,
-      publicKey: publicKey,
-      privateKey: privateKey
-    };
-    this.wallets.push(data);
-
-    // TODO must be last call
-    this.chromeStorage.save('wallets', this.wallets);
-    this.chromeStorage.save('currentWallet', this.wallets.length - 1);
+  addAccount(wallets: Wallet[]) {
+    this.chromeStorage.save('wallets', wallets);
+    this.chromeStorage.save('currentWallet', wallets.length - 1);
     this.commonService.chooseAccount$.next(true);
     this.router.navigate(['/home/account']);
   }
@@ -152,4 +102,50 @@ export class BackupComponent implements OnInit {
     document.body.removeChild(link);
   }
 
+  restore() {
+    this.isInvalidFile = false;
+
+    if (this.selectedFile.size > 0 && this.selectedFile.type === "text/plain") {
+      var reader = new FileReader();
+      reader.onload = (reader => {
+        return () => {
+          const contents = reader.result;
+          try {
+            const decrypted  = CryptoJS.AES.decrypt(contents, this.restorePassword).toString(CryptoJS.enc.Utf8);
+            this.keyStoreFile = JSON.parse(decrypted);
+          } catch(e) {
+            this.incorrectRestorePass = true;
+            this.ref.detectChanges();
+            return;
+          }
+
+          let wallets = this.wallets.slice();
+          this.keyStoreFile.forEach(key => {
+            const publicKey = this.generateWallet.getPublicKeyFromPrivate(key);
+            let isMatch = false;
+
+            this.wallets.forEach(wallet => {
+              wallet.publicKey === publicKey && (isMatch = true);
+            });
+
+            if (!isMatch) {
+              const encryptedKey = CryptoJS.AES.encrypt(key, this.identify).toString();
+              const data = {
+                id: wallets.length + 1,
+                name: 'Account ' + (wallets.length + 1),
+                publicKey: publicKey,
+                privateKey: encryptedKey
+              };
+              wallets.push(data);
+            }
+          });
+          this.addAccount(wallets);
+        }
+      })(reader);
+      reader.readAsText(this.selectedFile);
+    } else {
+      this.isInvalidFile = true;
+      this.ref.detectChanges();
+    }
+  }
 }

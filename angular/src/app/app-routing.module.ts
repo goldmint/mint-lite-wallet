@@ -9,12 +9,13 @@ import {DetailsAccountComponent} from "./components/home/details-account/details
 import {SendTokensComponent} from "./components/home/send-tokens/send-tokens.component";
 import {BackupComponent} from "./components/home/backup/backup.component";
 import {AuthGuard} from "./services/auth.guard";
+import {NewWalletComponent} from "./components/auth/new-wallet/new-wallet.component";
 
 const routes: Routes = [
   {
     path: '', component: AuthComponent, children: [
       { path: 'login', component: LoginComponent },
-      { path: 'new-account/:id', component: NewAccountComponent },
+      { path: 'new-wallet', component: NewWalletComponent },
     ]
   },
   {

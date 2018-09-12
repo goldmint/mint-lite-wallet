@@ -63,3 +63,11 @@ a {
 .bd-bottom {
   border-bottom: 2px solid $gold-color;
 }
+
+.open-tab-btn {
+  width: 20px;
+  height: auto;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}

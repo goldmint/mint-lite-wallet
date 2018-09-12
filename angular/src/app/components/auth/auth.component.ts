@@ -34,9 +34,13 @@ export class AuthComponent implements OnInit {
       if (this.loggedIn) {
         this.router.navigate(['/home/account']);
       } else {
-        this.result['wallets'] ? this.router.navigate(['/login']) : this.router.navigate(['/new-account/create'])
+        this.result['wallets'] ? this.router.navigate(['/login']) : this.router.navigate(['/new-wallet'])
       }
     }, 200);
+  }
+
+  openInTab() {
+    this.chrome.tabs.create({'url': this.chrome.extension.getURL('index.html')}, () => {});
   }
 
   clearStorage() {

@@ -14,17 +14,13 @@ import {CommonService} from "../../../services/common.service";
 })
 export class NewAccountComponent implements OnInit, OnDestroy {
 
-  public loading: boolean = false;
   public accountName: string = '';
-  public newPassword: string = '';
   public wallets: Wallet[] = [];
   public switchModel: {
     type: 'create'|'import'
   };
   public privateKey: string;
   public isInvalidFile: boolean = false;
-  public isEmptyWallet: boolean = false;
-
 
   private identify: string;
   private sub1: Subscription;
@@ -47,18 +43,13 @@ export class NewAccountComponent implements OnInit, OnDestroy {
     });
 
     this.chrome.storage.local.get(null, (result) => {
-      // add account
       if (result.wallets) {
         this.chrome.runtime.getBackgroundPage(page => {
           this.identify = page.sessionStorage.identify;
-          !this.identify && this.router.navigate(['/login']);
         });
 
         this.wallets = result.wallets;
         this.accountName = 'Account ' + (this.wallets.length + 1);
-      } else { // new account
-        this.accountName = 'Account 1';
-        this.isEmptyWallet = true;
       }
       this.ref.detectChanges();
     });
@@ -68,15 +59,19 @@ export class NewAccountComponent implements OnInit, OnDestroy {
     this.ref.detectChanges();
   }
 
+  addAccountToStorage() {
+    this.chromeStorage.save('wallets', this.wallets);
+    this.chromeStorage.save('currentWallet', this.wallets.length - 1);
+    this.commonService.chooseAccount$.next(true);
+    this.router.navigate(['/home/account']);
+  }
+
   create() {
-    this.identify = this.isEmptyWallet ? this.newPassword : this.identify;
     const keys = this.generateWallet.createWallet(this.identify);
     this.addAccount(keys.publicKey, keys.encryptedKey, this.accountName);
-    // this.addAccount('27SDWfMkZogDPpf4ouBq1413VBJhBHHREpwuns3qaaqtiAGEfs', 'Hello', this.accountName); // TODO for test
   }
 
   addAccount(publicKey: string, privateKey: string, name: string) {
-    // const encryptedKey = CryptoJS.AES.encrypt(privateKey, this.identify).toString(); // TODO for test
     const data = {
       id: this.wallets.length + 1,
       name: name,
@@ -85,15 +80,31 @@ export class NewAccountComponent implements OnInit, OnDestroy {
     };
     this.wallets.push(data);
 
-    this.isEmptyWallet && this.chrome.runtime.sendMessage({identify: this.newPassword});
-
-    this.chromeStorage.save('wallets', this.wallets);
-    this.chromeStorage.save('currentWallet', this.wallets.length - 1);
-    this.commonService.chooseAccount$.next(true);
-    this.router.navigate(['/home/account']);
+    this.addAccountToStorage();
   }
 
-  importKey() { }
+  importKey() {
+    const publicKey = this.generateWallet.getPublicKeyFromPrivate(this.privateKey);
+    let isMatch = false;
+    this.wallets.forEach(wallet => {
+      wallet.publicKey === publicKey && (isMatch = true);
+    });
+
+    if (!isMatch) {
+      const encryptedKey = CryptoJS.AES.encrypt(this.privateKey, this.identify).toString();
+      const data = {
+        id: this.wallets.length + 1,
+        name: 'Account ' + (this.wallets.length + 1),
+        publicKey: publicKey,
+        privateKey: encryptedKey
+      };
+      this.wallets.push(data);
+
+      this.addAccountToStorage();
+    } else {
+      this.router.navigate(['/home/account']);
+    }
+  }
 
   ngOnDestroy() {
     this.sub1 && this.sub1.unsubscribe();
