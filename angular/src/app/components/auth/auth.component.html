@@ -5,11 +5,21 @@
         </svg>
     </div>
 
-    <div class="open-tab-btn" tooltip="Open in tab" placement="left" (click)="openInTab()">
-        <svg class="icon-gold" width="20" height="20">
-            <use xlink:href="#out"></use>
-        </svg>
+    <div class="d-flex align-items-center w-100 justify-content-end">
+        <div class="open-tab-btn" tooltip="Open web wallet" placement="left">
+            <a [href]="webWalletLink" target="_blank">
+                <svg class="icon-gold" width="20" height="20">
+                    <use xlink:href="#out"></use>
+                </svg>
+            </a>
+        </div>
+        <div class="open-tab-btn ml-3" tooltip="Open in tab" placement="left" (click)="openInTab()">
+            <svg class="icon-gold" width="20" height="20">
+                <use xlink:href="#tabs"></use>
+            </svg>
+        </div>
     </div>
+
     <!--<div (click)="clearStorage()">clear</div>-->
     <!--<div (click)="show()">show</div>-->
 </div>

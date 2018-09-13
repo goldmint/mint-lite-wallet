@@ -6,6 +6,7 @@ import {Router} from "@angular/router";
 import {CommonService} from "../../../services/common.service";
 import {MessageBoxService} from "../../../services/message-box.service";
 import {GenerateWalletService} from "../../../services/generate-wallet.service";
+import {Backup} from "../../../models/backup";
 
 @Component({
   selector: 'app-backup',
@@ -17,6 +18,7 @@ export class BackupComponent implements OnInit {
   public switchModel: {
     type: 'backup'|'restore'
   };
+  public currentTub: string;
   public isInvalidFile: boolean = false;
   public selectedFile: any = null;
   public restorePassword: string = '';
@@ -40,6 +42,7 @@ export class BackupComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.currentTub = 'backup';
     this.switchModel = {
       type: 'backup'
     };
@@ -74,20 +77,22 @@ export class BackupComponent implements OnInit {
     let wallets = [];
     this.wallets.forEach(wallet => {
       try {
-        const key  = CryptoJS.AES.decrypt(wallet.privateKey, this.identify).toString(CryptoJS.enc.Utf8);
+        const key = CryptoJS.AES.decrypt(wallet.privateKey, this.identify).toString(CryptoJS.enc.Utf8);
         wallets.push(key);
       } catch(e) {
         this.messageBox.alert('Something went wrong');
         return;
       }
     });
-
+    let data = new Backup();
     const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(wallets), this.identify).toString();
-    this.downloadFile(encryptedData);
+    data.data = encryptedData;
+    this.downloadFile(JSON.stringify(data));
+    this.router.navigate(['/home/account']);
   }
 
   downloadFile(data: string) {
-    let blob = new Blob(['\ufeff' + data], {type: 'text/plane;charset=utf-8;'});
+    let blob = new Blob(['\ufeff' + data], {type: 'application/json;charset=utf-8;'});
     let link = document.createElement('a');
     let url = URL.createObjectURL(blob);
     let isSafariBrowser = navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1;
@@ -95,7 +100,7 @@ export class BackupComponent implements OnInit {
       link.setAttribute('target', '_blank');
     }
     link.setAttribute('href', url);
-    link.setAttribute('download', `wallet-backup.txt`);
+    link.setAttribute('download', `sumus-wallet-backup.json`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -103,15 +108,14 @@ export class BackupComponent implements OnInit {
   }
 
   restore() {
-    this.isInvalidFile = false;
-
-    if (this.selectedFile.size > 0 && this.selectedFile.type === "text/plain") {
+    this.isInvalidFile = this.incorrectRestorePass = false;
+    if (this.selectedFile.size > 0 && this.selectedFile.type === "application/json") {
       var reader = new FileReader();
       reader.onload = (reader => {
         return () => {
-          const contents = reader.result;
+          const contents = JSON.parse(reader.result);
           try {
-            const decrypted  = CryptoJS.AES.decrypt(contents, this.restorePassword).toString(CryptoJS.enc.Utf8);
+            const decrypted  = CryptoJS.AES.decrypt(contents.data, this.restorePassword).toString(CryptoJS.enc.Utf8);
             this.keyStoreFile = JSON.parse(decrypted);
           } catch(e) {
             this.incorrectRestorePass = true;
@@ -147,5 +151,18 @@ export class BackupComponent implements OnInit {
       this.isInvalidFile = true;
       this.ref.detectChanges();
     }
+  }
+
+  changeTab(tab: string) {
+    if (tab !== this.currentTub) {
+      this.currentTub = tab;
+      this.resetField();
+    }
+  }
+
+  resetField() {
+    this.isInvalidFile = this.incorrectRestorePass = this.incorrectBackupPass = false;
+    this.restorePassword = this.backupPassword = '';
+    this.selectedFile = null;
   }
 }

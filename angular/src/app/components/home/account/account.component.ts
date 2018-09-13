@@ -7,6 +7,7 @@ import {combineLatest} from "rxjs/internal/operators";
 import {TransactionList} from "../../../interfaces/transaction-list";
 import {environment} from "../../../../environments/environment";
 import {Subscription} from "rxjs/index";
+import {ChromeStorageService} from "../../../services/chrome-storage.service";
 
 @Component({
   selector: 'app-account',
@@ -16,6 +17,7 @@ import {Subscription} from "rxjs/index";
 export class AccountComponent implements OnInit, OnDestroy {
 
   public detailsLink: string = environment.detailsTxInfoLink;
+  public webWalletLink = environment.webWallet;
   public storageData: StorageData;
   public currentWallet: Wallet;
   public balance = {
@@ -25,6 +27,8 @@ export class AccountComponent implements OnInit, OnDestroy {
   public isDataLoaded: boolean = false;
   public loading: boolean = false;
   public transactionList: TransactionList[] = [];
+  public isEditing: boolean = false;
+  public accountName: string;
 
   private chrome = window['chrome'];
   private sub1: Subscription;
@@ -32,14 +36,17 @@ export class AccountComponent implements OnInit, OnDestroy {
   constructor(
     private ref: ChangeDetectorRef,
     private commonService: CommonService,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private chromeStorage: ChromeStorageService
   ) { }
 
   ngOnInit() {
-    this.getStorageData();
+    this.getStorageData(true);
 
-    this.sub1 = this.commonService.chooseAccount$.subscribe(() => {
-      this.getStorageData();
+    this.sub1 = this.commonService.chooseAccount$.subscribe((res: boolean) => {
+      this.getStorageData(res);
+      this.isEditing = false;
+      this.ref.detectChanges();
     });
   }
 
@@ -63,11 +70,11 @@ export class AccountComponent implements OnInit, OnDestroy {
     });
   }
 
-  getStorageData() {
+  getStorageData(loadBalance: boolean) {
     this.chrome.storage.local.get(null, (result) => {
       this.storageData = result;
       this.currentWallet = this.storageData.wallets[this.storageData.currentWallet];
-      this.getBalanceAndTx(this.currentWallet.publicKey);
+      loadBalance && this.getBalanceAndTx(this.currentWallet.publicKey);
       this.ref.detectChanges();
     });
   }
@@ -78,6 +85,19 @@ export class AccountComponent implements OnInit, OnDestroy {
 
   openInTab() {
     this.chrome.tabs.create({'url': this.chrome.extension.getURL('index.html')}, () => {});
+  }
+
+  editAccountName() {
+    this.accountName = this.currentWallet.name;
+    this.isEditing = true;
+  }
+
+  saveAccountName() {
+    let wallets = this.storageData.wallets;
+    wallets[this.storageData.currentWallet].name = this.accountName;
+
+    this.chromeStorage.save('wallets', wallets);
+    this.commonService.chooseAccount$.next(false);
   }
 
   ngOnDestroy() {

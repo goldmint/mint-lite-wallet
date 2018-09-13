@@ -5,10 +5,12 @@
         <label class="btn btn-primary btn-sm active wrap w-50"
                name="limitsSwitchModel.type"
                [(ngModel)]="switchModel.type"
+               (click)="changeTab('create')"
                btnRadio="create">Create</label>
         <label class="btn btn-primary btn-sm active wrap w-50"
                name="limitsSwitchModel.type"
                [(ngModel)]="switchModel.type"
+               (click)="changeTab('restore')"
                btnRadio="restore">Restore</label>
     </div>
 
@@ -16,19 +18,6 @@
         <div class="mt-4">
             <form #createForm="ngForm">
                 <div class="row">
-                    <div class="col-12">
-                        <div class="form-group">
-                            <input type="text" class="form-control" placeholder='Account name' name="account-name"
-                                   #name="ngModel"
-                                   [ngClass]="{'is-invalid': name.invalid && name.dirty}"
-                                   [(ngModel)]="accountName"
-                                   required>
-                            <div class="invalid-feedback invalid-feedback--abs" *ngIf="name?.errors?.required">
-                                Field is required
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="col-12">
                         <div class="form-group">
                             <input type="password" class="form-control" placeholder='Password' name="new-password"

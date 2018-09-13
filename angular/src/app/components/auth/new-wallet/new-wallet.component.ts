@@ -17,6 +17,7 @@ export class NewWalletComponent implements OnInit {
   public newPassword: string = '';
   public restorePassword: string = '';
   public wallets: Wallet[] = [];
+  public currentTub: string;
   public switchModel: {
     type: 'create' | 'restore'
   };
@@ -79,13 +80,13 @@ export class NewWalletComponent implements OnInit {
   restore() {
     this.isInvalidFile = false;
 
-    if (this.selectedFile.size > 0 && this.selectedFile.type === "text/plain") {
+    if (this.selectedFile.size > 0 && this.selectedFile.type === "application/json") {
       var reader = new FileReader();
       reader.onload = (reader => {
         return () => {
-          const contents = reader.result;
+          const contents = JSON.parse(reader.result);
           try {
-            const decrypted  = CryptoJS.AES.decrypt(contents, this.restorePassword).toString(CryptoJS.enc.Utf8);
+            const decrypted  = CryptoJS.AES.decrypt(contents.data, this.restorePassword).toString(CryptoJS.enc.Utf8);
             this.keyStoreFile = JSON.parse(decrypted);
           } catch(e) {
             this.incorrectRestorePass = true;
@@ -117,4 +118,18 @@ export class NewWalletComponent implements OnInit {
       this.ref.detectChanges();
     }
   }
+
+  changeTab(tab: string) {
+    if (tab !== this.currentTub) {
+      this.currentTub = tab;
+      this.resetField();
+    }
+  }
+
+  resetField() {
+    this.isInvalidFile = this.incorrectRestorePass = false;
+    this.restorePassword = this.newPassword = '';
+    this.selectedFile = null;
+  }
+
 }

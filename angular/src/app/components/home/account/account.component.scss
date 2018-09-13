@@ -3,6 +3,7 @@
 .account-public-key {
   font-size: .75rem;
   color: #aeaeae;
+  text-align: center;
 }
 
 .trs-item {
@@ -26,4 +27,39 @@
 .account-info-empty-el {
   width: 20px;
   height: 20px;
+}
+
+.account-name {
+  display: flex;
+  padding: 0 25px;
+  position: relative;
+}
+
+.account-name:hover .edit-account-btn {
+  display: block;
+}
+
+.edit-account-btn {
+  display: none;
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+  top: -1px;
+  z-index: 1;
+}
+
+.edit-account-input {
+  width: 100%;
+  text-align: center;
+  border: none;
+  border-bottom: 2px solid $gold-color;
+  margin-bottom: 3px;
+  padding: 0 25px 0 0;
+}
+
+.edit-account-save {
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+  top: 0;
 }

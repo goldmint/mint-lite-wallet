@@ -5,10 +5,12 @@
         <label class="btn btn-primary btn-sm active wrap w-50"
                name="limitsSwitchModel.type"
                [(ngModel)]="switchModel.type"
+               (click)="changeTab('backup')"
                btnRadio="backup">Backup</label>
         <label class="btn btn-primary btn-sm active wrap w-50"
                name="limitsSwitchModel.type"
                [(ngModel)]="switchModel.type"
+               (click)="changeTab('restore')"
                btnRadio="restore">Restore</label>
     </div>
 
