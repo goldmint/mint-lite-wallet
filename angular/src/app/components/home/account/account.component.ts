@@ -93,8 +93,11 @@ export class AccountComponent implements OnInit, OnDestroy {
   }
 
   saveAccountName() {
+    if (this.accountName.trim() == "") {
+      return;
+    }
     let wallets = this.storageData.wallets;
-    wallets[this.storageData.currentWallet].name = this.accountName;
+    wallets[this.storageData.currentWallet].name = this.accountName.trim();
 
     this.chromeStorage.save('wallets', wallets);
     this.commonService.chooseAccount$.next(false);
