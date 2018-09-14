@@ -33,10 +33,7 @@
               "src/assets/styles/main.scss",
               "src/styles.scss"
             ],
-            "scripts": [
-              "src/assets/sumus/nacl.js",
-              "src/assets/sumus/base58.js"
-            ]
+            "scripts": []
           },
           "configurations": {
             "production": {
