@@ -1,4 +1,4 @@
-<div class="progress-linear progress-linear--tiny" *ngIf="loading">
+<div class="progress-linear progress-linear--tiny" *ngIf="loading || currentPage === page[2]">
     <div class="container"></div>
 </div>
 
@@ -87,7 +87,7 @@
         <div class="bd-top bd-bottom py-2">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="confirm-item">
-                    {{ '27SDWfMkZogDPpf4ouBq1413VBJhBHHREpwuns3qaaqtiAGEfs' | reduction }}
+                    {{ sendData.from | reduction }}
                 </div>
                 <div>
                     <svg class="icon-gold" width="25" height="25">
@@ -95,7 +95,7 @@
                     </svg>
                 </div>
                 <div class="confirm-item">
-                    {{ '27SDWfMkZogDPpf4ouBq1413VBJhBHHREpwuns3qaaqtiAGEfs' | reduction }}
+                    {{ sendData.to | reduction }}
                 </div>
             </div>
             <div class="text-center mt-2">
@@ -110,11 +110,19 @@
 
         <div class="d-flex mt-4">
             <button type="button" class="btn btn-sm btn-primary w-50 mr-1" (click)="currentPage = page[0]">Cancel</button>
-            <button type="button" class="btn btn-sm btn-primary w-50 ml-1" (click)="currentPage = page[2]">Confirm</button>
+            <button type="button" class="btn btn-sm btn-primary w-50 ml-1" (click)="confirmTransfer()">Confirm</button>
         </div>
     </div>
 
     <div *ngIf="currentPage === page[2]">
+        <h4 class="mb-3">Sending transaction</h4>
+    </div>
+
+    <div *ngIf="currentPage === page[3]">
+        <h4 class="mb-3">Failed to send</h4>
+    </div>
+
+    <div *ngIf="currentPage === page[4]">
         <h4 class="mb-3">Transaction is sent</h4>
         <div>Your transaction id is:
             <div class="sent-tx-id mt-1" tooltip="Copy to clipboard" (click)="copyText(txId)">{{ txId }}</div>

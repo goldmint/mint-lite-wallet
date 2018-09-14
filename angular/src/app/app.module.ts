@@ -15,6 +15,7 @@ import {NewAccountComponent} from "./components/home/new-account/new-account.com
 import { AuthComponent } from './components/auth/auth.component';
 import {CommonService} from "./services/common.service";
 import { DetailsAccountComponent } from './components/home/details-account/details-account.component';
+import {SumusTransactionService} from "./services/sumus-transaction.service";
 
 import {
   ButtonsModule, ModalModule, TooltipModule
@@ -62,6 +63,7 @@ import { NewWalletComponent } from './components/auth/new-wallet/new-wallet.comp
   providers: [
     ChromeStorageService,
     GenerateWalletService,
+    SumusTransactionService,
     CommonService,
     ApiService,
     MessageBoxService,

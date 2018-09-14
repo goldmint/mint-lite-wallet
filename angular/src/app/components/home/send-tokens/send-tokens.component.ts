@@ -6,6 +6,7 @@ import {CommonService} from "../../../services/common.service";
 import {ApiService} from "../../../services/api.service";
 import {AccountBalance} from "../../../models/account-balance";
 import {environment} from "../../../../environments/environment";
+import {SumusTransactionService} from "../../../services/sumus-transaction.service";
 
 @Component({
   selector: 'app-send-tokens',
@@ -14,7 +15,7 @@ import {environment} from "../../../../environments/environment";
 })
 export class SendTokensComponent implements OnInit, OnDestroy {
 
-  public page = ['send', 'confirm', 'success'];
+  public page = ['send', 'confirm', 'post', 'failure', 'success'];
   public currentPage = this.page[0];
 
   public sendData = new SendData;
@@ -22,7 +23,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   public invalidBalance: boolean = true;
   public isAddressMatch: boolean = false;
   public balance = new AccountBalance();
-  public txId = 'pa43WLY7Tz6uJZmKo7gerPLuCHHejKzFs1otRwx6fLsSgp1KRThKmCzsuWUP'; // TODO for test
+  public txId = '';
   public detailsLink: string = environment.detailsTxInfoLink;
 
   private sub1: Subscription;
@@ -33,7 +34,8 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     private apiService: ApiService,
     private ref: ChangeDetectorRef,
     private commonService: CommonService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private sumusTransactionService: SumusTransactionService,
   ) { }
 
   ngOnInit() {
@@ -83,6 +85,39 @@ export class SendTokensComponent implements OnInit, OnDestroy {
 
   copyText(val: string){
     this.commonService.copyText(val);
+  }
+
+  confirmTransfer() {
+    this.currentPage = this.page[2];
+    this.ref.detectChanges();
+
+    debugger;
+
+    // make tx
+    this.sumusTransactionService.makeTransferAssetTransaction(
+      "PRIVATE KEY", this.sendData.to, this.sendData.token.toUpperCase(), this.sendData.amount
+    )
+    .then(res => {
+      this.txId = res.txHash
+      
+      // post tx
+      this.sumusTransactionService.postTransferAssetTransaction(res.txData)
+      .then(res => {
+        // done
+        this.currentPage = this.page[4];
+        this.ref.detectChanges();
+      })
+      .catch(err => {
+        // failed
+        this.currentPage = this.page[3];
+        this.ref.detectChanges();
+      })
+    })
+    .catch(err => {
+      // failed
+      this.currentPage = this.page[3];
+      this.ref.detectChanges();
+    });
   }
 
   ngOnDestroy() {

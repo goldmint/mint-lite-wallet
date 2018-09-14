@@ -6,6 +6,7 @@ import {HttpClient} from "@angular/common/http";
 export class ApiService {
 
   private baseUrl = environment.apiUrl;
+  private sumusProxyUrl = environment.sumusProxyUrl;
 
   constructor(private http: HttpClient) {}
 
@@ -15,5 +16,21 @@ export class ApiService {
 
   getWalletBalance(sumusAddress: string) {
     return this.http.post(`${this.baseUrl}/statistics/tokens/wallet_balance`, { sumusAddress });
+  }
+  
+  getWalletNonce(sumusAddress: string) {
+    return this.http.post(
+      `${this.sumusProxyUrl}/get-wallet-state`, 
+      { 'public_key': sumusAddress },
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+  
+  postWalletTransaction(txdata: string, name:string) {
+    return this.http.post(
+      `${this.sumusProxyUrl}/add-transaction`, 
+      { 'transaction_data': txdata, 'transaction_name': name },
+      { headers: { 'Content-Type': 'application/json' } }
+    );
   }
 }
