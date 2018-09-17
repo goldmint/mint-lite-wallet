@@ -7,7 +7,7 @@ import {MessageBoxService} from "../../services/message-box.service";
 @Injectable()
 export class APIHttpInterceptor implements HttpInterceptor {
 
-  constructor(private messageBox: MessageBoxService) {}
+  constructor() {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
@@ -15,7 +15,6 @@ export class APIHttpInterceptor implements HttpInterceptor {
       .pipe(
         catchError(
           (error: any, caught: Observable<HttpEvent<any>>) => {
-            this.messageBox.alert('Service is temporary unavailable', 'Info');
             throw error;
           }
         )

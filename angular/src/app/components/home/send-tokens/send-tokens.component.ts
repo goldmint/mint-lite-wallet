@@ -72,6 +72,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
         this.identify = page.sessionStorage.identify;
       });
 
+      this.currentWalletIndex = result.currentWallet;
       this.currentWallet = result.wallets[result.currentWallet];
       this.allWallets = result.wallets;
       this.sendData.from = this.currentWallet.publicKey;
@@ -155,42 +156,59 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     clearInterval(this.interval);
   }
 
-
   confirmTransfer() {
-    this.currentPage = this.page[2];
-    this.ref.detectChanges();
+    this.loading = true;
+    this.apiService.getWalletNonce(this.currentWallet.publicKey).subscribe(data => {
+      this.loading = false;
+      const nonce = +data['res'].params.last_transaction_id + 1;
 
-    let privateKey;
-    try {
-      privateKey = CryptoJS.AES.decrypt(this.currentWallet.privateKey, this.identify).toString(CryptoJS.enc.Utf8);
-    } catch (e) {
-      this.messageBox.alert('Something went wrong');
-      this.ref.detectChanges();
-      return;
-    }
-
-    const result = this.sumusTransactionService.makeTransferAssetTransaction(
-      privateKey, this.sendData.to, this.sendData.token.toUpperCase(), this.sendData.amount
-    );
-
-    this.apiService.postWalletTransaction(result.txData, 'TransferAssetsTransaction').subscribe(() => {
-      const timeEnd = (new Date().getTime() + this.timeTxFailed)
-      this.allWallets[this.currentWalletIndex].tx.hash = result.txHash;
-      this.allWallets[this.currentWalletIndex].tx.endTime = timeEnd;
-
-      this.chromeStorage.save('wallets', this.allWallets);
       this.currentPage = this.page[2];
-
-      this.interval = setInterval(() => {
-        this.checkTransactionStatus(result.txHash, timeEnd);
-      }, 30000);
-
       this.ref.detectChanges();
+
+      let privateKey;
+      try {
+        privateKey = CryptoJS.AES.decrypt(this.currentWallet.privateKey, this.identify).toString(CryptoJS.enc.Utf8);
+      } catch (e) {
+        this.failedTx();
+        return;
+      }
+
+      const result = this.sumusTransactionService.makeTransferAssetTransaction(
+        privateKey, this.sendData.to, this.sendData.token.toUpperCase(), this.sendData.amount, nonce
+      );
+
+      this.apiService.postWalletTransaction(result.txData, 'TransferAssetsTransaction').subscribe(() => {
+        const timeEnd = (new Date().getTime() + this.timeTxFailed);
+
+        this.allWallets[this.currentWalletIndex].tx = {
+          hash: null,
+          endTime: null
+        };
+        this.allWallets[this.currentWalletIndex].tx.hash = result.txHash;
+        this.allWallets[this.currentWalletIndex].tx.endTime = timeEnd;
+
+        this.chromeStorage.save('wallets', this.allWallets);
+        this.currentPage = this.page[2];
+
+        this.interval = setInterval(() => {
+          this.checkTransactionStatus(result.txHash, timeEnd);
+        }, 30000);
+
+        this.ref.detectChanges();
+      }, () => {
+        // failed
+        this.failedTx();
+      });
     }, () => {
       // failed
-      this.currentPage = this.page[3];
-      this.ref.detectChanges();
+     this.failedTx();
     });
+  }
+
+  failedTx() {
+    this.currentPage = this.page[3];
+    this.loading = false;
+    this.ref.detectChanges();
   }
 
   ngOnDestroy() {

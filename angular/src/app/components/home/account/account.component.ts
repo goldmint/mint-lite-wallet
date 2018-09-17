@@ -8,6 +8,7 @@ import {TransactionList} from "../../../interfaces/transaction-list";
 import {environment} from "../../../../environments/environment";
 import {Subscription} from "rxjs/index";
 import {ChromeStorageService} from "../../../services/chrome-storage.service";
+import {MessageBoxService} from "../../../services/message-box.service";
 
 @Component({
   selector: 'app-account',
@@ -37,7 +38,8 @@ export class AccountComponent implements OnInit, OnDestroy {
     private ref: ChangeDetectorRef,
     private commonService: CommonService,
     private apiService: ApiService,
-    private chromeStorage: ChromeStorageService
+    private chromeStorage: ChromeStorageService,
+    private messageBox: MessageBoxService
   ) { }
 
   ngOnInit() {
@@ -59,6 +61,9 @@ export class AccountComponent implements OnInit, OnDestroy {
       this.transactionList = data[0]['data'].items.map(item => {
         item.timeStamp = new Date(item.timeStamp.toString() + 'Z');
         return item;
+      }, () => {
+        this.messageBox.alert('Service is temporary unavailable', 'Info');
+        this.ref.detectChanges();
       });
 
       this.balance.mnt = data[1]['data'].mintAmount;

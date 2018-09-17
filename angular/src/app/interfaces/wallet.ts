@@ -4,7 +4,7 @@ export interface Wallet {
   publicKey: string,
   privateKey: string,
   tx?: {
-    hash: string
+    hash: string,
     endTime: number
   }
 }
