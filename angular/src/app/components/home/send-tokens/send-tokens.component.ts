@@ -81,7 +81,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
       if (this.currentWallet.tx) {
         const time = new Date().getTime();
         if (time < this.currentWallet.tx.endTime) {
-          this.currentPage = this.page[2];
+          // this.currentPage = this.page[2];
           this.checkTransactionStatus(this.currentWallet.tx.hash, this.currentWallet.tx.endTime);
 
           this.interval = setInterval(() => {
@@ -126,7 +126,6 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     } else {
       this.invalidBalance = false;
     }
-
     this.ref.detectChanges();
   }
 
