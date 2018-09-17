@@ -129,15 +129,14 @@ export class SendTokensComponent implements OnInit, OnDestroy {
 
     if (time < timeEnd) {
       this.apiService.getTransactionInfo(hash).subscribe(info => {
-        if (info['data']['status'] === 1) { // pending
+        const status = info['data']['status'];
+
+        if (status === 3) { // pending
           this.currentPage !== this.page[2] && (this.currentPage = this.page[2]);
-        } else if(info['data']['status'] === 2) { // success
+        } else if(status === 2) { // success
           this.clearTxQueue();
           this.txId = hash;
           this.currentPage = this.page[4];
-        } else if (info['data']['status'] === 3) { // failed
-          this.clearTxQueue();
-          this.currentPage = this.page[3];
         }
 
         this.ref.detectChanges();
@@ -160,7 +159,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.apiService.getWalletNonce(this.currentWallet.publicKey).subscribe(data => {
       this.loading = false;
-      const nonce = +data['res'].params.last_transaction_id + 1;
+      const nonce = +data['res'].params.last_transaction_id;
 
       this.currentPage = this.page[2];
       this.ref.detectChanges();

@@ -1,11 +1,8 @@
 import { Injectable } from '@angular/core';
 import * as sumus from '../../../../sumuslib/sumuslib.js';
-import {Wallet} from "../interfaces/wallet";
 
 @Injectable()
 export class SumusTransactionService {
-
-  public wallets: Wallet[];
 
   private sumusLib = window['SumusLib'];
 
