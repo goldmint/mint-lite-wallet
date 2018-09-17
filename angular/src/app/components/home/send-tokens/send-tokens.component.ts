@@ -32,6 +32,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   public balance = new AccountBalance();
   public txId = '';
   public detailsLink: string = environment.detailsTxInfoLink;
+  public nonce: number;
 
   private sub1: Subscription;
   private sub2: Subscription;
@@ -85,7 +86,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
 
           this.interval = setInterval(() => {
             this.checkTransactionStatus(this.currentWallet.tx.hash, this.currentWallet.tx.endTime);
-          }, 30000);
+          }, 10000);
 
           this.ref.detectChanges();
         } else {
@@ -115,6 +116,28 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     this.ref.detectChanges();
   }
 
+  changeValue(event) {
+    event.target.value = this.substrValue(event.target.value);
+    this.sendData.amount = +event.target.value;
+    event.target.setSelectionRange(event.target.value.length, event.target.value.length);
+
+    if (this.sendData.amount === 0 || this.sendData.amount > this.balance[this.sendData.token]) {
+      this.invalidBalance = true;
+    } else {
+      this.invalidBalance = false;
+    }
+
+    this.ref.detectChanges();
+  }
+
+  substrValue(value: number|string) {
+    return value.toString()
+      .replace(',', '.')
+      .replace(/([^\d.])|(^\.)/g, '')
+      .replace(/^(\d{1,6})\d*(?:(\.\d{0,6})[\d.]*)?/, '$1$2')
+      .replace(/^0+(\d)/, '$1');
+  }
+
   checkAddressMatch() {
     this.isAddressMatch = this.sendData.from === this.sendData.to;
     this.ref.detectChanges();
@@ -136,7 +159,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
         } else if(status === 2) { // success
           this.clearTxQueue();
           this.txId = hash;
-          this.currentPage = this.page[4];
+          this.currentPage = this.page[0];
         }
 
         this.ref.detectChanges();
@@ -155,53 +178,58 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     clearInterval(this.interval);
   }
 
-  confirmTransfer() {
+  sendTransaction() {
     this.loading = true;
     this.apiService.getWalletNonce(this.currentWallet.publicKey).subscribe(data => {
+      this.nonce = +data['res'].params.last_transaction_id;
+      this.currentPage = this.page[1];
       this.loading = false;
-      const nonce = +data['res'].params.last_transaction_id;
-
-      this.currentPage = this.page[2];
       this.ref.detectChanges();
-
-      let privateKey;
-      try {
-        privateKey = CryptoJS.AES.decrypt(this.currentWallet.privateKey, this.identify).toString(CryptoJS.enc.Utf8);
-      } catch (e) {
-        this.failedTx();
-        return;
-      }
-
-      const result = this.sumusTransactionService.makeTransferAssetTransaction(
-        privateKey, this.sendData.to, this.sendData.token.toUpperCase(), this.sendData.amount, nonce
-      );
-
-      this.apiService.postWalletTransaction(result.txData, 'TransferAssetsTransaction').subscribe(() => {
-        const timeEnd = (new Date().getTime() + this.timeTxFailed);
-
-        this.allWallets[this.currentWalletIndex].tx = {
-          hash: null,
-          endTime: null
-        };
-        this.allWallets[this.currentWalletIndex].tx.hash = result.txHash;
-        this.allWallets[this.currentWalletIndex].tx.endTime = timeEnd;
-
-        this.chromeStorage.save('wallets', this.allWallets);
-        this.currentPage = this.page[2];
-
-        this.interval = setInterval(() => {
-          this.checkTransactionStatus(result.txHash, timeEnd);
-        }, 30000);
-
-        this.ref.detectChanges();
-      }, () => {
-        // failed
-        this.failedTx();
-      });
     }, () => {
       // failed
-     this.failedTx();
+      this.failedTx();
     });
+    this.ref.detectChanges();
+  }
+
+  confirmTransfer() {
+    this.currentPage = this.page[2];
+    this.loading = true;
+
+    let privateKey;
+    try {
+      privateKey = CryptoJS.AES.decrypt(this.currentWallet.privateKey, this.identify).toString(CryptoJS.enc.Utf8);
+    } catch (e) {
+      this.failedTx();
+      return;
+    }
+
+    const result = this.sumusTransactionService.makeTransferAssetTransaction(
+      privateKey, this.sendData.to, this.sendData.token.toUpperCase(), this.sendData.amount, this.nonce
+    );
+
+    this.apiService.postWalletTransaction(result.txData, 'TransferAssetsTransaction').subscribe(() => {
+      const timeEnd = (new Date().getTime() + this.timeTxFailed);
+
+      this.allWallets[this.currentWalletIndex].tx = {
+        hash: null,
+        endTime: null
+      };
+      this.allWallets[this.currentWalletIndex].tx.hash = result.txHash;
+      this.allWallets[this.currentWalletIndex].tx.endTime = timeEnd;
+
+      this.chromeStorage.save('wallets', this.allWallets);
+      this.txId = result.txHash;
+      this.loading = false;
+      this.currentPage = this.page[4];
+
+      this.ref.detectChanges();
+    }, () => {
+      // failed
+      this.failedTx();
+    });
+
+    this.ref.detectChanges();
   }
 
   failedTx() {

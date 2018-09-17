@@ -33,6 +33,7 @@ export class AccountComponent implements OnInit, OnDestroy {
 
   private chrome = window['chrome'];
   private sub1: Subscription;
+  private interval;
 
   constructor(
     private ref: ChangeDetectorRef,
@@ -46,10 +47,26 @@ export class AccountComponent implements OnInit, OnDestroy {
     this.getStorageData(true);
 
     this.sub1 = this.commonService.chooseAccount$.subscribe((res: boolean) => {
+      clearInterval(this.interval);
+
       this.getStorageData(res);
       this.isEditing = false;
       this.ref.detectChanges();
     });
+  }
+
+  setUpdateBalanceInterval(publicKey: string) {
+    this.interval = setInterval(() => {
+      this.apiService.getWalletBalance(publicKey).subscribe(data => {
+        this.balance.mnt = data['data'].mintAmount;
+        this.balance.gold = data['data'].goldAmount;
+
+        this.ref.detectChanges();
+      }, () => {
+        this.messageBox.alert('Service is temporary unavailable', 'Info');
+        this.ref.detectChanges();
+      });
+    }, 15000);
   }
 
   getBalanceAndTx(publicKey: string) {
@@ -68,6 +85,8 @@ export class AccountComponent implements OnInit, OnDestroy {
 
       this.balance.mnt = data[1]['data'].mintAmount;
       this.balance.gold = data[1]['data'].goldAmount;
+
+      this.setUpdateBalanceInterval(publicKey);
 
       this.isDataLoaded = true;
       this.loading = false;
@@ -110,5 +129,6 @@ export class AccountComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.sub1 && this.sub1.unsubscribe();
+    clearInterval(this.interval);
   }
 }
