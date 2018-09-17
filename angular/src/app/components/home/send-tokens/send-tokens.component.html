@@ -120,16 +120,31 @@
 
     <div *ngIf="currentPage === page[3]">
         <h4 class="mb-3">Failed to send</h4>
+        <div class="text-center">
+            <svg class="icon-gold" width="50" height="50">
+                <use xlink:href="#error"></use>
+            </svg>
+        </div>
+        <div class="d-flex mt-4">
+            <button type="button" class="btn btn-sm btn-primary w-100" (click)="currentPage = page[0]">
+                Try again
+            </button>
+        </div>
     </div>
 
     <div *ngIf="currentPage === page[4]">
         <h4 class="mb-3">Transaction is sent</h4>
-        <div>Your transaction id is:
+        <div class="text-center">
+            <svg class="icon-gold" width="50" height="50">
+                <use xlink:href="#done"></use>
+            </svg>
+        </div>
+        <div class="mt-4">Your transaction id is:
             <div class="sent-tx-id mt-1" tooltip="Copy to clipboard" (click)="copyText(txId)">{{ txId }}</div>
         </div>
 
         <div class="d-flex mt-4">
-            <button type="button" class="btn btn-sm btn-primary w-100" (click)="currentPage = page[2]">
+            <button type="button" class="btn btn-sm btn-primary w-100">
                 <a [href]="detailsLink + txId" target="_blank">Check status</a>
             </button>
         </div>

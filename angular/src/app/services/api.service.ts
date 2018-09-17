@@ -17,7 +17,11 @@ export class ApiService {
   getWalletBalance(sumusAddress: string) {
     return this.http.post(`${this.baseUrl}/statistics/tokens/wallet_balance`, { sumusAddress });
   }
-  
+
+  getTransactionInfo(hash: string) {
+    return this.http.post(`${this.baseUrl}/explorer/transaction`, { hash });
+  }
+
   getWalletNonce(sumusAddress: string) {
     return this.http.post(
       `${this.sumusProxyUrl}/get-wallet-state`, 
