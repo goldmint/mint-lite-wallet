@@ -1,8 +1,14 @@
 {
-	"name": "Sumus Wallet angular",
-	"description" : "Goldmint blockchain light wallet",
+	"name": "Goldmint Lite Wallet",
+	"description" : "Goldmint blockchain lite wallet",
+    "short_name": "Goldmint wallet",
 	"version": "0.5.0",
 	"manifest_version": 2,
+      "icons": {
+        "16": "assets/logo/logo16.png",
+        "48": "assets/logo/logo48.png",
+        "128": "assets/logo/logo128.png"
+    },
     "background": {
       "scripts": ["background.js"]
     },
