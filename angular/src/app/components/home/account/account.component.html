@@ -13,7 +13,7 @@
 
     <div>
         <div class="account-name" >
-            <div *ngIf="!isEditing">
+            <div *ngIf="!isEditing" class="account-name-text">
                 {{ currentWallet?.name }}
                 <div class="edit-account-btn" (click)="!loading && editAccountName()">
                     <svg width="15" height="15">

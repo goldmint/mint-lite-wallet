@@ -63,3 +63,10 @@
   right: 0;
   top: 0;
 }
+
+.account-name-text {
+  overflow: hidden;
+  max-width: 160px;
+  max-height: 48px;
+  text-align: center;
+}
