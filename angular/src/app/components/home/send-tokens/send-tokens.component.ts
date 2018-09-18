@@ -180,9 +180,13 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   sendTransaction() {
     this.loading = true;
     this.apiService.getWalletNonce(this.currentWallet.publicKey).subscribe(data => {
-      this.nonce = +data['res'].params.last_transaction_id;
-      this.currentPage = this.page[1];
-      this.loading = false;
+      if (data['res'].result == 0) {
+        this.nonce = +data['res'].params.last_transaction_id;
+        this.currentPage = this.page[1];
+        this.loading = false;
+      } else {
+        this.failedTx();
+      }
       this.ref.detectChanges();
     }, () => {
       // failed
@@ -207,21 +211,24 @@ export class SendTokensComponent implements OnInit, OnDestroy {
       privateKey, this.sendData.to, this.sendData.token.toUpperCase(), this.sendData.amount, this.nonce
     );
 
-    this.apiService.postWalletTransaction(result.txData, 'TransferAssetsTransaction').subscribe(() => {
-      const timeEnd = (new Date().getTime() + this.timeTxFailed);
+    this.apiService.postWalletTransaction(result.txData, 'TransferAssetsTransaction').subscribe((data) => {
+      if (data['res'].result == 0) {
+        const timeEnd = (new Date().getTime() + this.timeTxFailed);
 
-      this.allWallets[this.currentWalletIndex].tx = {
-        hash: null,
-        endTime: null
-      };
-      this.allWallets[this.currentWalletIndex].tx.hash = result.txHash;
-      this.allWallets[this.currentWalletIndex].tx.endTime = timeEnd;
+        this.allWallets[this.currentWalletIndex].tx = {
+          hash: null,
+          endTime: null
+        };
+        this.allWallets[this.currentWalletIndex].tx.hash = result.txHash;
+        this.allWallets[this.currentWalletIndex].tx.endTime = timeEnd;
 
-      this.chromeStorage.save('wallets', this.allWallets);
-      this.txId = result.txHash;
-      this.loading = false;
-      this.currentPage = this.page[4];
-
+        this.chromeStorage.save('wallets', this.allWallets);
+        this.txId = result.txHash;
+        this.loading = false;
+        this.currentPage = this.page[4];
+      } else {
+        this.failedTx();
+      }
       this.ref.detectChanges();
     }, () => {
       // failed
