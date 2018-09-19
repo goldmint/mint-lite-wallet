@@ -137,6 +137,7 @@ export class BackupComponent implements OnInit {
               const data = {
                 id: wallets.length + 1,
                 name: 'Account ' + (wallets.length + 1),
+                nonce: 0,
                 publicKey: publicKey,
                 privateKey: encryptedKey
               };

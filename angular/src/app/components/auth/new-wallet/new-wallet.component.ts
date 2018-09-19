@@ -67,6 +67,7 @@ export class NewWalletComponent implements OnInit {
     const data = {
       id: 1,
       name: name,
+      nonce: 0,
       publicKey: publicKey,
       privateKey: privateKey
     };
@@ -101,6 +102,7 @@ export class NewWalletComponent implements OnInit {
             const data = {
               id: this.wallets.length + 1,
               name: 'Account ' + (this.wallets.length + 1),
+              nonce: 0,
               publicKey: publicKey,
               privateKey: encryptedKey
             };

@@ -3,6 +3,7 @@ export interface Wallet {
   name: string,
   publicKey: string,
   privateKey: string,
+  nonce: number,
   tx?: {
     hash: string,
     endTime: number

@@ -50,7 +50,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     private router: Router,
     private sumusTransactionService: SumusTransactionService,
     private messageBox: MessageBoxService,
-    private chromeStorage: ChromeStorageService,
+    private chromeStorage: ChromeStorageService
   ) { }
 
   ngOnInit() {
@@ -60,7 +60,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     });
 
     this.sub2 = this.commonService.chooseAccount$.subscribe(() => {
-      this.getCurrentWallet();
+      this.currentPage === this.page[0] && this.getCurrentWallet();
     });
 
     this.getCurrentWallet();
@@ -79,22 +79,14 @@ export class SendTokensComponent implements OnInit, OnDestroy {
       this.allWallets = result.wallets;
       this.sendData.from = this.currentWallet.publicKey;
 
-      if (this.currentWallet.tx) {
-        const time = new Date().getTime();
-        if (time < this.currentWallet.tx.endTime) {
-          // this.currentPage = this.page[2];
-          this.checkTransactionStatus(this.currentWallet.tx.hash, this.currentWallet.tx.endTime);
-
-          this.interval = setInterval(() => {
-            this.checkTransactionStatus(this.currentWallet.tx.hash, this.currentWallet.tx.endTime);
-          }, 10000);
-
-          this.ref.detectChanges();
-        } else {
-          delete this.allWallets[this.currentWalletIndex].tx;
-          this.chromeStorage.save('wallets', this.allWallets);
-        }
-      }
+      // if (this.currentWallet.tx) {
+      //   clearInterval(this.interval);
+      //   this.checkTransactionStatus(this.currentWallet.tx.hash);
+      //
+      //   this.interval = setInterval(() => {
+      //     this.currentWallet.tx && this.checkTransactionStatus(this.currentWallet.tx.hash);
+      //   }, 5000);
+      // }
 
       this.apiService.getWalletBalance(this.currentWallet.publicKey).subscribe(data => {
         this.balance.gold = data['data'].goldAmount;
@@ -147,34 +139,22 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     this.commonService.copyText(val);
   }
 
-  checkTransactionStatus(hash: string, timeEnd: number) {
-    const time = new Date().getTime();
+  checkTransactionStatus(hash: string) {
+    this.chrome.storage.local.get(null, (result) => {
+      let wallet = result.wallets[result.currentWallet];
 
-    if (time < timeEnd) {
-      this.apiService.getTransactionInfo(hash).subscribe(info => {
-        const status = info['data']['status'];
-
-        if (status === 3) { // pending
-          this.currentPage !== this.page[2] && (this.currentPage = this.page[2]);
-        } else if(status === 2) { // success
-          this.clearTxQueue();
-          this.txId = hash;
-          this.currentPage = this.page[0];
-        }
-
-        this.ref.detectChanges();
-      });
-    } else {
-      // failed
-      this.currentPage = this.page[3];
-      this.clearTxQueue();
+      if (wallet.tx) {
+        this.currentPage !== this.page[2] && (this.currentPage = this.page[2]);
+      } else {
+        this.clearTxQueue();
+        this.txId = hash;
+        this.currentPage = this.page[0];
+      }
       this.ref.detectChanges();
-    }
+    });
   }
 
   clearTxQueue() {
-    delete this.allWallets[this.currentWalletIndex].tx;
-    this.chromeStorage.save('wallets', this.allWallets);
     clearInterval(this.interval);
   }
 
@@ -184,6 +164,14 @@ export class SendTokensComponent implements OnInit, OnDestroy {
       if (data['res'].result == 0) {
         this.feeCalculate();
         this.nonce = +data['res'].params.last_transaction_id;
+
+        if (this.currentWallet.nonce < this.nonce) {
+          this.allWallets[this.currentWalletIndex].nonce = this.nonce;
+          this.chromeStorage.save('wallets', this.allWallets);
+        } else {
+          this.nonce = this.currentWallet.nonce;
+        }
+
         this.currentPage = this.page[1];
         this.loading = false;
       } else {
@@ -249,8 +237,12 @@ export class SendTokensComponent implements OnInit, OnDestroy {
         };
         this.allWallets[this.currentWalletIndex].tx.hash = result.txHash;
         this.allWallets[this.currentWalletIndex].tx.endTime = timeEnd;
+        this.allWallets[this.currentWalletIndex].nonce = this.nonce+1;
 
-        this.chromeStorage.save('wallets', this.allWallets);
+        this.chrome.storage.local.set({['wallets']: this.allWallets}, () => {
+          this.chrome.runtime.sendMessage({newTransaction: true});
+        });
+
         this.txId = result.txHash;
         this.loading = false;
         this.currentPage = this.page[4];
