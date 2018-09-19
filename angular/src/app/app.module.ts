@@ -32,6 +32,7 @@ import { BackupComponent } from './components/home/backup/backup.component';
 import {AuthGuard} from "./services/auth.guard";
 import { NewWalletComponent } from './components/auth/new-wallet/new-wallet.component';
 import {SubstrPipe} from "./pipes/substr.pipe";
+import {NoexpPipe} from "./pipes/noexp.pipe";
 
 @NgModule({
   declarations: [
@@ -49,6 +50,7 @@ import {SubstrPipe} from "./pipes/substr.pipe";
     SumusAddressValidator,
     AccountReductionPipe,
     SubstrPipe,
+    NoexpPipe,
     BackupComponent,
     NewWalletComponent
   ],

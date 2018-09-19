@@ -1,9 +1,4 @@
 <div id="header" class="d-flex justify-content-between align-items-center px-3">
-    <!--<div (click)="clearStorage()">-->
-        <!--<svg class="icon-gold" width="25" height="25">-->
-            <!--<use xlink:href="#logo"></use>-->
-        <!--</svg>-->
-    <!--</div>-->
     <div class="pointer" routerLink="/home/account">
         <svg class="icon-gold" width="25" height="25">
             <use xlink:href="#logo"></use>
@@ -12,7 +7,7 @@
 
     <div class="header-select-account-cont">
         <div class="form-group mb-0">
-            <select class="form-control custom-select black mb-0 header-select-account" [(ngModel)]="selectedAccount" (change)="chooseAccount()">
+            <select class="form-control custom-select black mb-0 header-select-account border-0" [(ngModel)]="selectedAccount" (change)="chooseAccount()">
                 <option *ngFor="let w of storageData?.wallets; index as i" [value]="i" (click)="chooseAccount()">{{ w?.name }}</option>
             </select>
         </div>

@@ -33,6 +33,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   public txId = '';
   public detailsLink: string = environment.detailsTxInfoLink;
   public nonce: number;
+  public fee: number;
 
   private sub1: Subscription;
   private sub2: Subscription;
@@ -181,6 +182,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.apiService.getWalletNonce(this.currentWallet.publicKey).subscribe(data => {
       if (data['res'].result == 0) {
+        this.feeCalculate();
         this.nonce = +data['res'].params.last_transaction_id;
         this.currentPage = this.page[1];
         this.loading = false;
@@ -193,6 +195,32 @@ export class SendTokensComponent implements OnInit, OnDestroy {
       this.failedTx();
     });
     this.ref.detectChanges();
+  }
+
+  feeCalculate() {
+    if (this.sendData.token === 'mnt') {
+      this.fee = 0.02;
+      return;
+    }
+    const amount = this.sendData.amount;
+
+    if (amount < 10) {
+      this.fee = 1 * amount / 100;
+    } else if (amount >= 10 && amount < 1000) {
+      this.fee = 0.3 * amount / 100;
+    } else if (amount >= 1000 && amount < 10000) {
+      this.fee = 0.03 * amount / 100;
+    } else if (amount >= 10000) {
+      const value = 0.03 * amount / 100;
+
+      if (value >= 0.002) {
+        this.fee = 0.002
+      } else if (value <= 0.0002) {
+        this.fee = 0.0002
+      } else {
+        this.fee = value;
+      }
+    }
   }
 
   confirmTransfer() {
