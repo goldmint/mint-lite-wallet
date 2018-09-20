@@ -54,7 +54,7 @@
 
                 <div class="col-12">
                     <div class="form-group">
-                        <label class="mb-0" for="amount">Amount</label>
+                        <label class="mb-0" for="amount">Amount <span>(Fee: {{ fee | noexp }} {{ sendData.token | uppercase }})</span></label>
                         <input type="text" class="form-control" id="amount" placeholder='Amount' name="amount"
                                #amount="ngModel"
                                [ngClass]="{'is-invalid': (amount.invalid || invalidBalance) && amount.dirty}"

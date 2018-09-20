@@ -33,7 +33,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   public txId = '';
   public detailsLink: string = environment.detailsTxInfoLink;
   public nonce: number;
-  public fee: number;
+  public fee: number = 0;
 
   private sub1: Subscription;
   private sub2: Subscription;
@@ -93,6 +93,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
         this.balance.mnt = data['data'].mintAmount;
 
         this.checkAddressMatch();
+        this.checkAmount();
         this.loading = false;
         this.ref.detectChanges();
       });
@@ -101,7 +102,10 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   }
 
   checkAmount() {
-    if (this.sendData.amount === 0 || this.sendData.amount > this.balance[this.sendData.token]) {
+    this.feeCalculate();
+    let balance = this.balance[this.sendData.token] - this.fee;
+
+    if (this.sendData.amount === 0 || this.sendData.amount > balance) {
       this.invalidBalance = true;
     } else {
       this.invalidBalance = false;
@@ -114,7 +118,10 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     this.sendData.amount = +event.target.value;
     event.target.setSelectionRange(event.target.value.length, event.target.value.length);
 
-    if (this.sendData.amount === 0 || this.sendData.amount > this.balance[this.sendData.token]) {
+    this.feeCalculate();
+    let balance = this.balance[this.sendData.token] - this.fee;
+
+    if (this.sendData.amount === 0 || this.sendData.amount > balance) {
       this.invalidBalance = true;
     } else {
       this.invalidBalance = false;
