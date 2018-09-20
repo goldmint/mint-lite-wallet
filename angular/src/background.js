@@ -20,7 +20,7 @@ function watchTransactionStatus(firstLoad) {
    browser.storage.local.get(null, (result) => {
         wallets = result.wallets;
 
-        wallets.forEach(wallet => {
+        wallets && wallets.forEach(wallet => {
             if (wallet.tx) {
                 const hash = wallet.tx.hash;
                 const endTime = wallet.tx.endTime;
