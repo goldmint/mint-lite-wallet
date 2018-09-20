@@ -49,16 +49,16 @@ function checkTransactionStatus(hash, endTime) {
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(JSON.stringify({hash: hash}));
 
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4 && xhr.status == 200) {
+        xhr.onload = () => {
+            try {
                 const result = JSON.parse(xhr.responseText);
 
                 if (result.data.status === 2) {
                     finishTx(hash);
                     successTxNotification(hash);
                 }
-            }
-        }
+            } catch (e) { }
+        };
     } else {
         finishTx(hash);
         feiledTxNotification(hash);
