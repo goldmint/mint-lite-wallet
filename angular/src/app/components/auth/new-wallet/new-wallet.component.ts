@@ -95,19 +95,23 @@ export class NewWalletComponent implements OnInit {
             return;
           }
 
-          this.keyStoreFile.forEach(restoreWallet => {
-            if (!restoreWallet['key']) {
-              this.isInvalidFile = true;
-              this.ref.detectChanges();
-              return;
+          this.keyStoreFile.forEach(restoreData => {
+            let restoreKey, accountName;
+
+            if (contents.version === 1) {
+              restoreKey = restoreData;
+              accountName = 'Account ' + (this.wallets.length + 1);
+            } else if (contents.version === 2) {
+              restoreKey = restoreData['key'];
+              accountName = restoreData['name'];
             }
 
-            const publicKey = this.generateWallet.getPublicKeyFromPrivate(restoreWallet['key']);
-            const encryptedKey = CryptoJS.AES.encrypt(restoreWallet['key'], this.restorePassword).toString();
+            const publicKey = this.generateWallet.getPublicKeyFromPrivate(restoreKey);
+            const encryptedKey = CryptoJS.AES.encrypt(restoreKey, this.restorePassword).toString();
 
             const data = {
               id: this.wallets.length + 1,
-              name: restoreWallet['name'],
+              name: accountName,
               nonce: 0,
               publicKey: publicKey,
               privateKey: encryptedKey
@@ -115,11 +119,9 @@ export class NewWalletComponent implements OnInit {
             this.wallets.push(data);
           });
 
-          if (!this.isInvalidFile) {
-            this.chrome.runtime.sendMessage({identify: this.restorePassword});
-            this.commonService.isLoggedIn = true;
-            this.addAccountToStorage();
-          }
+          this.chrome.runtime.sendMessage({identify: this.restorePassword});
+          this.commonService.isLoggedIn = true;
+          this.addAccountToStorage();
         }
       })(reader);
       reader.readAsText(this.selectedFile);

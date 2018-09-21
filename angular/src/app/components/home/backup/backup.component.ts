@@ -124,14 +124,18 @@ export class BackupComponent implements OnInit {
           }
 
           let wallets = this.wallets.slice();
-          this.keyStoreFile.forEach(restoreWallet => {
-            if (!restoreWallet['key']) {
-              this.isInvalidFile = true;
-              this.ref.detectChanges();
-              return;
+          this.keyStoreFile.forEach(restoreData => {
+            let restoreKey, accountName;
+
+            if (contents.version === 1) {
+              restoreKey = restoreData;
+              accountName = 'Account ' + (this.wallets.length + 1);
+            } else if (contents.version === 2) {
+              restoreKey = restoreData['key'];
+              accountName = restoreData['name'];
             }
 
-            const publicKey = this.generateWallet.getPublicKeyFromPrivate(restoreWallet['key']);
+            const publicKey = this.generateWallet.getPublicKeyFromPrivate(restoreKey);
             let isMatch = false;
 
             this.wallets.forEach(wallet => {
@@ -139,10 +143,10 @@ export class BackupComponent implements OnInit {
             });
 
             if (!isMatch) {
-              const encryptedKey = CryptoJS.AES.encrypt(restoreWallet['key'], this.identify).toString();
+              const encryptedKey = CryptoJS.AES.encrypt(restoreKey, this.identify).toString();
               const data = {
                 id: wallets.length + 1,
-                name: restoreWallet['name'],
+                name: accountName,
                 nonce: 0,
                 publicKey: publicKey,
                 privateKey: encryptedKey
@@ -150,7 +154,7 @@ export class BackupComponent implements OnInit {
               wallets.push(data);
             }
           });
-          !this.isInvalidFile && this.addAccount(wallets);
+          this.addAccount(wallets);
         }
       })(reader);
       reader.readAsText(this.selectedFile);
