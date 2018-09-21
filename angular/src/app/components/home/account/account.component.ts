@@ -79,7 +79,7 @@ export class AccountComponent implements OnInit, OnDestroy {
       this.loading = false;
       this.ref.detectChanges();
     }, () => {
-      this.messageBox.error();
+      this.messageBox.alert('Service is temporary unavailable');
       this.ref.detectChanges();
     });
   }
