@@ -1,7 +1,12 @@
+const config = {
+    checkTxUrl: 'https://staging.goldmint.io/wallet/api/v1/explorer/transaction',
+    successTxStatus: 2,
+    checkTxTime: 30000
+};
+
 let isFirefox = typeof InstallTrigger !== 'undefined';
 let browser = isFirefox ? browser : chrome;
 let xhr = new XMLHttpRequest();
-let checkStatusUrl = 'https://staging.goldmint.io/wallet/api/v1/explorer/transaction';
 
 let wallets = [];
 let txQueue = {};
@@ -33,7 +38,7 @@ function watchTransactionStatus(firstLoad) {
                 if (!isMatch) {
                     const interval = setInterval(() => {
                         checkTransactionStatus(hash, endTime);
-                    }, 30000);
+                    }, config.checkTxTime);
                     txQueue[hash] = interval;
                     firstLoad && checkTransactionStatus(hash, endTime);
                 }
@@ -45,7 +50,7 @@ function watchTransactionStatus(firstLoad) {
 function checkTransactionStatus(hash, endTime) {
     const time = new Date().getTime();
     if (time < endTime) {
-        xhr.open('POST', checkStatusUrl, true);
+        xhr.open('POST', config.checkTxUrl, true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(JSON.stringify({hash: hash}));
 
@@ -53,7 +58,7 @@ function checkTransactionStatus(hash, endTime) {
             try {
                 const result = JSON.parse(xhr.responseText);
 
-                if (result.data.status === 2) {
+                if (result.data.status === config.successTxStatus) {
                     finishTx(hash);
                     successTxNotification(hash);
                 }

@@ -19,3 +19,9 @@
 .trs-fee {
   font-size: 0.875rem;
 }
+
+.confirm-item.name {
+  max-width: 86px;
+  min-width: 86px;
+  overflow: hidden;
+}

@@ -78,7 +78,7 @@ export class BackupComponent implements OnInit {
     this.wallets.forEach(wallet => {
       try {
         const key = CryptoJS.AES.decrypt(wallet.privateKey, this.identify).toString(CryptoJS.enc.Utf8);
-        wallets.push(key);
+        wallets.push({name: wallet.name, key: key});
       } catch(e) {
         this.messageBox.alert('Something went wrong');
         return;
@@ -124,8 +124,14 @@ export class BackupComponent implements OnInit {
           }
 
           let wallets = this.wallets.slice();
-          this.keyStoreFile.forEach(key => {
-            const publicKey = this.generateWallet.getPublicKeyFromPrivate(key);
+          this.keyStoreFile.forEach(restoreWallet => {
+            if (!restoreWallet['key']) {
+              this.isInvalidFile = true;
+              this.ref.detectChanges();
+              return;
+            }
+
+            const publicKey = this.generateWallet.getPublicKeyFromPrivate(restoreWallet['key']);
             let isMatch = false;
 
             this.wallets.forEach(wallet => {
@@ -133,10 +139,10 @@ export class BackupComponent implements OnInit {
             });
 
             if (!isMatch) {
-              const encryptedKey = CryptoJS.AES.encrypt(key, this.identify).toString();
+              const encryptedKey = CryptoJS.AES.encrypt(restoreWallet['key'], this.identify).toString();
               const data = {
                 id: wallets.length + 1,
-                name: 'Account ' + (wallets.length + 1),
+                name: restoreWallet['name'],
                 nonce: 0,
                 publicKey: publicKey,
                 privateKey: encryptedKey
@@ -144,7 +150,7 @@ export class BackupComponent implements OnInit {
               wallets.push(data);
             }
           });
-          this.addAccount(wallets);
+          !this.isInvalidFile && this.addAccount(wallets);
         }
       })(reader);
       reader.readAsText(this.selectedFile);

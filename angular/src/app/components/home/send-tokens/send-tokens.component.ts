@@ -34,6 +34,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   public detailsLink: string = environment.detailsTxInfoLink;
   public nonce: number;
   public fee: number = 0;
+  public accountName: string;
 
   private sub1: Subscription;
   private sub2: Subscription;
@@ -78,6 +79,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
       this.currentWallet = result.wallets[result.currentWallet];
       this.allWallets = result.wallets;
       this.sendData.from = this.currentWallet.publicKey;
+      this.accountName = this.currentWallet.name;
 
       // if (this.currentWallet.tx) {
       //   clearInterval(this.interval);

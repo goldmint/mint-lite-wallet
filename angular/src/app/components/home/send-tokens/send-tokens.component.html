@@ -13,7 +13,7 @@
                         <input type="text" class="form-control" id="from" placeholder='Main account' name="from"
                                #from="ngModel"
                                [ngClass]="{'is-invalid': from.invalid && from.dirty}"
-                               [(ngModel)]="sendData.from"
+                               [(ngModel)]="accountName"
                                required
                                readonly>
                     </div>
@@ -75,7 +75,7 @@
                 <div class="col-12 text-center mt-3">
                     <div class="d-flex">
                         <button type="button" class="btn btn-sm btn-primary w-50 mr-1" routerLink="/home/account">Cancel</button>
-                        <button type="button" class="btn btn-sm btn-primary w-50 ml-1" (click)="sendTransaction()" [disabled]="form.invalid || loading || invalidBalance || isAddressMatch">Send</button>
+                        <button type="button" class="btn btn-sm btn-primary w-50 ml-1" (click)="sendTransaction()" [disabled]="form.invalid || loading || invalidBalance || isAddressMatch || !sendData.amount">Send</button>
                     </div>
                 </div>
             </div>
@@ -86,8 +86,8 @@
         <h4 class="mb-3">Confirm transaction</h4>
         <div class="bd-top bd-bottom py-2">
             <div class="d-flex justify-content-between align-items-center">
-                <div class="confirm-item">
-                    {{ sendData.from | reduction }}
+                <div class="confirm-item name">
+                    {{ accountName }}
                 </div>
                 <div>
                     <svg class="icon-gold" width="25" height="25">
