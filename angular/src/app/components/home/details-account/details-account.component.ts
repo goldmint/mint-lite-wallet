@@ -49,7 +49,7 @@ export class DetailsAccountComponent implements OnInit, OnDestroy {
     try {
       this.privateKey = CryptoJS.AES.decrypt(this.currentWallet.privateKey, this.password).toString(CryptoJS.enc.Utf8);
     } catch (e) {
-      this.messageBox.alert('Something went wrong');
+      this.messageBox.error();
     }
     this.ref.detectChanges();
   }

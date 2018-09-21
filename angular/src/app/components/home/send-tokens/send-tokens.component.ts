@@ -91,8 +91,8 @@ export class SendTokensComponent implements OnInit, OnDestroy {
       // }
 
       this.apiService.getWalletBalance(this.currentWallet.publicKey).subscribe(data => {
-        this.balance.gold = data['data'].goldAmount;
-        this.balance.mnt = data['data'].mintAmount;
+        this.balance.mnt = data['res'].balance.mint;
+        this.balance.gold = data['res'].balance.gold;
 
         this.checkAddressMatch();
         this.checkAmount();
@@ -169,23 +169,19 @@ export class SendTokensComponent implements OnInit, OnDestroy {
 
   sendTransaction() {
     this.loading = true;
-    this.apiService.getWalletNonce(this.currentWallet.publicKey).subscribe(data => {
-      if (data['res'].result == 0) {
-        this.feeCalculate();
-        this.nonce = +data['res'].params.last_transaction_id;
+    this.apiService.getTransactionList(this.currentWallet.publicKey).subscribe(data => {
+      this.feeCalculate();
+      this.nonce = +data['res'][0].nonce;
 
-        if (this.currentWallet.nonce < this.nonce) {
-          this.allWallets[this.currentWalletIndex].nonce = this.nonce;
-          this.chromeStorage.save('wallets', this.allWallets);
-        } else {
-          this.nonce = this.currentWallet.nonce;
-        }
-
-        this.currentPage = this.page[1];
-        this.loading = false;
+      if (this.currentWallet.nonce < this.nonce) {
+        this.allWallets[this.currentWalletIndex].nonce = this.nonce;
+        this.chromeStorage.save('wallets', this.allWallets);
       } else {
-        this.failedTx();
+        this.nonce = this.currentWallet.nonce;
       }
+
+      this.currentPage = this.page[1];
+      this.loading = false;
       this.ref.detectChanges();
     }, () => {
       // failed
@@ -237,7 +233,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     );
 
     this.apiService.postWalletTransaction(result.txData, 'TransferAssetsTransaction').subscribe((data) => {
-      if (data['res'].result == 0) {
+      // if (data['res'].result == 0) {
         const timeEnd = (new Date().getTime() + this.timeTxFailed);
 
         this.allWallets[this.currentWalletIndex].tx = {
@@ -255,9 +251,9 @@ export class SendTokensComponent implements OnInit, OnDestroy {
         this.txId = result.txHash;
         this.loading = false;
         this.currentPage = this.page[4];
-      } else {
-        this.failedTx();
-      }
+      // } else {
+      //   this.failedTx();
+      // }
       this.ref.detectChanges();
     }, () => {
       // failed

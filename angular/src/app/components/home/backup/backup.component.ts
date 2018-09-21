@@ -80,7 +80,7 @@ export class BackupComponent implements OnInit {
         const key = CryptoJS.AES.decrypt(wallet.privateKey, this.identify).toString(CryptoJS.enc.Utf8);
         wallets.push({name: wallet.name, key: key});
       } catch(e) {
-        this.messageBox.alert('Something went wrong');
+        this.messageBox.error();
         return;
       }
     });

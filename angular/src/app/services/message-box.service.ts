@@ -83,6 +83,10 @@ export class MessageBoxService {
     return this._show(message, title, single);
   }
 
+  public error(): Subject<any> {
+    return this._show('', '', true);
+  }
+
   public confirm(message: string, title?: string, single?: boolean): Subject<boolean> {
     return this._show(message, title, single, MessageType.Confirm);
   }

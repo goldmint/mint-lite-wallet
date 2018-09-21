@@ -33,6 +33,7 @@ import {AuthGuard} from "./services/auth.guard";
 import { NewWalletComponent } from './components/auth/new-wallet/new-wallet.component';
 import {SubstrPipe} from "./pipes/substr.pipe";
 import {NoexpPipe} from "./pipes/noexp.pipe";
+import {ReplaceZero} from "./pipes/replace-zero";
 
 @NgModule({
   declarations: [
@@ -51,6 +52,7 @@ import {NoexpPipe} from "./pipes/noexp.pipe";
     AccountReductionPipe,
     SubstrPipe,
     NoexpPipe,
+    ReplaceZero,
     BackupComponent,
     NewWalletComponent
   ],

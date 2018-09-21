@@ -55,41 +55,31 @@ export class AccountComponent implements OnInit, OnDestroy {
     });
   }
 
-  setUpdateBalanceInterval(publicKey: string) {
+  setUpdateDataInterval(publicKey: string) {
     this.interval = setInterval(() => {
-      this.apiService.getWalletBalance(publicKey).subscribe(data => {
-        this.balance.mnt = data['data'].mintAmount;
-        this.balance.gold = data['data'].goldAmount;
-
-        this.ref.detectChanges();
-      }, () => {
-        this.messageBox.alert('Service is temporary unavailable', 'Info');
-        this.ref.detectChanges();
-      });
+      this.getBalanceAndTx(publicKey);
     }, 15000);
   }
 
   getBalanceAndTx(publicKey: string) {
     this.loading = true;
-    const combined = this.apiService.getTxByAddress(publicKey, 0, 4, "date").pipe(combineLatest(
+    const combined = this.apiService.getTransactionList(publicKey).pipe(combineLatest(
       this.apiService.getWalletBalance(publicKey)
     ));
     combined.subscribe((data: any) => {
-      this.transactionList = data[0]['data'].items.map(item => {
-        item.timeStamp = new Date(item.timeStamp.toString() + 'Z');
-        return item;
-      }, () => {
-        this.messageBox.alert('Service is temporary unavailable', 'Info');
-        this.ref.detectChanges();
-      });
+      clearInterval(this.interval);
+      this.transactionList = (data[0].res).slice(0, 4);
 
-      this.balance.mnt = data[1]['data'].mintAmount;
-      this.balance.gold = data[1]['data'].goldAmount;
+      this.balance.mnt = data[1].res.balance.mint;
+      this.balance.gold = data[1].res.balance.gold;
 
-      this.setUpdateBalanceInterval(publicKey);
+      this.setUpdateDataInterval(publicKey);
 
       this.isDataLoaded = true;
       this.loading = false;
+      this.ref.detectChanges();
+    }, () => {
+      this.messageBox.error();
       this.ref.detectChanges();
     });
   }

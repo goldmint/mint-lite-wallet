@@ -6,7 +6,7 @@ export class NoexpPipe implements PipeTransform {
     const amount = this.getNoExpValue(value);
     const position = amount.toString().indexOf('.');
     if (position >= 0) {
-      return amount.toString().substr(0, position + 9);
+      return (amount.toString().substr(0, position + 9)).replace(/0+$/, '');
     } else {
       return amount;
     }

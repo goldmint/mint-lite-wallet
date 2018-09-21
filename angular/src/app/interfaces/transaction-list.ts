@@ -1,13 +1,11 @@
 export interface TransactionList {
-  blockNumber: number,
-  createDate: Date,
-  destinationWallet: string,
-  id: number,
-  sourceWallet: string,
-  timeStamp: Date,
-  tokenType: string,
-  tokensCount: number,
-  transactionFee: number,
-  transactionId: number,
-  uniqueId: string
+  name: string,
+  from: string,
+  to: string,
+  nonce: number,
+  amount: string,
+  token: string,
+  status: string,
+  hash: string,
+  digest: string
 }
