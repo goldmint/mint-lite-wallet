@@ -6,6 +6,8 @@ export interface Wallet {
   nonce: number,
   tx?: {
     hash: string,
-    endTime: number
+    endTime: number,
+    amount: number,
+    token: string
   }
 }

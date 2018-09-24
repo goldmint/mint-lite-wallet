@@ -9,6 +9,7 @@ import {environment} from "../../../../environments/environment";
 import {Subscription} from "rxjs/index";
 import {ChromeStorageService} from "../../../services/chrome-storage.service";
 import {MessageBoxService} from "../../../services/message-box.service";
+import {Transaction} from "../../../models/transaction";
 
 @Component({
   selector: 'app-account',
@@ -27,13 +28,13 @@ export class AccountComponent implements OnInit, OnDestroy {
   };
   public isDataLoaded: boolean = false;
   public loading: boolean = false;
-  public transactionList: TransactionList[] = [];
+  public transactionList/*: TransactionList[]*/ = [];
   public isEditing: boolean = false;
   public accountName: string;
 
   private chrome = window['chrome'];
   private sub1: Subscription;
-  private interval;
+  private interval = null;
 
   constructor(
     private ref: ChangeDetectorRef,
@@ -48,6 +49,7 @@ export class AccountComponent implements OnInit, OnDestroy {
 
     this.sub1 = this.commonService.chooseAccount$.subscribe((res: boolean) => {
       clearInterval(this.interval);
+      this.interval = null;
 
       this.getStorageData(res);
       this.isEditing = false;
@@ -57,18 +59,52 @@ export class AccountComponent implements OnInit, OnDestroy {
 
   setUpdateDataInterval(publicKey: string) {
     this.interval = setInterval(() => {
-      this.getBalanceAndTx(publicKey);
+      this.getStorageData(true);
     }, 15000);
   }
 
+  // getBalanceAndTx(publicKey: string) {
+  //   this.loading = true;
+  //   const combined = this.apiService.getTransactionList(publicKey).pipe(combineLatest(
+  //     this.apiService.getWalletBalance(publicKey)
+  //   ));
+  //   combined.subscribe((data: any) => {
+  //     clearInterval(this.interval);
+  //     this.transactionList = (data[0].res).slice(0, 4);
+  //
+  //     this.balance.mnt = data[1].res.balance.mint;
+  //     this.balance.gold = data[1].res.balance.gold;
+  //
+  //     this.setUpdateDataInterval(publicKey);
+  //
+  //     this.isDataLoaded = true;
+  //     this.loading = false;
+  //     this.ref.detectChanges();
+  //   }, () => {
+  //     this.messageBox.alert('Service is temporary unavailable');
+  //     this.ref.detectChanges();
+  //   });
+  // }
+
   getBalanceAndTx(publicKey: string) {
-    this.loading = true;
-    const combined = this.apiService.getTransactionList(publicKey).pipe(combineLatest(
+    this.interval === null && (this.loading = true);
+    let txCount = this.currentWallet.tx ? 3 : 4;
+
+    const combined = this.apiService.getTxByAddress(publicKey, 0, txCount, "date").pipe(combineLatest(
       this.apiService.getWalletBalance(publicKey)
     ));
     combined.subscribe((data: any) => {
       clearInterval(this.interval);
-      this.transactionList = (data[0].res).slice(0, 4);
+      this.transactionList = data[0]['data'].items;
+
+      if (this.currentWallet.tx) {
+        let tx = this.currentWallet.tx;
+        this.transactionList.unshift(new Transaction());
+        this.transactionList[0].tokensCount = tx.amount;
+        this.transactionList[0].uniqueId = tx.hash;
+        this.transactionList[0].sourceWallet = this.currentWallet.publicKey;
+        this.transactionList[0].tokenType = tx.token === 'GOLD' ? 'commodity' : 'utility';
+      }
 
       this.balance.mnt = data[1].res.balance.mint;
       this.balance.gold = data[1].res.balance.gold;

@@ -81,14 +81,14 @@ export class SendTokensComponent implements OnInit, OnDestroy {
       this.sendData.from = this.currentWallet.publicKey;
       this.accountName = this.currentWallet.name;
 
-      // if (this.currentWallet.tx) {
-      //   clearInterval(this.interval);
-      //   this.checkTransactionStatus(this.currentWallet.tx.hash);
-      //
-      //   this.interval = setInterval(() => {
-      //     this.currentWallet.tx && this.checkTransactionStatus(this.currentWallet.tx.hash);
-      //   }, 5000);
-      // }
+      if (this.currentWallet.tx) {
+        clearInterval(this.interval);
+        this.checkTransactionStatus(this.currentWallet.tx.hash);
+
+        this.interval = setInterval(() => {
+          this.currentWallet.tx && this.checkTransactionStatus(this.currentWallet.tx.hash);
+        }, 5000);
+      }
 
       this.apiService.getWalletBalance(this.currentWallet.publicKey).subscribe(data => {
         this.balance.mnt = data['res'].balance.mint;
@@ -238,10 +238,15 @@ export class SendTokensComponent implements OnInit, OnDestroy {
 
         this.allWallets[this.currentWalletIndex].tx = {
           hash: null,
-          endTime: null
+          endTime: null,
+          amount: null,
+          token: null
         };
         this.allWallets[this.currentWalletIndex].tx.hash = result.txHash;
         this.allWallets[this.currentWalletIndex].tx.endTime = timeEnd;
+        this.allWallets[this.currentWalletIndex].tx.amount = this.sendData.amount;
+        this.allWallets[this.currentWalletIndex].tx.token = this.sendData.token.toUpperCase();
+
         this.allWallets[this.currentWalletIndex].nonce = this.nonce+1;
 
         this.chrome.storage.local.set({['wallets']: this.allWallets}, () => {
