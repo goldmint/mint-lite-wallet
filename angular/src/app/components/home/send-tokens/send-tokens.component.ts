@@ -169,9 +169,9 @@ export class SendTokensComponent implements OnInit, OnDestroy {
 
   sendTransaction() {
     this.loading = true;
-    this.apiService.getTransactionList(this.currentWallet.publicKey).subscribe(data => {
+    this.apiService.getWalletBalance(this.currentWallet.publicKey).subscribe(data => {
       this.feeCalculate();
-      this.nonce = +data['res'][0].nonce;
+      this.nonce = +data['res'].approved_nonce;
 
       if (this.currentWallet.nonce < this.nonce) {
         this.allWallets[this.currentWalletIndex].nonce = this.nonce;
