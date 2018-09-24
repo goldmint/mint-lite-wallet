@@ -1,6 +1,8 @@
 const config = {
-    checkTxUrl: 'https://service.goldmint.io/sumus/rest-proxy/v1/tx/',
-    successTxStatus: "approved",
+    // checkTxUrl: 'https://service.goldmint.io/sumus/rest-proxy/v1/tx/',
+    checkTxUrl: 'https://staging.goldmint.io/wallet/api/v1/explorer/transaction',
+    // successTxStatus: "approved",
+    successTxStatus: 2,
     checkTxTime: 30000
 };
 
@@ -50,15 +52,14 @@ function watchTransactionStatus(firstLoad) {
 function checkTransactionStatus(hash, endTime) {
     const time = new Date().getTime();
     if (time < endTime) {
-        xhr.open('GET', config.checkTxUrl + hash, true);
+        xhr.open('POST', config.checkTxUrl, true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(JSON.stringify({hash: hash}));
 
         xhr.onload = () => {
             try {
                 const result = JSON.parse(xhr.responseText);
-
-                if (result.res.status == config.successTxStatus) {
+                if (result.data.status == config.successTxStatus) {
                     finishTx(hash);
                     successTxNotification(hash);
                 }
