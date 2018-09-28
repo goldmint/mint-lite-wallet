@@ -29,6 +29,8 @@
               "src/assets/logo/logo48.png",
               "src/assets/logo/logo128.png",
               "src/background.js",
+              "src/content.js",
+              "src/inpage.js",
               "src/manifest.json"
             ],
             "styles": [

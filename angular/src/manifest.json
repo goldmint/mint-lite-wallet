@@ -12,6 +12,11 @@
     "background": {
       "scripts": ["background.js"]
     },
+    "content_scripts": [{
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "all_frames": true
+    }],
 	"browser_action": {
 		"default_popup": "index.html",
 		"default_icon": "assets/icon.png"
@@ -19,6 +24,11 @@
 	"permissions": [
 	  "storage",
       "tabs",
-      "notifications"
-	]
+      "activeTab",
+      "notifications",
+      "*://*/*"
+	],
+    "web_accessible_resources": [
+      "inpage.js"
+    ]
 }

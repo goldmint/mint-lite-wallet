@@ -1,3 +1,5 @@
+"use strict"
+
 const config = {
     // checkTxUrl: 'https://service.goldmint.io/sumus/rest-proxy/v1/tx/',
     checkTxUrl: 'https://staging.goldmint.io/wallet/api/v1/explorer/transaction',
@@ -16,11 +18,29 @@ let txQueue = {};
 // after load page
 watchTransactionStatus(true);
 
-function storageAction(request) {
-    request.identify && window.sessionStorage.setItem('identify', request.identify);
-    request.logout && window.sessionStorage.removeItem('identify');
+function actions(request) {
+    request.identify && login(request);
+    request.logout && logout();
+    // check login status
+    request.checkLoginStatus && sendMessage('loginStatus', window.sessionStorage.getItem('identify') ? true : false);
     // after added new tx
     request.newTransaction && watchTransactionStatus(false);
+}
+
+function login(request) {
+    window.sessionStorage.setItem('identify', request.identify);
+    sendMessage('login', true);
+}
+
+function logout() {
+    window.sessionStorage.removeItem('identify');
+    sendMessage('login', false);
+}
+
+function sendMessage(key, value) {
+    browser.tabs.query({active: true, currentWindow: true}, (tabs) => {
+        chrome.tabs.sendMessage(tabs[0].id, {[key]: value});
+    });
 }
 
 function watchTransactionStatus(firstLoad) {
@@ -100,10 +120,20 @@ function feiledTxNotification(hash) {
 
 if (isFirefox) {
     browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
-        storageAction(request);
+        actions(request);
     });
 } else {
     browser.extension.onMessage.addListener((request, sender, sendResponse) => {
-        storageAction(request);
+        actions(request);
     });
+
+    // browser.runtime.onMessageExternal.addListener((request, sender, sendResponse) => {
+    //     alert(request)
+    // });
 }
+
+// chrome.tabs.onUpdated.addListener((tabId, info, tab) => {
+//     if (info.status === 'complete' && tab.active) {
+//         chrome.tabs.executeScript(null, { file: "inpage.js"});
+//     }
+// });
