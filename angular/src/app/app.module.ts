@@ -34,6 +34,7 @@ import { NewWalletComponent } from './components/auth/new-wallet/new-wallet.comp
 import {SubstrPipe} from "./pipes/substr.pipe";
 import {NoexpPipe} from "./pipes/noexp.pipe";
 import {ReplaceZero} from "./pipes/replace-zero";
+import { ConfirmTransactionComponent } from './components/auth/confirm-transaction/confirm-transaction.component';
 
 @NgModule({
   declarations: [
@@ -54,7 +55,8 @@ import {ReplaceZero} from "./pipes/replace-zero";
     NoexpPipe,
     ReplaceZero,
     BackupComponent,
-    NewWalletComponent
+    NewWalletComponent,
+    ConfirmTransactionComponent
   ],
   imports: [
     BrowserModule,

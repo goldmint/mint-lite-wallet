@@ -1,0 +1,48 @@
+<div class="progress-linear progress-linear--tiny" *ngIf="loading">
+    <div class="container"></div>
+</div>
+
+<div class="mt-2">
+    <div *ngIf="currentPage === page[0]">
+        <h4 class="mb-3">Confirm transaction</h4>
+        <div class="bd-top bd-bottom py-2">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="confirm-item name">
+                    {{ currentTx?.from | reduction }}
+                </div>
+                <div>
+                    <svg class="icon-gold" width="25" height="25">
+                        <use xlink:href="#next"></use>
+                    </svg>
+                </div>
+                <div class="confirm-item">
+                    {{ currentTx?.to | reduction }}
+                </div>
+            </div>
+            <div class="text-center mt-2">
+                {{ currentTx?.amount }} {{ currentTx?.token | uppercase }}
+                <div class="trs-fee">Fee: {{ fee | noexp }} {{ currentTx?.token | uppercase }}</div>
+                <div class="nonce-info">
+                    nonce: #{{ nonce }}
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex mt-4">
+            <button type="button" class="btn btn-sm btn-primary w-50 mr-1" (click)="cancelTransfer(true)">Cancel</button>
+            <button type="button" class="btn btn-sm btn-primary w-50 ml-1" (click)="confirmTransfer()" [disabled]="loading">Confirm</button>
+        </div>
+    </div>
+
+    <div *ngIf="currentPage === page[1]">
+        <h4 class="mb-3">Failed to send</h4>
+        <div class="text-center">
+            <svg class="icon-gold" width="50" height="50">
+                <use xlink:href="#error"></use>
+            </svg>
+        </div>
+        <div class="mt-4">
+            <button type="button" class="btn btn-sm btn-primary mt-3 w-100" (click)="done()">Done</button>
+        </div>
+    </div>
+</div>

@@ -104,7 +104,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   }
 
   checkAmount() {
-    this.feeCalculate();
+    this.fee = this.sumusTransactionService.feeCalculate(this.sendData.amount, this.sendData.token);
     let balance = this.balance[this.sendData.token] - this.fee;
 
     if (this.sendData.amount === 0 || this.sendData.amount > balance) {
@@ -120,7 +120,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     this.sendData.amount = +event.target.value;
     event.target.setSelectionRange(event.target.value.length, event.target.value.length);
 
-    this.feeCalculate();
+    this.fee = this.sumusTransactionService.feeCalculate(this.sendData.amount, this.sendData.token);
     let balance = this.balance[this.sendData.token] - this.fee;
 
     if (this.sendData.amount === 0 || this.sendData.amount > balance) {
@@ -170,7 +170,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   sendTransaction() {
     this.loading = true;
     this.apiService.getWalletBalance(this.currentWallet.publicKey).subscribe(data => {
-      this.feeCalculate();
+      this.fee = this.sumusTransactionService.feeCalculate(this.sendData.amount, this.sendData.token);
       this.nonce = +data['res'].approved_nonce;
 
       if (this.currentWallet.nonce < this.nonce) {
@@ -188,32 +188,6 @@ export class SendTokensComponent implements OnInit, OnDestroy {
       this.failedTx();
     });
     this.ref.detectChanges();
-  }
-
-  feeCalculate() {
-    if (this.sendData.token === 'mnt') {
-      this.fee = 0.02;
-      return;
-    }
-    const amount = this.sendData.amount;
-
-    if (amount < 10) {
-      this.fee = 1 * amount / 100;
-    } else if (amount >= 10 && amount < 1000) {
-      this.fee = 0.3 * amount / 100;
-    } else if (amount >= 1000 && amount < 10000) {
-      this.fee = 0.03 * amount / 100;
-    } else if (amount >= 10000) {
-      const value = 0.03 * amount / 100;
-
-      if (value >= 0.002) {
-        this.fee = 0.002
-      } else if (value <= 0.0002) {
-        this.fee = 0.0002
-      } else {
-        this.fee = value;
-      }
-    }
   }
 
   confirmTransfer() {

@@ -11,7 +11,7 @@
     };
 
     let css = `
-               body, html {
+        body, html {
             margin: 0;
             padding: 0;
             width: 300px;
@@ -174,8 +174,7 @@
         }
     `
     let queryParams = {};
-    window.location.search.replace(/^\?/, '').split('&').forEach(item =>
-    {
+    window.location.search.replace(/^\?/, '').split('&').forEach(item => {
         let param = item.split('=');
         queryParams[decodeURIComponent(param[0])] = param.length > 1 ? decodeURIComponent(param[1]) : '';
     });
@@ -226,6 +225,10 @@
 
             unconfirmedTx.forEach(tx => {
                 if (tx.id == id) {
+
+                    tx.tabId = tabId;
+                    browser.storage.local.set({['unconfirmedTx']: unconfirmedTx}, () => { });
+
                     http('GET', config.api.getBalance, tx.from).then(result => {
                         if (result) {
                             nonce = +result['res'].approved_nonce;
@@ -360,6 +363,7 @@
             });
 
             browser.storage.local.set({['unconfirmedTx']: unconfirmedTx}, () => {
+                browser.runtime.sendMessage({sendTxResult: {hash: null, id, tabId}});
                 isClose && close();
             });
         });

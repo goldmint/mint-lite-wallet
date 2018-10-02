@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, NgZone, OnInit} from '@angular/core';
 import {Router} from "@angular/router";
 import {ChromeStorageService} from "../../services/chrome-storage.service";
 import {CommonService} from "../../services/common.service";
@@ -20,38 +20,34 @@ export class AuthComponent implements OnInit {
   constructor(
     private router: Router,
     private chromeStorage: ChromeStorageService,
-    private commonService: CommonService
+    private commonService: CommonService,
+    private zone: NgZone
   ) { }
 
   ngOnInit() {
     this.chrome.runtime.getBackgroundPage(page => {
       this.loggedIn = page.sessionStorage.identify;
       this.loggedIn && (this.commonService.isLoggedIn = true);
-    });
 
-    this.chrome.storage.local.get(null, (result) => {
-      this.result = result;
-    });
+      this.chrome.storage.local.get(null, (result) => {
+        this.result = result;
 
-    setTimeout(() => {
-      if (this.loggedIn) {
-        this.router.navigate(['/home/account']);
-      } else {
-        this.result['wallets'] ? this.router.navigate(['/login']) : this.router.navigate(['/new-wallet'])
-      }
-    }, 200);
+        this.zone.run(() => {
+          if (this.loggedIn) {
+            if (this.result.unconfirmedTx && this.result.unconfirmedTx.length) {
+              this.router.navigate(['/confirm-transaction']);
+            } else {
+              this.router.navigate(['/home/account']);
+            }
+          } else {
+            this.result['wallets'] ? this.router.navigate(['/login']) : this.router.navigate(['/new-wallet'])
+          }
+        });
+      });
+    });
   }
 
   openInTab() {
     this.chrome.tabs.create({'url': this.chrome.extension.getURL('index.html')}, () => {});
   }
-
-  clearStorage() {
-    this.chromeStorage.clear();
-  }
-
-  show() {
-    this.chromeStorage.load(null);
-  }
-
 }

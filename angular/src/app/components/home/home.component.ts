@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {ChromeStorageService} from "../../services/chrome-storage.service";
 import {Router} from "@angular/router";
 import {CommonService} from "../../services/common.service";
@@ -11,7 +11,7 @@ import {Subscription} from "rxjs/index";
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
 
   public isOpenSettingModal: boolean = false;
   public storageData: StorageData;

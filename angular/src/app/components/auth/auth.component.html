@@ -6,13 +6,6 @@
     </div>
 
     <div class="d-flex align-items-center w-100 justify-content-end">
-        <!--<div class="open-tab-btn" tooltip="Open web wallet" placement="left">-->
-            <!--<a [href]="webWalletLink" target="_blank">-->
-                <!--<svg class="icon-gold" width="20" height="20">-->
-                    <!--<use xlink:href="#out"></use>-->
-                <!--</svg>-->
-            <!--</a>-->
-        <!--</div>-->
         <div class="open-tab-btn ml-3" tooltip="Open in tab" placement="left" (click)="openInTab()">
             <svg class="icon-gold" width="20" height="20">
                 <use xlink:href="#tabs"></use>
@@ -22,6 +15,6 @@
 
 </div>
 
-<div class="p-3">
+<div class="p-3 position-relative">
     <router-outlet></router-outlet>
 </div>

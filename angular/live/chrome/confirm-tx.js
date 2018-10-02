@@ -11,7 +11,7 @@
     };
 
     let css = `
-            body, html {
+        body, html {
             margin: 0;
             padding: 0;
             width: 300px;
@@ -32,7 +32,7 @@
             color: #e9cb6b;
             fill: #e9cb6b;
         }
-        .confirm-container {
+        .confirm-container, .failed-container {
             padding: 1rem;
         }
         .confirm-block {
@@ -148,10 +148,33 @@
         .btn-primary.focus, .btn-primary:focus, .btn-primary:not(:disabled):not(.disabled).active:focus, .btn-primary:not(:disabled):not(.disabled):active:focus, .show>.btn-primary.dropdown-toggle:focus {
             box-shadow: 0 0 0 0.2rem rgba(233,203,107,.5);
         }
+        .failed-icon {
+            text-align: center;
+        }
+        .btn-done {
+            width: 100%;
+        }
+        .btn-primary.disabled, .btn-primary:disabled {
+            color: #212529;
+            background-color: #e9cb6b;
+            border-color: #e9cb6b;
+            cursor: not-allowed;
+        }
+        .btn.disabled, .btn:disabled {
+            opacity: .65;
+        }
+        .failed-container {
+            display: none;
+        }
+        body.failed .confirm-container {
+            display: none;
+        }
+        body.failed .failed-container {
+            display: block;
+        }
     `
     let queryParams = {};
-    window.location.search.replace(/^\?/, '').split('&').forEach(item =>
-    {
+    window.location.search.replace(/^\?/, '').split('&').forEach(item => {
         let param = item.split('=');
         queryParams[decodeURIComponent(param[0])] = param.length > 1 ? decodeURIComponent(param[1]) : '';
     });
@@ -202,6 +225,10 @@
 
             unconfirmedTx.forEach(tx => {
                 if (tx.id == id) {
+
+                    tx.tabId = tabId;
+                    browser.storage.local.set({['unconfirmedTx']: unconfirmedTx}, () => { });
+
                     http('GET', config.api.getBalance, tx.from).then(result => {
                         if (result) {
                             nonce = +result['res'].approved_nonce;
@@ -336,6 +363,7 @@
             });
 
             browser.storage.local.set({['unconfirmedTx']: unconfirmedTx}, () => {
+                browser.runtime.sendMessage({sendTxResult: {hash: null, id, tabId}});
                 isClose && close();
             });
         });

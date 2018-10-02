@@ -1,0 +1,25 @@
+.confirm-item {
+  font-size: 14px;
+  color: $color-gray-2;
+}
+
+.sent-tx-id {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.nonce-info {
+  font-size: 0.75em;
+  color: $color-gray-1;
+}
+
+.trs-fee {
+  font-size: 0.875rem;
+}
+
+.confirm-item.name {
+  max-width: 86px;
+  min-width: 86px;
+  overflow: hidden;
+}
