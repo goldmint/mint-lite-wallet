@@ -9,11 +9,21 @@ const config = {
 };
 
 let isFirefox = typeof InstallTrigger !== 'undefined';
-let browser = isFirefox ? browser : chrome;
+let brows = isFirefox ? browser : chrome;
 let xhr = new XMLHttpRequest();
 
 let wallets = [];
 let txQueue = {};
+
+if (isFirefox) {
+    brows.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        actions(request, sender);
+    });
+} else {
+    brows.extension.onMessage.addListener((request, sender, sendResponse) => {
+        actions(request, sender);
+    });
+}
 
 // after load page
 watchTransactionStatus(true);
@@ -29,8 +39,8 @@ function actions(request, sender) {
     request.sendTransaction && createConfirmWindow(request.sendTransaction, sender.tab.id);
     // after success confirm tx from lib
     if (request.hasOwnProperty('sendTxResult')) {
-        browser.tabs.query({active: true, currentWindow: true}, (tabs) => {
-            browser.tabs.sendMessage(+request.sendTxResult.tabId, {sendTxResultContent: request.sendTxResult});
+        brows.tabs.query({active: true, currentWindow: true}, (tabs) => {
+            brows.tabs.sendMessage(+request.sendTxResult.tabId, {sendTxResultContent: request.sendTxResult});
         });
         request.sendTxResult && watchTransactionStatus(false);
     }
@@ -49,13 +59,13 @@ function logout() {
 }
 
 function sendMessage(key, value) {
-    browser.tabs.query({active: true, currentWindow: true}, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, {[key]: value});
+    brows.tabs.query({active: true, currentWindow: true}, (tabs) => {
+        brows.tabs.sendMessage(tabs[0].id, {[key]: value});
     });
 }
 
 function watchTransactionStatus(firstLoad) {
-   browser.storage.local.get(null, (result) => {
+   brows.storage.local.get(null, (result) => {
         wallets = result.wallets;
 
         wallets && wallets.forEach(wallet => {
@@ -112,7 +122,7 @@ function finishTx(hash) {
         }
         return wallet;
     });
-    browser.storage.local.set({['wallets']: wallets}, () => { });
+    brows.storage.local.set({['wallets']: wallets}, () => { });
 }
 
 function successTxNotification(hash) {
@@ -130,15 +140,5 @@ function failedTxNotification(hash) {
 }
 
 function createConfirmWindow(id, tabId) {
-    browser.windows.create({url: `confirm-tx.html?id=${id}&tabId=${tabId}`, type: "popup", width: 300, height: 520}, (data) => { });
-}
-
-if (isFirefox) {
-    browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
-        actions(request, sender);
-    });
-} else {
-    browser.extension.onMessage.addListener((request, sender, sendResponse) => {
-        actions(request, sender);
-    });
+    brows.windows.create({url: `confirm-tx.html?id=${id}&tabId=${tabId}`, type: "popup", width: 300, height: 520}, (data) => { });
 }

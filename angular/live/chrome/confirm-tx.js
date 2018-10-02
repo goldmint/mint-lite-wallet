@@ -14,8 +14,10 @@
         body, html {
             margin: 0;
             padding: 0;
-            width: 300px;
+            max-width: 300px;
+            width: 100%;
             height: 520px;
+            overflow: hidden;
             font-size: 16px;
             font-family: Avenir,Helvetica,Arial,sans-serif;
             line-height: 1.5;
@@ -180,7 +182,7 @@
     });
 
     let isFirefox = typeof InstallTrigger !== 'undefined',
-        browser = isFirefox ? browser : chrome,
+        brows = isFirefox ? browser : chrome,
         nonce,
         privateKey,
         unconfirmedTx,
@@ -199,15 +201,15 @@
         initCSS();
 
         if (isFirefox) {
-            browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+            brows.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 actions(request);
             });
         } else {
-            browser.extension.onMessage.addListener((request, sender, sendResponse) => {
+            brows.extension.onMessage.addListener((request, sender, sendResponse) => {
                 actions(request);
             });
         }
-        browser.runtime.sendMessage({getIdentifier: true});
+        brows.runtime.sendMessage({getIdentifier: true});
 
         chooseDomElements([
            'infoFrom', 'infoTo', 'infoAmount', 'infoFee', 'infoNonce', 'btnClose', 'btnConfirm', 'btnDone'
@@ -219,7 +221,7 @@
 
         disabledBtn();
 
-        browser.storage.local.get(null, data => {
+        brows.storage.local.get(null, data => {
             wallets = data.wallets;
             unconfirmedTx = data.unconfirmedTx;
 
@@ -227,7 +229,7 @@
                 if (tx.id == id) {
 
                     tx.tabId = tabId;
-                    browser.storage.local.set({['unconfirmedTx']: unconfirmedTx}, () => { });
+                    brows.storage.local.set({['unconfirmedTx']: unconfirmedTx}, () => { });
 
                     http('GET', config.api.getBalance, tx.from).then(result => {
                         if (result) {
@@ -306,7 +308,7 @@
     }
 
     function successTx(hash) {
-        browser.storage.local.get(null, (data) => {
+        brows.storage.local.get(null, (data) => {
             unconfirmedTx = data.unconfirmedTx;
             wallets = data.wallets;
             let endTime = (new Date().getTime() + config.timeTxFailed);
@@ -330,9 +332,9 @@
                 }
             });
 
-            browser.storage.local.set({['wallets']: wallets}, () => {
-                browser.storage.local.set({['unconfirmedTx']: unconfirmedTx}, () => {
-                    browser.runtime.sendMessage({sendTxResult: {hash, id, tabId}});
+            brows.storage.local.set({['wallets']: wallets}, () => {
+                brows.storage.local.set({['unconfirmedTx']: unconfirmedTx}, () => {
+                    brows.runtime.sendMessage({sendTxResult: {hash, id, tabId}});
                     close();
                 });
             });
@@ -342,7 +344,7 @@
 
     function failedTx() {
         document.body.classList.add('failed');
-        browser.runtime.sendMessage({sendTxResult: {hash: null, id, tabId}}, () => {
+        brows.runtime.sendMessage({sendTxResult: {hash: null, id, tabId}}, () => {
             cancel(false);
         });
     }
@@ -354,7 +356,7 @@
     }
 
     function cancel(isClose = true) {
-        browser.storage.local.get(null, (data) => {
+        brows.storage.local.get(null, (data) => {
             unconfirmedTx = data.unconfirmedTx;
             unconfirmedTx.forEach((tx, index) => {
                 if (tx.id == id) {
@@ -362,16 +364,16 @@
                 }
             });
 
-            browser.storage.local.set({['unconfirmedTx']: unconfirmedTx}, () => {
-                browser.runtime.sendMessage({sendTxResult: {hash: null, id, tabId}});
+            brows.storage.local.set({['unconfirmedTx']: unconfirmedTx}, () => {
+                brows.runtime.sendMessage({sendTxResult: {hash: null, id, tabId}});
                 isClose && close();
             });
         });
     }
 
     function close() {
-        browser.windows.getCurrent((window) => {
-            browser.windows.remove(window.id);
+        brows.windows.getCurrent((window) => {
+            brows.windows.remove(window.id);
         });
     }
 

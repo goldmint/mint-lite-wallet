@@ -4,6 +4,10 @@ html, body {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  width: 300px;
+  height: 520px;
+  margin: 0 auto;
+  overflow: hidden;
 }
 
 app-root {
@@ -11,6 +15,7 @@ app-root {
   background: #fff;
   width: 300px;
   height: 520px;
+  overflow: hidden;
   margin: 0 auto;
   display: block;
 }
