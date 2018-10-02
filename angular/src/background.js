@@ -18,13 +18,24 @@ let txQueue = {};
 // after load page
 watchTransactionStatus(true);
 
-function actions(request) {
+function actions(request, sender) {
     request.identify && login(request);
     request.logout && logout();
     // check login status
     request.checkLoginStatus && sendMessage('loginStatus', window.sessionStorage.getItem('identify') ? true : false);
     // after added new tx
     request.newTransaction && watchTransactionStatus(false);
+    // after send tx from lib
+    request.sendTransaction && createConfirmWindow(request.sendTransaction, sender.tab.id);
+    // after success confirm tx from lib
+    if (request.hasOwnProperty('sendTxResult')) {
+        browser.tabs.query({active: true, currentWindow: true}, (tabs) => {
+            browser.tabs.sendMessage(+request.sendTxResult.tabId, {sendTxResultContent: request.sendTxResult});
+        });
+        request.sendTxResult && watchTransactionStatus(false);
+    }
+    // pass password
+    request.getIdentifier && sendMessage('identifier', window.sessionStorage.getItem('identify'));
 }
 
 function login(request) {
@@ -87,7 +98,7 @@ function checkTransactionStatus(hash, endTime) {
         };
     } else {
         finishTx(hash);
-        feiledTxNotification(hash);
+        failedTxNotification(hash);
     }
 }
 
@@ -111,29 +122,23 @@ function successTxNotification(hash) {
     });
 }
 
-function feiledTxNotification(hash) {
+function failedTxNotification(hash) {
     new Notification('Goldmint Lite Wallet', {
         icon: 'assets/icon.png',
         body: `Transaction ${hash} is failed`,
     });
 }
 
+function createConfirmWindow(id, tabId) {
+    browser.windows.create({url: `confirm-tx.html?id=${id}&tabId=${tabId}`, type: "popup", width: 300, height: 520}, (data) => { });
+}
+
 if (isFirefox) {
     browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
-        actions(request);
+        actions(request, sender);
     });
 } else {
     browser.extension.onMessage.addListener((request, sender, sendResponse) => {
-        actions(request);
+        actions(request, sender);
     });
-
-    // browser.runtime.onMessageExternal.addListener((request, sender, sendResponse) => {
-    //     alert(request)
-    // });
 }
-
-// chrome.tabs.onUpdated.addListener((tabId, info, tab) => {
-//     if (info.status === 'complete' && tab.active) {
-//         chrome.tabs.executeScript(null, { file: "inpage.js"});
-//     }
-// });

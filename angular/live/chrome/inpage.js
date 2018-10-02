@@ -24,7 +24,11 @@
         }
 
         getBalance(address) {
-            return sendQuestion('getBalance', {address});
+            return sendQuestion('getBalance', { address });
+        }
+
+        sendTransaction(from, to, token, amount) {
+            return sendQuestion('sendTransaction', { from, to, token, amount });
         }
     }
 

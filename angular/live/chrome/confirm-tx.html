@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GoldMint Wallet Notification</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 300px;
+            height: 520px;
+            font-size: 16px;
+            font-family: Avenir,Helvetica,Arial,sans-serif;
+            line-height: 1.5;
+        }
+        header {
+            background: #212121;
+            color: #ccc;
+            height: 57px;
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+        }
+        .icon-gold {
+            color: #e9cb6b;
+            fill: #e9cb6b;
+        }
+        .confirm-container, .failed-container {
+            padding: 1rem;
+        }
+        .confirm-block {
+            margin-top: 0.5rem;
+        }
+        .h4, h4 {
+            font-size: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            line-height: 1.2;
+        }
+        .confirm-info-block {
+            border-bottom: 2px solid #e9cb6b;
+            border-top: 2px solid #e9cb6b;
+            padding: 0.5rem 0;
+        }
+        .button-block {
+            display: flex;
+            margin-top: 1.5rem;
+        }
+        .confirm-address-block {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .confirm-item {
+            font-size: 14px;
+            color: #7a7a7a;
+        }
+        .confirm-item.name {
+            max-width: 86px;
+            min-width: 86px;
+            overflow: hidden;
+        }
+        .confirm-details-block {
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+        .trs-fee {
+            font-size: .875rem;
+        }
+        .nonce-info {
+            font-size: .75em;
+            color: #ababab;
+        }
+        .btn:not(:disabled):not(.disabled) {
+            cursor: pointer;
+        }
+        .btn {
+            font-size: 1.125rem;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            padding: .875rem 1.25rem;
+            min-height: 57px;
+            min-width: 150px;
+            cursor: pointer;
+            display: inline-block;
+            font-weight: 700;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            border: 1px solid transparent;
+            line-height: 1.5;
+            border-radius: 0;
+            transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        }
+        .btn-sm {
+            font-size: .875rem;
+            line-height: 1rem;
+            letter-spacing: 0;
+            text-transform: none;
+            padding: .625rem .875rem;
+            min-height: 38px;
+            min-width: 75px;
+        }
+        .btn-primary {
+            background-color: #e9cb6b;
+            border-color: #e9cb6b;
+            color: #1c1c1c;
+        }
+        .btn-cancel {
+            margin-right: 0.25rem;
+            width: 50%;
+        }
+        .btn-confirm {
+            margin-left: 0.25rem;
+            width: 50%;
+        }
+        [type=reset], [type=submit], button, html [type=button] {
+            -webkit-appearance: button;
+        }
+        .btn-primary:hover {
+            color: #212529;
+            background-color: #fadc7d;
+            border-color: #fadc7d;
+        }
+        .btn:focus, .btn:hover {
+            text-decoration: none;
+            outline: none;
+        }
+        .btn-primary:not(:disabled):not(.disabled).active, .btn-primary:not(:disabled):not(.disabled):active, .show>.btn-primary.dropdown-toggle {
+            background-color: #fadc7d;
+            border-color: #fadc7d;
+        }
+        .btn-primary:not([disabled]):not(.disabled).active, .btn-primary:not([disabled]):not(.disabled):active {
+            color: #fff;
+        }
+        .btn-primary.focus, .btn-primary:focus, .btn-primary:not(:disabled):not(.disabled).active:focus, .btn-primary:not(:disabled):not(.disabled):active:focus, .show>.btn-primary.dropdown-toggle:focus {
+            box-shadow: 0 0 0 0.2rem rgba(233,203,107,.5);
+        }
+        .failed-icon {
+            text-align: center;
+        }
+        .btn-done {
+            width: 100%;
+        }
+        .btn-primary.disabled, .btn-primary:disabled {
+            color: #212529;
+            background-color: #e9cb6b;
+            border-color: #e9cb6b;
+            cursor: not-allowed;
+        }
+        .btn.disabled, .btn:disabled {
+            opacity: .65;
+        }
+        .failed-container {
+            display: none;
+        }
+        body.failed .confirm-container {
+            display: none;
+        }
+        body.failed .failed-container {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div>
+            <svg class="icon-gold" width="25" height="25">
+                <use xlink:href="#logo"></use>
+            </svg>
+        </div>
+    </header>
+    <div class="confirm-container">
+        <div class="confirm-block">
+            <h4 class="mb-3">Confirm transaction</h4>
+            <div class="confirm-info-block">
+                <div class="confirm-address-block">
+                    <div class="confirm-item name" id="infoFrom"></div>
+                    <div>
+                        <svg class="icon-gold" width="25" height="25">
+                            <use xlink:href="#next"></use>
+                        </svg>
+                    </div>
+                    <div class="confirm-item" id="infoTo"></div>
+                </div>
+                <div class="confirm-details-block">
+                    <span id="infoAmount"></span>
+                    <div class="trs-fee">Fee: <span id="infoFee"></span></div>
+                    <div class="nonce-info">
+                        nonce: #<span id="infoNonce"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-block">
+                <button type="button" id="btnClose" class="btn btn-sm btn-primary btn-cancel">Cancel</button>
+                <button type="button" id="btnConfirm" class="btn btn-sm btn-primary btn-confirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+    <div class="failed-container">
+        <div class="confirm-block">
+            <h4 class="mb-3">Failed to send</h4>
+            <div class="failed-icon">
+                <svg class="icon-gold" width="50" height="50">
+                    <use xlink:href="#error"></use>
+                </svg>
+            </div>
+            <div class="button-block">
+                <button type="button" id="btnDone" class="btn btn-sm btn-primary btn-done">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sprite">
+        <svg width="0" height="0" style="position:absolute"><symbol viewBox="0 0 8 8" id="amount-plus"><use fill="currentColor" transform="translate(0 3)" xlink:href="#aprefix__path0_fill"/><use fill="currentColor" transform="rotate(90 2.5 2.5)" xlink:href="#aprefix__path0_fill"/><defs><path id="aprefix__path0_fill" d="M0 0h8v2H0V0z"/></defs></symbol><symbol viewBox="0 0 512 512" id="backup"><path d="M369.776 341.337a549.977 549.977 0 0 1-28.442-.738v56.798c8.981.525 18.451.827 28.442.827 85.031 0 133.853-20.975 142.224-30.855v-48.748c-37.926 15.438-90.193 22.716-142.224 22.716zM369.776 227.559a548.859 548.859 0 0 1-28.442-.738v56.798c8.981.525 18.451.827 28.442.827 78.633 0 126.274-17.929 139.62-28.444 1.085-.855 1.974-1.667 2.604-2.41v-48.748c-37.926 15.437-90.193 22.715-142.224 22.715zM369.776 113.778c-12.84 0-25.695-.448-38.347-1.346 6.379 8.81 9.904 18.728 9.904 29.791v27.618c8.981.525 18.451.827 28.442.827 78.633 0 126.274-17.929 139.62-28.444 1.085-.855 1.974-1.667 2.604-2.412V91.065c-37.925 15.437-90.19 22.713-142.223 22.713zM369.776.001c-78.618 0-126.285 17.929-139.641 28.444C243.491 38.96 291.156 56.89 369.776 56.89s126.288-17.93 139.643-28.445C496.062 17.93 448.397.001 369.776.001zM255.999 441.815c-33.653 8.996-73.786 13.297-113.777 13.297-52.03 0-104.298-7.278-142.222-22.716v48.748c8.368 9.882 57.19 30.855 142.222 30.855s133.853-20.973 142.224-30.855V432.396c-8.777 3.573-18.315 6.71-28.447 9.419zM255.999 328.038c-9.055 2.42-18.58 4.502-28.444 6.25-9.22 1.635-18.735 2.975-28.444 4.035a504.192 504.192 0 0 1-28.444 2.276c-9.432.491-18.94.736-28.444.736-52.03 0-104.298-7.278-142.222-22.716v48.748c.63.745 1.517 1.555 2.602 2.41 13.346 10.515 60.987 28.444 139.62 28.444 13.028 0 25.194-.497 36.507-1.367 12.692-.975 24.278-2.427 34.77-4.189 17.175-2.884 31.372-6.597 42.5-10.435 12.591-4.342 21.25-8.835 25.843-12.453 1.085-.855 1.974-1.667 2.604-2.41V318.619c-8.778 3.573-18.316 6.709-28.448 9.419zM255.999 214.261c-9.055 2.42-18.58 4.502-28.444 6.25-9.22 1.635-18.735 2.975-28.444 4.035a504.192 504.192 0 0 1-28.444 2.276c-9.432.491-18.94.736-28.444.736-52.03 0-104.298-7.278-142.222-22.716v48.748c.63.745 1.517 1.555 2.602 2.41 13.346 10.515 60.987 28.444 139.62 28.444a483.38 483.38 0 0 0 36.507-1.367 409.373 409.373 0 0 0 20.381-2.061 367.635 367.635 0 0 0 14.389-2.128 325.535 325.535 0 0 0 14.055-2.661c11.029-2.357 20.506-5.035 28.444-7.775 12.591-4.343 21.25-8.835 25.843-12.453 1.085-.855 1.974-1.667 2.604-2.41V204.841c-8.777 3.574-18.315 6.71-28.447 9.42zM227.555 121.999a309.455 309.455 0 0 0-10.883-2.122 361.536 361.536 0 0 0-17.562-2.659 401.329 401.329 0 0 0-10.964-1.24 435.925 435.925 0 0 0-17.48-1.379 485.37 485.37 0 0 0-28.444-.821c-78.618 0-126.285 17.929-139.641 28.444 13.356 10.515 61.021 28.444 139.641 28.444 9.986.002 19.465-.292 28.444-.817 2.738-.159 5.416-.349 8.061-.552a411.772 411.772 0 0 0 20.383-2.067c5.008-.637 9.81-1.344 14.395-2.114a323.833 323.833 0 0 0 14.05-2.666c11.023-2.353 20.524-5.029 28.461-7.767 12.589-4.343 21.25-8.841 25.848-12.459-7.496-5.899-25.799-14.134-54.309-20.225z"/></symbol><symbol viewBox="0 0 34 28" id="burger"><use fill="currentColor" xlink:href="#cprefix__path0_fill"/><use fill="currentColor" transform="translate(0 12)" xlink:href="#cprefix__path0_fill"/><use fill="currentColor" transform="translate(0 24)" xlink:href="#cprefix__path0_fill"/><defs><path id="cprefix__path0_fill" d="M0 0h34v4H0V0z"/></defs></symbol><symbol viewBox="0 0 26 26" id="check"><path d="M.3 14c-.2-.2-.3-.5-.3-.7s.1-.5.3-.7l1.4-1.4c.4-.4 1-.4 1.4 0l.1.1 5.5 5.9c.2.2.5.2.7 0L22.8 3.3h.1c.4-.4 1-.4 1.4 0l1.4 1.4c.4.4.4 1 0 1.4l-16 16.6c-.2.2-.4.3-.7.3-.3 0-.5-.1-.7-.3L.5 14.3.3 14z"/></symbol><symbol viewBox="0 0 24 24" id="close"><use fill="currentColor" transform="translate(-1 6)" xlink:href="#eprefix__path0_fill"/><defs><path id="eprefix__path0_fill" d="M24.72 14.992L15.65 5.92l9.072-9.072-2.448-2.496-9.12 9.168c-2.976-3.072-6-6.096-9.024-9.168L1.68-3.152l9.072 9.072-9.072 9.072 2.448 2.496 9.024-9.12c3.072 3.024 6.048 6.048 9.12 9.12l2.448-2.496z"/></defs></symbol><symbol viewBox="0 0 426.667 426.667" id="done"><path d="M293.333 135.04L190.08 240.213l-52.907-53.12-28.373 28.374 83.413 83.2 133.974-129.92z"/><path d="M213.333 0C95.513 0 0 95.513 0 213.333s95.513 213.333 213.333 213.333 213.333-95.513 213.333-213.333S331.154 0 213.333 0zm0 388.053c-96.495 0-174.72-78.225-174.72-174.72s78.225-174.72 174.72-174.72c96.446.117 174.602 78.273 174.72 174.72 0 96.496-78.224 174.72-174.72 174.72z"/></symbol><symbol viewBox="0 0 528.899 528.899" id="edit"><path d="M328.883 89.125l107.59 107.589-272.34 272.34L56.604 361.465l272.279-272.34zm189.23-25.948l-47.981-47.981c-18.543-18.543-48.653-18.543-67.259 0l-45.961 45.961 107.59 107.59 53.611-53.611c14.382-14.383 14.382-37.577 0-51.959zM.3 512.69c-1.958 8.812 5.998 16.708 14.811 14.565l119.891-29.069L27.473 390.597.3 512.69z"/></symbol><symbol viewBox="0 0 511.995 511.995" id="error"><path d="M437.126 74.939c-99.826-99.826-262.307-99.826-362.133 0C26.637 123.314 0 187.617 0 256.005s26.637 132.691 74.993 181.047c49.923 49.923 115.495 74.874 181.066 74.874s131.144-24.951 181.066-74.874c99.826-99.826 99.826-262.268.001-362.113zM409.08 409.006c-84.375 84.375-221.667 84.375-306.042 0-40.858-40.858-63.37-95.204-63.37-153.001s22.512-112.143 63.37-153.021c84.375-84.375 221.667-84.355 306.042 0 84.355 84.375 84.355 221.667 0 306.022z"/><path d="M341.525 310.827l-56.151-56.071 56.151-56.071c7.735-7.735 7.735-20.29.02-28.046-7.755-7.775-20.31-7.755-28.065-.02l-56.19 56.111-56.19-56.111c-7.755-7.735-20.31-7.755-28.065.02-7.735 7.755-7.735 20.31.02 28.046l56.151 56.071-56.151 56.071c-7.755 7.735-7.755 20.29-.02 28.046 3.868 3.887 8.965 5.811 14.043 5.811s10.155-1.944 14.023-5.792l56.19-56.111 56.19 56.111c3.868 3.868 8.945 5.792 14.023 5.792a19.828 19.828 0 0 0 14.043-5.811c7.733-7.756 7.733-20.311-.022-28.046z"/></symbol><symbol viewBox="0 0 16 15" id="export"><use fill="currentColor" transform="translate(0 13)" xlink:href="#iprefix__path0_fill"/><use fill="currentColor" transform="rotate(90 1.5 7.5)" xlink:href="#iprefix__path1_fill"/><use fill="currentColor" transform="rotate(180 6.5 3)" xlink:href="#iprefix__path2_fill"/><defs><path id="iprefix__path0_fill" d="M16 0H0v2h16V0z"/><path id="iprefix__path1_fill" d="M5 0H0v2h5V0z"/><path id="iprefix__path2_fill" d="M5 6l5-6H0l5 6z"/></defs></symbol><symbol viewBox="0 0 16 15" id="import"><use fill="currentColor" transform="translate(0 13)" xlink:href="#jprefix__path0_fill"/><use fill="currentColor" transform="rotate(-90 6 -1)" xlink:href="#jprefix__path1_fill"/><use fill="currentColor" transform="translate(3 5)" xlink:href="#jprefix__path2_fill"/><defs><path id="jprefix__path0_fill" d="M16 0H0v2h16V0z"/><path id="jprefix__path1_fill" d="M5 0H0v2h5V0z"/><path id="jprefix__path2_fill" d="M5 6l5-6H0l5 6z"/></defs></symbol><symbol viewBox="0 0 330 330" id="information"><path d="M165 0C74.019 0 0 74.02 0 165.001 0 255.982 74.019 330 165 330s165-74.018 165-164.999S255.981 0 165 0zm0 300c-74.44 0-135-60.56-135-134.999S90.56 30 165 30s135 60.562 135 135.001C300 239.44 239.439 300 165 300z"/><path d="M164.998 70c-11.026 0-19.996 8.976-19.996 20.009 0 11.023 8.97 19.991 19.996 19.991 11.026 0 19.996-8.968 19.996-19.991 0-11.033-8.97-20.009-19.996-20.009zM165 140c-8.284 0-15 6.716-15 15v90c0 8.284 6.716 15 15 15 8.284 0 15-6.716 15-15v-90c0-8.284-6.716-15-15-15z"/></symbol><symbol viewBox="0 0 32 32" id="logo"><use fill="currentColor" xlink:href="#lprefix__path0_fill"/><use fill="currentColor" transform="translate(17.05 13.22)" xlink:href="#lprefix__path1_fill"/><defs><path id="lprefix__path0_fill" d="M16.018 32C7.194 32 0 24.822 0 15.982S7.194 0 16.018 0c3.72 0 7.335 1.308 10.206 3.642l-1.701 2.05c-2.375-1.98-5.422-3.04-8.505-3.04-7.371 0-13.36 5.976-13.36 13.33 0 7.355 5.989 13.366 13.36 13.366 5.174 0 9.78-2.935 12.013-7.46H17.045v-2.653h14.778l-.567 1.733A15.997 15.997 0 0 1 16.018 32z"/><path id="lprefix__path1_fill" d="M14.955 0H0v2.652h14.955V0z"/></defs></symbol><symbol viewBox="0 0 320.002 320.002" id="logout"><path d="M51.213 175.001h173.785c8.284 0 15-6.716 15-15 0-8.284-6.716-15-15-15H51.213l19.394-19.394c5.858-5.858 5.858-15.355 0-21.213-5.857-5.858-15.355-5.858-21.213 0L4.396 149.393c-.351.351-.683.719-.997 1.103-.137.167-.256.344-.385.515-.165.22-.335.435-.488.664-.14.209-.261.426-.389.64-.123.206-.252.407-.365.619-.118.22-.217.446-.323.67-.104.219-.213.435-.306.659-.09.219-.164.442-.243.664-.087.24-.179.477-.253.722-.067.222-.116.447-.172.672-.063.249-.133.497-.183.751-.051.259-.082.521-.119.782-.032.223-.075.443-.097.669a15.09 15.09 0 0 0-.074 1.457l-.001.022.001.022c.001.487.026.973.074 1.458.022.223.064.44.095.661.038.264.069.528.121.79.05.252.119.496.182.743.057.227.107.456.175.681.073.241.164.474.248.71.081.226.155.453.247.675.091.22.198.431.3.646.108.229.21.46.33.685.11.205.235.4.354.599.131.221.256.444.4.659.146.219.309.424.466.635.136.181.262.368.407.544.299.364.616.713.947 1.048.016.016.029.034.045.05l45 45.001A14.956 14.956 0 0 0 60 220.003a14.96 14.96 0 0 0 10.606-4.393c5.858-5.858 5.858-15.355.001-21.213l-19.394-19.396z"/><path d="M305.002 25h-190c-8.284 0-15 6.716-15 15v60c0 8.284 6.716 15 15 15s15-6.716 15-15V55h160v210.001h-160V220c0-8.284-6.716-15-15-15s-15 6.716-15 15v60.001c0 8.284 6.716 15 15 15h190c8.284 0 15-6.716 15-15V40c0-8.284-6.716-15-15-15z"/></symbol><symbol viewBox="0 0 31.49 31.49" id="next"><path fill="currentColor" d="M21.205 5.007a1.112 1.112 0 0 0-1.587 0 1.12 1.12 0 0 0 0 1.571l8.047 8.047H1.111A1.106 1.106 0 0 0 0 15.737c0 .619.492 1.127 1.111 1.127h26.554l-8.047 8.032c-.429.444-.429 1.159 0 1.587a1.112 1.112 0 0 0 1.587 0l9.952-9.952a1.093 1.093 0 0 0 0-1.571l-9.952-9.953z"/></symbol><symbol viewBox="0 0 512 512" id="out"><path d="M488.727 0H302.545c-12.853 0-23.273 10.42-23.273 23.273s10.42 23.273 23.273 23.273h129.997L192.999 286.09c-9.089 9.089-9.089 23.823 0 32.912a23.195 23.195 0 0 0 16.455 6.816 23.194 23.194 0 0 0 16.457-6.817L465.455 79.458v129.997c0 12.853 10.42 23.273 23.273 23.273s23.273-10.42 23.273-23.273V23.273C512 10.42 501.58 0 488.727 0z"/><path d="M395.636 232.727c-12.853 0-23.273 10.42-23.273 23.273v209.455H46.545V139.636H256c12.853 0 23.273-10.42 23.273-23.273S268.853 93.091 256 93.091H23.273C10.42 93.091 0 103.511 0 116.364v372.364C0 501.58 10.42 512 23.273 512h372.364c12.853 0 23.273-10.42 23.273-23.273V256c-.001-12.853-10.421-23.273-23.274-23.273z"/></symbol><symbol viewBox="0 0 4 5" id="select"><path fill="currentColor" d="M2 0L0 2h4zm0 5L0 3h4z"/></symbol><symbol viewBox="0 0 294.834 294.834" id="tab"><path d="M288.834 0H47.413a6 6 0 0 0-6 6v17.398a6 6 0 0 0 12 0V12h229.421v229.421h-11.398a6 6 0 0 0 0 12h17.398a6 6 0 0 0 6-6V6a6 6 0 0 0-6-6z"/><path d="M247.421 41.413H6a6 6 0 0 0-6 6v241.421a6 6 0 0 0 6 6h241.421a6 6 0 0 0 6-6V47.413a6 6 0 0 0-6-6zm-6 241.421H12V53.413h229.421v229.421z"/></symbol><symbol viewBox="0 0 56 56" id="tabs"><path d="M3 12.5h50a1 1 0 1 0 0-2H3a1 1 0 1 0 0 2zM6 8.5h44a1 1 0 1 0 0-2H6a1 1 0 1 0 0 2zM9 4.5h38a1 1 0 1 0 0-2H9a1 1 0 1 0 0 2zM0 14.5v39h56v-39H0zm50 33H6v-27h44v27z"/></symbol></svg>
+    </div>
+    <script type="text/javascript" src="./assets/libs/crypto-js/crypto-js.js"></script>
+    <script type="text/javascript" src="./assets/libs/sumus-lib/sumuslib.js"></script>
+    <script type="text/javascript" src="./confirm-tx.js"></script>
+</body>
+</html>

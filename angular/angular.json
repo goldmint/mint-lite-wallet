@@ -25,13 +25,14 @@
             "assets": [
               "src/favicon.ico",
               "src/assets/icon.png",
-              "src/assets/logo/logo16.png",
-              "src/assets/logo/logo48.png",
-              "src/assets/logo/logo128.png",
+              "src/assets/logo/",
+              "src/assets/libs/",
               "src/background.js",
               "src/content.js",
               "src/inpage.js",
-              "src/manifest.json"
+              "src/manifest.json",
+              "src/confirm-tx.html",
+              "src/confirm-tx.js"
             ],
             "styles": [
               "node_modules/bootstrap/scss/bootstrap.scss",

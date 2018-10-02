@@ -11,7 +11,7 @@ function injectScript(file_path, tag) {
     var script = document.createElement('script');
     script.setAttribute('type', 'text/javascript');
     script.setAttribute('src', file_path);
-    node.appendChild(script);
+    node && node.appendChild(script);
 }
 injectScript(chrome.extension.getURL('inpage.js'), 'body');
 
@@ -20,8 +20,9 @@ var isLoggedIn = false;
 var isFirefox = typeof InstallTrigger !== 'undefined';
 var browser = isFirefox ? browser : chrome;
 
+
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    request.hasOwnProperty('loginStatus') && (isLoggedIn = request.loginStatus);
+    request.hasOwnProperty('loginStatus') && isLoggedIn !== request.loginStatus && (isLoggedIn = request.loginStatus);
     request.hasOwnProperty('login') && (isLoggedIn = request.login);
 });
 browser.runtime.sendMessage({checkLoginStatus: true});
@@ -41,27 +42,31 @@ window.addEventListener("message", (data) => {
     }
 });
 
+window.addEventListener('focus', () => {
+    browser.runtime.sendMessage({checkLoginStatus: true});
+});
+
 function http(method, url, params = '') {
     let xhr = new XMLHttpRequest(),
         currentUrl = method.toUpperCase() === "GET" ? url + params : url;
-
     xhr.open(method.toUpperCase(), currentUrl, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
-    method.toUpperCase() === "GET" ? xhr.send() : xhr.send(params);
+    method.toUpperCase() === "GET" ? xhr.send() : xhr.send(JSON.stringify(params));
 
     return new Promise((resolve, reject) => {
         xhr.onload = () => {
-            try {
-                resolve(JSON.parse(xhr.responseText));
-            } catch (e) {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                    resolve(JSON.parse(xhr.responseText));
+                } catch (e) {
+                    resolve(null);
+                }
+            } else {
                 resolve(null);
             }
         };
-        xhr.onerror = () => {
-            resolve(null);
-        }
     });
-}
+};
 
 var actions = {
     getAccount: data => new Promise((resolve, reject) => {
@@ -81,4 +86,29 @@ var actions = {
             }
         });
     }),
+    sendTransaction: data => new Promise((resolve, reject) => {
+        if (!isLoggedIn) {
+            return resolve(null);
+        }
+
+        browser.storage.local.get(null, (storage) => {
+            const id = Math.random().toString(36).substr(2, 9);
+            let tx = { id: id, from: data.from, to: data.to, token: data.token, amount: data.amount },
+                unconfirmedTx = [];
+
+            storage.unconfirmedTx && (unconfirmedTx = storage.unconfirmedTx);
+            unconfirmedTx.push(tx);
+
+            browser.runtime.onMessage.addListener(function answer(request, sender, sendResponse) {
+                if (request.hasOwnProperty('sendTxResultContent') && request.sendTxResultContent.id === id) {
+                    resolve(request.sendTxResultContent.hash);
+                    browser.runtime.onMessage.removeListener(answer);
+                }
+            });
+
+            browser.storage.local.set({'unconfirmedTx': unconfirmedTx}, () => {
+                browser.runtime.sendMessage({sendTransaction: id});
+            });
+        });
+    })
 };

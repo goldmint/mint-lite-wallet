@@ -1,6 +1,8 @@
 import {Wallet} from "./wallet";
+import {UnconfirmedTx} from "./unconfirmed-tx";
 
 export interface StorageData {
   currentWallet: number,
-  wallets: Wallet[]
+  wallets: Wallet[],
+  unconfirmedTx: UnconfirmedTx[]
 }
