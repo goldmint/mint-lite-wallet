@@ -10,14 +10,10 @@ var isLoggedIn = false;
 var isFirefox = typeof InstallTrigger !== 'undefined';
 var brows = isFirefox ? browser : chrome;
 
-function injectScript(file_path, tag) {
-    var node = document.getElementsByTagName(tag)[0];
-    var script = document.createElement('script');
-    script.setAttribute('type', 'text/javascript');
-    script.setAttribute('src', file_path);
-    node && node.appendChild(script);
-}
-injectScript(brows.extension.getURL('inpage.js'), 'head');
+var script = document.createElement('script');
+script.setAttribute('type', 'text/javascript');
+script.setAttribute('src', brows.extension.getURL('inpage.js'));
+document.documentElement.insertBefore(script , document.head);
 
 brows.runtime.onMessage.addListener((request, sender, sendResponse) => {
     request.hasOwnProperty('loginStatus') && isLoggedIn !== request.loginStatus && (isLoggedIn = request.loginStatus);
