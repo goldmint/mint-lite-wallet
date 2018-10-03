@@ -17,7 +17,7 @@ function injectScript(file_path, tag) {
     script.setAttribute('src', file_path);
     node && node.appendChild(script);
 }
-injectScript(brows.extension.getURL('inpage.js'), 'body');
+injectScript(brows.extension.getURL('inpage.js'), 'head');
 
 brows.runtime.onMessage.addListener((request, sender, sendResponse) => {
     request.hasOwnProperty('loginStatus') && isLoggedIn !== request.loginStatus && (isLoggedIn = request.loginStatus);
@@ -38,10 +38,6 @@ window.addEventListener("message", (data) => {
             window.postMessage({type: 'answer', id: data.data.id, isSuccess: false, data: r}, "*");
         });
     }
-});
-
-window.addEventListener('focus', () => {
-    brows.runtime.sendMessage({checkLoginStatus: true});
 });
 
 function http(method, url, params = '') {
@@ -68,45 +64,75 @@ function http(method, url, params = '') {
 
 var actions = {
     getAccount: data => new Promise((resolve, reject) => {
-        brows.storage.local.get(null, (result) => {
-            resolve(isLoggedIn ? [result.wallets[result.currentWallet].publicKey] : []);
-        });
-    }),
-    getBalance: data => new Promise((resolve, reject) => {
-        http('GET', config.api.getBalance, data.address).then(result => {
-            if (result) {
-                resolve({
-                    gold: result.res.balance.gold,
-                    mint: result.res.balance.mint
+        brows.runtime.onMessage.addListener(function checkLogin(request, sender, sendResponse) {
+            if (request.hasOwnProperty('loginStatus')) {
+                isLoggedIn = request.loginStatus;
+
+                brows.storage.local.get(null, (result) => {
+                    resolve(isLoggedIn ? [result.wallets[result.currentWallet].publicKey] : []);
+                    brows.runtime.onMessage.removeListener(checkLogin);
                 });
-            } else {
-                resolve(null);
             }
         });
+        brows.runtime.sendMessage({checkLoginStatus: true});
+    }),
+    getBalance: data => new Promise((resolve, reject) => {
+        brows.runtime.onMessage.addListener(function checkLogin(request, sender, sendResponse) {
+            if (request.hasOwnProperty('loginStatus')) {
+                isLoggedIn = request.loginStatus;
+                if (isLoggedIn) {
+                    http('GET', config.api.getBalance, data.address).then(result => {
+                        if (result) {
+                            resolve({
+                                gold: result.res.balance.gold,
+                                mint: result.res.balance.mint
+                            });
+                            brows.runtime.onMessage.removeListener(checkLogin);
+                        } else {
+                            resolve(null);
+                            brows.runtime.onMessage.removeListener(checkLogin);
+                        }
+                    });
+                } else {
+                    resolve(null);
+                    brows.runtime.onMessage.removeListener(checkLogin);
+                }
+            }
+        });
+        brows.runtime.sendMessage({checkLoginStatus: true});
     }),
     sendTransaction: data => new Promise((resolve, reject) => {
-        if (!isLoggedIn) {
-            return resolve(null);
-        }
+        brows.runtime.onMessage.addListener(function checkLogin(request, sender, sendResponse) {
+            if (request.hasOwnProperty('loginStatus')) {
+                isLoggedIn = request.loginStatus;
 
-        brows.storage.local.get(null, (storage) => {
-            const id = Math.random().toString(36).substr(2, 9);
-            let tx = { id: id, from: data.from, to: data.to, token: data.token, amount: data.amount },
-                unconfirmedTx = [];
-
-            storage.unconfirmedTx && (unconfirmedTx = storage.unconfirmedTx);
-            unconfirmedTx.push(tx);
-
-            brows.runtime.onMessage.addListener(function answer(request, sender, sendResponse) {
-                if (request.hasOwnProperty('sendTxResultContent') && request.sendTxResultContent.id === id) {
-                    resolve(request.sendTxResultContent.hash);
-                    brows.runtime.onMessage.removeListener(answer);
+                if (!isLoggedIn) {
+                    brows.runtime.onMessage.removeListener(checkLogin);
+                    return resolve(null);
                 }
-            });
 
-            brows.storage.local.set({'unconfirmedTx': unconfirmedTx}, () => {
-                brows.runtime.sendMessage({sendTransaction: id});
-            });
+                brows.storage.local.get(null, (storage) => {
+                    const id = Math.random().toString(36).substr(2, 9);
+                    let tx = { id: id, from: data.from, to: data.to, token: data.token, amount: data.amount },
+                        unconfirmedTx = [];
+
+                    storage.unconfirmedTx && (unconfirmedTx = storage.unconfirmedTx);
+                    unconfirmedTx.push(tx);
+
+                    brows.storage.local.set({'unconfirmedTx': unconfirmedTx}, () => {
+                        brows.runtime.sendMessage({sendTransaction: id});
+                    });
+
+                    brows.runtime.onMessage.addListener(function answer(request, sender, sendResponse) {
+                        if (request.hasOwnProperty('sendTxResultContent') && request.sendTxResultContent.id === id) {
+                            resolve(request.sendTxResultContent.hash);
+                            brows.runtime.onMessage.removeListener(answer);
+                            brows.runtime.onMessage.removeListener(checkLogin);
+                        }
+                    });
+                });
+            }
         });
+        brows.runtime.sendMessage({checkLoginStatus: true});
     })
 };
