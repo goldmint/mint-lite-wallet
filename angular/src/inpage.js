@@ -27,8 +27,8 @@
             return sendQuestion('getBalance', { address });
         }
 
-        sendTransaction(from, to, token, amount) {
-            return sendQuestion('sendTransaction', { from, to, token, amount });
+        sendTransaction(to, token, amount) {
+            return sendQuestion('sendTransaction', { to, token, amount });
         }
     }
 

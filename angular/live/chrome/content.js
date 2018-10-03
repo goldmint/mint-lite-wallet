@@ -109,7 +109,9 @@ var actions = {
 
                 brows.storage.local.get(null, (storage) => {
                     const id = Math.random().toString(36).substr(2, 9);
-                    let tx = { id: id, from: data.from, to: data.to, token: data.token, amount: data.amount },
+                    const from = storage.wallets[storage.currentWallet].publicKey;
+
+                    let tx = { id, from, to: data.to, token: data.token, amount: data.amount },
                         unconfirmedTx = [];
 
                     storage.unconfirmedTx && (unconfirmedTx = storage.unconfirmedTx);
