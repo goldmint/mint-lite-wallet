@@ -28,10 +28,14 @@ window.addEventListener("message", (data) => {
             resourceData = JSON.parse(data.data.data);
         } catch (e) {}
 
-        actions[data.data.resource](resourceData).then(r => {
-            window.postMessage({type: 'answer', id: data.data.id, isSuccess: true, data: r}, "*");
+        window.postMessage && actions[data.data.resource](resourceData).then(r => {
+            try {
+                window.postMessage({type: 'answer', id: data.data.id, isSuccess: true, data: r}, "*");
+            } catch(e) {}
         }, r => {
-            window.postMessage({type: 'answer', id: data.data.id, isSuccess: false, data: r}, "*");
+            try {
+                window.postMessage({type: 'answer', id: data.data.id, isSuccess: false, data: r}, "*");
+            } catch (e) {}
         });
     }
 });
