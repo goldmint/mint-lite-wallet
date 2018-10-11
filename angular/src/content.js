@@ -22,7 +22,7 @@ brows.runtime.onMessage.addListener((request, sender, sendResponse) => {
 brows.runtime.sendMessage({checkLoginStatus: true});
 
 window.addEventListener("message", (data) => {
-    if (data.data && data.data.type === 'question' && data.data.resource in actions) {
+    if (data && data.data && data.data.type === 'question' && data.data.resource in actions) {
         let resourceData = undefined;
         try {
             resourceData = JSON.parse(data.data.data);

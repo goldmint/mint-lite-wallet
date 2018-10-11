@@ -9,7 +9,7 @@
     });
 
     window.addEventListener("message", (data) => {
-        if (data.data.type === 'answer' && data.data.id in questions) {
+        if (data && data.data && data.data.type === 'answer' && data.data.id in questions) {
             questions[data.data.id][data.data.isSuccess ? 0 : 1](data.data.data);
             delete questions[data.data.id];
         }
