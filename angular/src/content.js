@@ -143,13 +143,13 @@ var actions = {
 
                     brows.storage.local.set({'unconfirmedTx': unconfirmedTx}, () => {
                         brows.runtime.sendMessage({sendTransaction: id});
+                        brows.runtime.onMessage.removeListener(checkLogin);
                     });
 
                     brows.runtime.onMessage.addListener(function answer(request, sender, sendResponse) {
                         if (request.hasOwnProperty('sendTxResultContent') && request.sendTxResultContent.id === id) {
                             resolve(request.sendTxResultContent.hash);
                             brows.runtime.onMessage.removeListener(answer);
-                            brows.runtime.onMessage.removeListener(checkLogin);
                         }
                     });
                 });
