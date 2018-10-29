@@ -63,47 +63,19 @@ export class AccountComponent implements OnInit, OnDestroy {
     }, 15000);
   }
 
-  // getBalanceAndTx(publicKey: string) {
-  //   this.loading = true;
-  //   const combined = this.apiService.getTransactionList(publicKey).pipe(combineLatest(
-  //     this.apiService.getWalletBalance(publicKey)
-  //   ));
-  //   combined.subscribe((data: any) => {
-  //     clearInterval(this.interval);
-  //     this.transactionList = (data[0].res).slice(0, 4);
-  //
-  //     this.balance.mnt = data[1].res.balance.mint;
-  //     this.balance.gold = data[1].res.balance.gold;
-  //
-  //     this.setUpdateDataInterval(publicKey);
-  //
-  //     this.isDataLoaded = true;
-  //     this.loading = false;
-  //     this.ref.detectChanges();
-  //   }, () => {
-  //     this.messageBox.alert('Service is temporary unavailable');
-  //     this.ref.detectChanges();
-  //   });
-  // }
-
   getBalanceAndTx(publicKey: string) {
-    this.interval === null && (this.loading = true);
-    let txCount = this.currentWallet.tx ? 3 : 4;
-
-    const combined = this.apiService.getTxByAddress(publicKey, 0, txCount, "date").pipe(combineLatest(
+    this.loading = true;
+    const combined = this.apiService.getTransactionList(publicKey).pipe(combineLatest(
       this.apiService.getWalletBalance(publicKey)
     ));
     combined.subscribe((data: any) => {
       clearInterval(this.interval);
-      this.transactionList = data[0]['data'].items;
-
-      if (this.currentWallet.tx) {
-        let tx = this.currentWallet.tx;
-        this.transactionList.unshift(new Transaction());
-        this.transactionList[0].tokensCount = tx.amount;
-        this.transactionList[0].uniqueId = tx.hash;
-        this.transactionList[0].sourceWallet = this.currentWallet.publicKey;
-        this.transactionList[0].tokenType = tx.token === 'GOLD' ? 'commodity' : 'utility';
+      let txs = data[0].res.list;
+      if (txs) {
+        this.transactionList = txs.filter(tx => {
+          return tx.transaction.name === "TransferAssetsTransaction";
+        });
+        this.transactionList = this.transactionList.slice(0, 4);
       }
 
       this.balance.mnt = data[1].res.balance.mint;

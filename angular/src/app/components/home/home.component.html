@@ -27,6 +27,16 @@
 
 <div class="setting-modal p-3" *ngIf="isOpenSettingModal">
     <div class="setting-actions">
+        <div>
+          <div class="form-group mb-3">
+            <select class="form-control custom-select black mb-0 header-select-account border-0"
+                    [(ngModel)]="selectedNetwork" (change)="chooseNetwork()">
+              <option value="main">Main network</option>
+              <option value="test">Test network</option>
+            </select>
+          </div>
+        </div>
+
         <div class="d-flex align-items-center pointer" (click)="createAccount()">
             <svg class="icon-gold" width="15" height="15">
                 <use xlink:href="#amount-plus"></use>

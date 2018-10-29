@@ -23,6 +23,10 @@
             return sendQuestion('getAccount');
         }
 
+        getCurrentNetwork() {
+            return sendQuestion('getCurrentNetwork');
+        }
+
         getBalance(address) {
             return sendQuestion('getBalance', { address });
         }

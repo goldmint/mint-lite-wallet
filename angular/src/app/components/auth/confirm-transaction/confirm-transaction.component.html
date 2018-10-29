@@ -23,7 +23,7 @@
                 {{ currentTx?.amount }} {{ currentTx?.token | uppercase }}
                 <div class="trs-fee">Fee: {{ fee | noexp }} {{ currentTx?.token | uppercase }}</div>
                 <div class="nonce-info">
-                    nonce: #{{ nonce }}
+                    nonce: #{{ nonce + 1 }}
                 </div>
             </div>
         </div>

@@ -26,6 +26,7 @@ export class ConfirmTransactionComponent implements OnInit {
   public fee: number = 0;
   public unconfirmedTx: UnconfirmedTx[];
   public currentTx: UnconfirmedTx;
+  public network: string;
 
   private chrome = window['chrome'];
   private identify: string;
@@ -44,6 +45,7 @@ export class ConfirmTransactionComponent implements OnInit {
     this.chrome.storage.local.get(null, (result) => {
       this.unconfirmedTx = result.unconfirmedTx;
       this.allWallets = result.wallets;
+      this.network = result.currentNetwork;
       this.getTxData();
     });
 
@@ -75,12 +77,12 @@ export class ConfirmTransactionComponent implements OnInit {
       this.fee = this.sumusTransactionService.feeCalculate(this.currentTx.amount, this.currentTx.token)
       this.nonce = +data['res'].approved_nonce;
 
-      // if (this.currentWallet.nonce < this.nonce) {
-      //   this.allWallets[this.currentWalletIndex].nonce = this.nonce;
-      //   this.chromeStorage.save('wallets', this.allWallets);
-      // } else {
-      //   this.nonce = this.currentWallet.nonce;
-      // }
+      if (this.currentWallet.nonce < this.nonce) {
+        this.allWallets[this.currentWalletIndex].nonce = this.nonce;
+        this.chromeStorage.save('wallets', this.allWallets);
+      } else {
+        this.nonce = this.currentWallet.nonce;
+      }
 
       this.loading = false;
       this.ref.detectChanges();
@@ -118,27 +120,29 @@ export class ConfirmTransactionComponent implements OnInit {
     }
 
     const result = this.sumusTransactionService.makeTransferAssetTransaction(
-      privateKey, this.currentTx.to, this.currentTx.token.toUpperCase(), this.currentTx.amount, this.nonce
+      privateKey, this.currentTx.to, this.currentTx.token.toUpperCase(), this.currentTx.amount, this.nonce+1
     );
 
-    this.apiService.postWalletTransaction(result.txData, 'TransferAssetsTransaction').subscribe((data) => {
+    this.apiService.postWalletTransaction(result.txData, result.txName).subscribe(() => {
       const timeEnd = (new Date().getTime() + this.timeTxFailed);
 
       this.allWallets[this.currentWalletIndex].tx = {
         hash: null,
         endTime: null,
         amount: null,
-        token: null
+        token: null,
+        network: null
       };
-      this.allWallets[this.currentWalletIndex].tx.hash = result.txHash;
+      this.allWallets[this.currentWalletIndex].tx.hash = result.txDigest;
       this.allWallets[this.currentWalletIndex].tx.endTime = timeEnd;
       this.allWallets[this.currentWalletIndex].tx.amount = this.currentTx.amount;
       this.allWallets[this.currentWalletIndex].tx.token = this.currentTx.token.toUpperCase();
+      this.allWallets[this.currentWalletIndex].tx.network = this.network;
 
       this.allWallets[this.currentWalletIndex].nonce = this.nonce+1;
 
       this.chrome.storage.local.set({['wallets']: this.allWallets}, () => {
-        this.chrome.runtime.sendMessage({sendTxResult: { hash: result.txHash, id: this.currentTx.id, tabId: this.currentTx.tabId }});
+        this.chrome.runtime.sendMessage({sendTxResult: { hash: result.txDigest, id: this.currentTx.id, tabId: this.currentTx.tabId }});
       });
 
       this.cancelTransfer(false);

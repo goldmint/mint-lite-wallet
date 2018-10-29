@@ -1,10 +1,12 @@
 "use strict"
 
 const config = {
-    // checkTxUrl: 'https://service.goldmint.io/sumus/rest-proxy/v1/tx/',
-    checkTxUrl: 'https://staging.goldmint.io/wallet/api/v1/explorer/transaction',
-    // successTxStatus: "approved",
-    successTxStatus: 2,
+    networkUrl: {
+        main: 'https://service.goldmint.io/sumus/mainnet/v1',
+        test: 'https://service.goldmint.io/sumus/testnet/v1'
+    },
+    checkTxUrl: '/tx/',
+    successTxStatus: "approved",
     checkTxTime: 30000
 };
 
@@ -67,11 +69,11 @@ function sendMessage(key, value) {
 function watchTransactionStatus(firstLoad) {
    brows.storage.local.get(null, (result) => {
         wallets = result.wallets;
-
         wallets && wallets.forEach(wallet => {
             if (wallet.tx) {
-                const hash = wallet.tx.hash;
-                const endTime = wallet.tx.endTime;
+                const hash = wallet.tx.hash,
+                      endTime = wallet.tx.endTime,
+                      network = wallet.tx.network;
 
                 let isMatch = false;
                 Object.keys(txQueue).forEach(key => {
@@ -80,27 +82,27 @@ function watchTransactionStatus(firstLoad) {
 
                 if (!isMatch) {
                     const interval = setInterval(() => {
-                        checkTransactionStatus(hash, endTime);
+                        checkTransactionStatus(hash, endTime, network);
                     }, config.checkTxTime);
                     txQueue[hash] = interval;
-                    firstLoad && checkTransactionStatus(hash, endTime);
+                    firstLoad && checkTransactionStatus(hash, endTime, network);
                 }
             }
         });
     });
 }
 
-function checkTransactionStatus(hash, endTime) {
+function checkTransactionStatus(hash, endTime, network) {
     const time = new Date().getTime();
     if (time < endTime) {
-        xhr.open('POST', config.checkTxUrl, true);
+        xhr.open('GET', config.networkUrl[network] + config.checkTxUrl + hash, true);
         xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.send(JSON.stringify({hash: hash}));
+        xhr.send();
 
         xhr.onload = () => {
             try {
                 const result = JSON.parse(xhr.responseText);
-                if (result.data.status == config.successTxStatus) {
+                if (result.res.status == config.successTxStatus) {
                     finishTx(hash);
                     successTxNotification(hash);
                 }

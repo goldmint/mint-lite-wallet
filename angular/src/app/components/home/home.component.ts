@@ -4,6 +4,7 @@ import {Router} from "@angular/router";
 import {CommonService} from "../../services/common.service";
 import {StorageData} from "../../interfaces/storage-data";
 import {Subscription} from "rxjs/index";
+import {ApiService} from "../../services/api.service";
 
 
 @Component({
@@ -16,11 +17,14 @@ export class HomeComponent implements OnInit, OnDestroy {
   public isOpenSettingModal: boolean = false;
   public storageData: StorageData;
   public selectedAccount: number;
+  public selectedNetwork: string;
 
   private chrome = window['chrome'];
   private sub1: Subscription;
+  private sub2: Subscription;
 
   constructor(
+    private apiService: ApiService,
     private chromeStorage: ChromeStorageService,
     private commonService: CommonService,
     private router: Router,
@@ -32,6 +36,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     this.sub1 = this.commonService.chooseAccount$.subscribe(() => {
       this.getStorageData();
+    });
+    this.sub2 = this.apiService.getCurrentNetwork.subscribe((network: any) => {
+      this.selectedNetwork = network;
     });
   }
 
@@ -51,6 +58,14 @@ export class HomeComponent implements OnInit, OnDestroy {
   chooseAccount() {
     this.chromeStorage.save('currentWallet', this.selectedAccount);
     this.commonService.chooseAccount$.next(true);
+    this.ref.detectChanges();
+  }
+
+  chooseNetwork() {
+    this.apiService.getCurrentNetwork.next(this.selectedNetwork);
+    this.commonService.chooseAccount$.next(true);
+    this.isOpenSettingModal = false;
+    this.router.navigate(['/home/account']);
     this.ref.detectChanges();
   }
 
@@ -96,6 +111,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.sub1 && this.sub1.unsubscribe();
+    this.sub2 && this.sub2.unsubscribe();
   }
 
 }

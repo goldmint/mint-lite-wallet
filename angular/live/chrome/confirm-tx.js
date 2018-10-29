@@ -1,11 +1,14 @@
 'use strict';
 
 !function() {
-
     const config = {
+        networkUrl: {
+            main: 'https://service.goldmint.io/sumus/mainnet/v1',
+            test: 'https://service.goldmint.io/sumus/testnet/v1'
+        },
         api: {
-            getBalance: 'https://service.goldmint.io/sumus/rest-proxy/v1/wallet/',
-            addTx: 'https://service.goldmint.io/sumus/rest-proxy/v1/tx'
+            getBalance: '/wallet/',
+            addTx: '/tx'
         },
         timeTxFailed: 1800000, // 30 minutes,
     };
@@ -192,6 +195,7 @@
         cryptoJS = CryptoJS,
         id = queryParams.id,
         tabId = queryParams.tabId,
+        network,
         identify,
         domElements = {};
 
@@ -229,9 +233,10 @@
                 if (tx.id == id) {
 
                     tx.tabId = tabId;
+                    network = tx.network;
                     brows.storage.local.set({['unconfirmedTx']: unconfirmedTx}, () => { });
 
-                    http('GET', config.api.getBalance, tx.from).then(result => {
+                    http('GET', config.networkUrl[network] + config.api.getBalance, tx.from).then(result => {
                         if (result) {
                             nonce = +result['res'].approved_nonce;
 
@@ -248,7 +253,7 @@
                                 domElements.infoTo.innerHTML = reduction(tx.to);
                                 domElements.infoAmount.innerHTML = tx.amount + ' ' + tx.token.toUpperCase();
                                 domElements.infoFee.innerHTML = feeCalculate(tx.amount, tx.token) + ' ' + tx.token.toUpperCase();
-                                domElements.infoNonce.innerHTML = nonce;
+                                domElements.infoNonce.innerHTML = nonce + 1;
 
                                 enableBtn();
                             } catch (e) {
@@ -270,17 +275,19 @@
     function makeTransferAssetTransaction(signerPrivateKey, toAddress, token, amount, nonce) {
         let tx = sumusLib.Transaction.TransferAsset(signerPrivateKey, nonce, toAddress, token, amount.toPrecision(18));
 
-        let txData = tx.Data();
-        let txHash = tx.Hash();
+        let txData = tx.Data(),
+            txDigest = tx.Digest(),
+            txName = tx.Name()
 
         return {
             txData,
-            txHash,
+            txDigest,
+            txName
         }
     }
 
     function postWalletTransaction(data, name, hash) {
-        http('POST', config.api.addTx, {data, name}).then(result => {
+        http('POST', config.networkUrl[network] + config.api.addTx, {data, name}).then(result => {
             result ? successTx(hash) : failedTx();
         });
     }
@@ -319,7 +326,8 @@
                         hash,
                         endTime,
                         amount: currentUnconfirmedTx.amount,
-                        token: currentUnconfirmedTx.token.toUpperCase()
+                        token: currentUnconfirmedTx.token.toUpperCase(),
+                        network
                     };
                     wallet.nonce = nonce + 1;
                 }
@@ -351,8 +359,8 @@
 
     function confirm() {
         disabledBtn();
-        const txAsset = makeTransferAssetTransaction(privateKey, currentUnconfirmedTx.to, currentUnconfirmedTx.token.toUpperCase(), currentUnconfirmedTx.amount, nonce);
-        postWalletTransaction(txAsset.txData, 'TransferAssetsTransaction', txAsset.txHash);
+        const txAsset = makeTransferAssetTransaction(privateKey, currentUnconfirmedTx.to, currentUnconfirmedTx.token.toUpperCase(), currentUnconfirmedTx.amount, nonce+1);
+        postWalletTransaction(txAsset.txData, txAsset.txName, txAsset.txDigest);
     }
 
     function cancel(isClose = true) {

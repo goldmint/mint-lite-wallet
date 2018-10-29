@@ -12,13 +12,14 @@ export class SumusTransactionService {
 
   makeTransferAssetTransaction(signerPrivateKey: string, toAddress: string, token: string, amount: number, nonce: number) {
     let tx = this.sumusLib.Transaction.TransferAsset(signerPrivateKey, nonce, toAddress, token, amount.toPrecision(18));
-
-    let txData = tx.Data();
-    let txHash = tx.Hash();
+    let txData = tx.Data(),
+        txDigest = tx.Digest(),
+        txName = tx.Name()
 
     return {
       txData,
-      txHash,
+      txDigest,
+      txName
     }
   }
 

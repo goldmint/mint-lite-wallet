@@ -55,24 +55,19 @@
 
 <div class="mt-4 bd-top">
     <div class="my-2">Latest transactions</div>
-    <div *ngIf="transactionList.length && isDataLoaded; else noTx">
+    <div *ngIf="transactionList && transactionList.length && isDataLoaded; else noTx">
         <div *ngFor="let t of transactionList" class="trs-item">
-            <a [href]="detailsLink + t.uniqueId" target="_blank">
+            <a [href]="detailsLink + t.transaction.digest" target="_blank">
                 <svg width="15" height="15" class="icon-gold mr-2">
-                    <use xlink:href="#export" *ngIf="t.sourceWallet === currentWallet.publicKey; else incoming"></use>
+                    <use xlink:href="#export" *ngIf="t.transaction.from === currentWallet.publicKey; else incoming"></use>
                     <ng-template #incoming>
                         <use xlink:href="#import"></use>
                     </ng-template>
                 </svg>
 
-                {{ t.tokensCount | substr: t.tokensCount >= 1 ? 3 : 8 }} <span *ngIf="t.tokenType === 'utility'; else commodity"> MNT</span>
-                <ng-template #commodity> GOLD</ng-template>
-
-                - <span *ngIf="t.createDate; else pending">approved</span>
-                <ng-template #pending>pending</ng-template>
-                <!--{{ t.amount | replaceZero }} <span *ngIf="t.token === 'utility'; else commodity"> MNT</span>-->
-                <!--<ng-template #commodity> GOLD</ng-template>-->
-                 <!-- - <span>{{ t.status }}</span>-->
+                <span *ngIf="+t.transaction.amount_gold">{{ +t.transaction.amount_gold }} GOLD</span>
+                <span *ngIf="+t.transaction.amount_mnt">{{ +t.transaction.amount_mnt }} MNT</span>
+                <span> - {{ t.status }}</span>
             </a>
         </div>
     </div>

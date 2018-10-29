@@ -8,6 +8,7 @@ export interface Wallet {
     hash: string,
     endTime: number,
     amount: number,
-    token: string
+    token: string,
+    network: string
   }
 }

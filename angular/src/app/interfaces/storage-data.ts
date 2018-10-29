@@ -4,5 +4,6 @@ import {UnconfirmedTx} from "./unconfirmed-tx";
 export interface StorageData {
   currentWallet: number,
   wallets: Wallet[],
-  unconfirmedTx: UnconfirmedTx[]
+  unconfirmedTx: UnconfirmedTx[],
+  currentNetwork: string
 }

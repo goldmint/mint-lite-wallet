@@ -4,5 +4,6 @@ export interface UnconfirmedTx {
   from: string,
   to: string,
   token: string,
-  amount: number
+  amount: number,
+  network: string
 }

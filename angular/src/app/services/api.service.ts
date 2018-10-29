@@ -1,34 +1,46 @@
 import { Injectable } from '@angular/core';
 import {environment} from "../../environments/environment";
 import {HttpClient} from "@angular/common/http";
+import {Subject} from "rxjs/index";
 
 @Injectable()
 export class ApiService {
 
-  private baseUrl = environment.apiUrl;
-  private sumusProxyUrl = environment.sumusProxyUrl;
+  public getCurrentNetwork = new Subject();
 
-  constructor(private http: HttpClient) {}
+  private networkUrl = environment.networkUrl.main;
+  private chrome = window['chrome'];
 
-  getTxByAddress(sumusAddress: string, offset: number = 0, limit: number = null, sort: string = 'date') {
-    return this.http.post(`${this.baseUrl}/statistics/transactions/tx_by_address`, { sumusAddress, offset, limit, sort, ascending: false });
+  constructor(private http: HttpClient) {
+    this.getCurrentNetwork.subscribe((network: any) => {
+      if (network) {
+        this.networkUrl = environment.networkUrl[network];
+        this.chrome.storage.local.set({['currentNetwork']: network}, () => { });
+      } else {
+        this.chrome.storage.local.set({['currentNetwork']: 'main'}, () => { });
+      }
+    });
+
+    this.chrome.storage.local.get(null, (result) => {
+      this.getCurrentNetwork.next(result.currentNetwork);
+    });
   }
 
   getWalletBalance(address: string) {
-    return this.http.get(`${this.sumusProxyUrl}/wallet/${address}`,
+    return this.http.get(`${this.networkUrl}/wallet/${address}`,
       { headers: { 'Content-Type': 'application/json' } }
     );
   }
 
   getTransactionList(address: string) {
-    return this.http.get(`${this.sumusProxyUrl}/tx/${address}`,
+    return this.http.get(`${this.networkUrl}/tx/${address}/0`,
       { headers: { 'Content-Type': 'application/json' } }
     );
   }
 
   postWalletTransaction(txdata: string, name: string) {
     return this.http.post(
-      `${this.sumusProxyUrl}/tx`,
+      `${this.networkUrl}/tx`,
       { 'name': name, 'data': txdata},
       { headers: { 'Content-Type': 'application/json' } }
     );

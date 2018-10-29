@@ -35,6 +35,8 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   public nonce: number;
   public fee: number = 0;
   public accountName: string;
+  public isEmissionWallet: boolean = false;
+  public network: string;
 
   private sub1: Subscription;
   private sub2: Subscription;
@@ -80,6 +82,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
       this.allWallets = result.wallets;
       this.sendData.from = this.currentWallet.publicKey;
       this.accountName = this.currentWallet.name;
+      this.network = result.currentNetwork;
 
       if (this.currentWallet.tx) {
         clearInterval(this.interval);
@@ -93,6 +96,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
       this.apiService.getWalletBalance(this.currentWallet.publicKey).subscribe(data => {
         this.balance.mnt = data['res'].balance.mint;
         this.balance.gold = data['res'].balance.gold;
+        this.isEmissionWallet = data['res'].tags.indexOf('EmissionWallet') >= 0;
 
         this.checkAddressMatch();
         this.checkAmount();
@@ -107,7 +111,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     this.fee = this.sumusTransactionService.feeCalculate(this.sendData.amount, this.sendData.token);
     let balance = this.balance[this.sendData.token] - this.fee;
 
-    if (this.sendData.amount === 0 || this.sendData.amount > balance) {
+    if (!this.isEmissionWallet && (this.sendData.amount === 0 || this.sendData.amount > balance)) {
       this.invalidBalance = true;
     } else {
       this.invalidBalance = false;
@@ -123,7 +127,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     this.fee = this.sumusTransactionService.feeCalculate(this.sendData.amount, this.sendData.token);
     let balance = this.balance[this.sendData.token] - this.fee;
 
-    if (this.sendData.amount === 0 || this.sendData.amount > balance) {
+    if (!this.isEmissionWallet && (this.sendData.amount === 0 || this.sendData.amount > balance)) {
       this.invalidBalance = true;
     } else {
       this.invalidBalance = false;
@@ -184,7 +188,6 @@ export class SendTokensComponent implements OnInit, OnDestroy {
       this.loading = false;
       this.ref.detectChanges();
     }, () => {
-      // failed
       this.failedTx();
     });
     this.ref.detectChanges();
@@ -203,23 +206,24 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     }
 
     const result = this.sumusTransactionService.makeTransferAssetTransaction(
-      privateKey, this.sendData.to, this.sendData.token.toUpperCase(), this.sendData.amount, this.nonce
+      privateKey, this.sendData.to, this.sendData.token.toUpperCase(), this.sendData.amount, this.nonce+1
     );
 
-    this.apiService.postWalletTransaction(result.txData, 'TransferAssetsTransaction').subscribe((data) => {
-      // if (data['res'].result == 0) {
+    this.apiService.postWalletTransaction(result.txData, result.txName).subscribe(() => {
         const timeEnd = (new Date().getTime() + this.timeTxFailed);
 
         this.allWallets[this.currentWalletIndex].tx = {
           hash: null,
           endTime: null,
           amount: null,
-          token: null
+          token: null,
+          network: null
         };
-        this.allWallets[this.currentWalletIndex].tx.hash = result.txHash;
+        this.allWallets[this.currentWalletIndex].tx.hash = result.txDigest;
         this.allWallets[this.currentWalletIndex].tx.endTime = timeEnd;
         this.allWallets[this.currentWalletIndex].tx.amount = this.sendData.amount;
         this.allWallets[this.currentWalletIndex].tx.token = this.sendData.token.toUpperCase();
+        this.allWallets[this.currentWalletIndex].tx.network = this.network;
 
         this.allWallets[this.currentWalletIndex].nonce = this.nonce+1;
 
@@ -227,15 +231,11 @@ export class SendTokensComponent implements OnInit, OnDestroy {
           this.chrome.runtime.sendMessage({newTransaction: true});
         });
 
-        this.txId = result.txHash;
+        this.txId = result.txDigest;
         this.loading = false;
         this.currentPage = this.page[4];
-      // } else {
-      //   this.failedTx();
-      // }
       this.ref.detectChanges();
     }, () => {
-      // failed
       this.failedTx();
     });
 

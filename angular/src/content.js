@@ -1,8 +1,12 @@
 "use strict"
 
 const config = {
+    networkUrl: {
+        main: 'https://service.goldmint.io/sumus/mainnet/v1',
+        test: 'https://service.goldmint.io/sumus/testnet/v1'
+    },
     api: {
-        getBalance: 'https://service.goldmint.io/sumus/rest-proxy/v1/wallet/'
+        getBalance: '/wallet/'
     }
 };
 
@@ -76,27 +80,44 @@ var actions = {
         });
         brows.runtime.sendMessage({checkLoginStatus: true});
     }),
+    getCurrentNetwork: data => new Promise((resolve, reject) => {
+        brows.runtime.onMessage.addListener(function checkLogin(request, sender, sendResponse) {
+            if (request.hasOwnProperty('loginStatus')) {
+                isLoggedIn = request.loginStatus;
+
+                brows.storage.local.get(null, (result) => {
+                    resolve(isLoggedIn && result.currentNetwork ? result.currentNetwork : null);
+                    brows.runtime.onMessage.removeListener(checkLogin);
+                });
+            }
+        });
+        brows.runtime.sendMessage({checkLoginStatus: true});
+    }),
     getBalance: data => new Promise((resolve, reject) => {
         brows.runtime.onMessage.addListener(function checkLogin(request, sender, sendResponse) {
             if (request.hasOwnProperty('loginStatus')) {
                 isLoggedIn = request.loginStatus;
-                if (isLoggedIn) {
-                    http('GET', config.api.getBalance, data.address).then(result => {
-                        if (result) {
-                            resolve({
-                                gold: result.res.balance.gold,
-                                mint: result.res.balance.mint
-                            });
-                            brows.runtime.onMessage.removeListener(checkLogin);
-                        } else {
-                            resolve(null);
-                            brows.runtime.onMessage.removeListener(checkLogin);
-                        }
-                    });
-                } else {
-                    resolve(null);
-                    brows.runtime.onMessage.removeListener(checkLogin);
-                }
+
+                brows.storage.local.get(null, (result) => {
+                    let currentNetwork = config.networkUrl[result.currentNetwork];
+                    if (isLoggedIn) {
+                        http('GET', currentNetwork + config.api.getBalance, data.address).then(result => {
+                            if (result) {
+                                resolve({
+                                    gold: result.res.balance.gold,
+                                    mint: result.res.balance.mint
+                                });
+                                brows.runtime.onMessage.removeListener(checkLogin);
+                            } else {
+                                resolve(null);
+                                brows.runtime.onMessage.removeListener(checkLogin);
+                            }
+                        });
+                    } else {
+                        resolve(null);
+                        brows.runtime.onMessage.removeListener(checkLogin);
+                    }
+                });
             }
         });
         brows.runtime.sendMessage({checkLoginStatus: true});
@@ -110,12 +131,11 @@ var actions = {
                     brows.runtime.onMessage.removeListener(checkLogin);
                     return resolve(null);
                 }
-
                 brows.storage.local.get(null, (storage) => {
                     const id = Math.random().toString(36).substr(2, 9);
                     const from = storage.wallets[storage.currentWallet].publicKey;
 
-                    let tx = { id, from, to: data.to, token: data.token, amount: data.amount },
+                    let tx = { id, from, to: data.to, token: data.token, amount: data.amount, network: storage.currentNetwork },
                         unconfirmedTx = [];
 
                     storage.unconfirmedTx && (unconfirmedTx = storage.unconfirmedTx);
