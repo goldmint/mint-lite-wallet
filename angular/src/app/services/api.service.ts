@@ -33,7 +33,7 @@ export class ApiService {
   }
 
   getTransactionList(address: string) {
-    return this.http.get(`${this.networkUrl}/tx/${address}/0`,
+    return this.http.get(`${this.networkUrl}/tx/list/0/${address}/0`,
       { headers: { 'Content-Type': 'application/json' } }
     );
   }
