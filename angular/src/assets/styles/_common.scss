@@ -1,0 +1,83 @@
+html, body {
+  background: #68655d;
+  color: $main-color;
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  width: 300px;
+  height: 520px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+app-root {
+  position: relative;
+  background: #fff;
+  width: 300px;
+  height: 520px;
+  overflow: hidden;
+  margin: 0 auto;
+  display: block;
+}
+
+#header {
+  background: #212121;
+  color: #ccc;
+  height: 57px;
+}
+
+#footer {
+  color: $main-color;
+  font-size: .8rem;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
+.icon-gold {
+  color: $gold-color;
+  fill: $gold-color;
+}
+
+.icon-green {
+  color: $green-color;
+  fill: $green-color;
+}
+
+a {
+  color: inherit;
+
+  &:hover {
+    text-decoration: none;
+    color: inherit;
+  }
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.invalid-feedback--abs {
+  position: absolute;
+  bottom: -5px;
+}
+
+.hidden {
+  overflow: hidden;
+}
+
+.bd-top {
+  border-top: 2px solid $gold-color;
+}
+
+.bd-bottom {
+  border-bottom: 2px solid $gold-color;
+}
+
+.open-tab-btn {
+  width: 20px;
+  height: auto;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}

@@ -1,0 +1,63 @@
+@import "../../../assets/styles/variables";
+
+.setting-modal {
+  color: #fff;
+  position: absolute;
+  width: 100%;
+  height: calc(100% - 56px);
+  top: 56px;
+  left: 0;
+  background: #434343;
+  z-index: 1;
+}
+
+.setting-top {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid $gold-color;
+  padding-bottom: 10px;
+}
+
+.setting-logout-btn {
+  cursor: pointer;
+}
+
+.setting-account-list-container {
+  overflow: hidden;
+}
+
+.setting-account-list {
+  margin-top: 10px;
+  border-bottom: 1px solid $gold-color;
+  max-height: 150px;
+  overflow-x: auto;
+  margin-right: -20px;
+}
+
+.setting-account-list ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.setting-account-list ul li {
+  margin: 3px;
+  cursor: pointer;
+}
+
+.setting-actions {
+
+}
+
+.header-select-account-cont {
+  width: 100%;
+  max-width: 180px;
+}
+
+.header-select-account {
+  color: #fff;
+  cursor: pointer;
+}
+
+.home-logo:focus {
+  outline: none;
+}

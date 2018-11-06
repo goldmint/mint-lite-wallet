@@ -1,0 +1,78 @@
+<div class="progress-linear progress-linear--tiny" *ngIf="!isDataLoaded || loading">
+    <div class="container"></div>
+</div>
+
+<div class="d-flex justify-content-between">
+    <div class="open-tab-btn" tooltip="Open web wallet" placement="right">
+        <a [href]="webWalletLink + currentWallet?.publicKey" target="_blank">
+            <svg width="20" height="20">
+                <use xlink:href="#out"></use>
+            </svg>
+        </a>
+    </div>
+
+    <div>
+        <div class="account-name" >
+            <div *ngIf="!isEditing" class="account-name-text">
+                {{ currentWallet?.name }}
+                <div class="edit-account-btn" (click)="!loading && editAccountName()">
+                    <svg width="15" height="15">
+                        <use xlink:href="#edit"></use>
+                    </svg>
+                </div>
+            </div>
+            <div *ngIf="isEditing" class="position-relative">
+                <input type="text" class="edit-account-input" [(ngModel)]="accountName">
+                <div class="edit-account-save" (click)="saveAccountName()">
+                    <svg class="icon-green" width="20" height="20">
+                        <use xlink:href="#check"></use>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <div class="account-public-key pointer" tooltip="Copy to clipboard" placement="bottom" (click)="copyText(currentWallet?.publicKey)">
+            {{ currentWallet?.publicKey | reduction }}
+        </div>
+    </div>
+
+    <div class="open-tab-btn" tooltip="Open in tab" placement="left" (click)="openInTab()">
+        <svg width="20" height="20">
+            <use xlink:href="#tabs"></use>
+        </svg>
+    </div>
+</div>
+
+<div class="mt-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>MNT: {{ balance.mnt | replaceZero }}</div>
+        <button type="button" class="btn btn-sm btn-primary" routerLink="/home/send-tokens/mnt" [disabled]="loading">Send</button>
+    </div>
+    <div class="d-flex justify-content-between align-items-center">
+        <div>GOLD: {{ balance.gold | replaceZero }}</div>
+        <button type="button" class="btn btn-sm btn-primary" routerLink="/home/send-tokens/gold" [disabled]="loading">Send</button>
+    </div>
+</div>
+
+<div class="mt-4 bd-top">
+    <div class="my-2">Latest transactions</div>
+    <div *ngIf="transactionList && transactionList.length && isDataLoaded; else noTx">
+        <div *ngFor="let t of transactionList" class="trs-item">
+            <a [href]="detailsLink + t.transaction.digest" target="_blank">
+                <svg width="15" height="15" class="icon-gold mr-2">
+                    <use xlink:href="#export" *ngIf="t.transaction.from === currentWallet.publicKey; else incoming"></use>
+                    <ng-template #incoming>
+                        <use xlink:href="#import"></use>
+                    </ng-template>
+                </svg>
+
+                <span *ngIf="+t.transaction.amount_gold">{{ +t.transaction.amount_gold }} GOLD</span>
+                <span *ngIf="+t.transaction.amount_mnt">{{ +t.transaction.amount_mnt }} MNT</span>
+                <span> - {{ t.status }}</span>
+            </a>
+        </div>
+    </div>
+
+    <ng-template #noTx>
+        <div class="no-tx">No transactions</div>
+    </ng-template>
+</div>

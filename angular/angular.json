@@ -24,15 +24,22 @@
             "tsConfig": "src/tsconfig.app.json",
             "assets": [
               "src/favicon.ico",
-              "src/assets/icon.png"
+              "src/assets/icon.png",
+              "src/assets/logo/",
+              "src/assets/libs/",
+              "src/background.js",
+              "src/content.js",
+              "src/inpage.js",
+              "src/manifest.json",
+              "src/confirm-tx.html",
+              "src/confirm-tx.js"
             ],
             "styles": [
+              "node_modules/bootstrap/scss/bootstrap.scss",
+              "src/assets/styles/main.scss",
               "src/styles.scss"
             ],
-            "scripts": [
-              "src/assets/sumus/nacl.js",
-              "src/assets/sumus/base58.js"
-            ]
+            "scripts": []
           },
           "configurations": {
             "production": {

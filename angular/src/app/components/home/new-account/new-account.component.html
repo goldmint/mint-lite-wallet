@@ -1,0 +1,83 @@
+<div class="mt-3">
+    <h4 class="mb-3">New account</h4>
+
+    <div class="col-auto btn-group p-0 mn-tabs w-100">
+        <label class="btn btn-primary btn-sm active wrap w-50"
+               name="limitsSwitchModel.type"
+               [(ngModel)]="switchModel.type"
+               btnRadio="create">Create</label>
+        <label class="btn btn-primary btn-sm active wrap w-50"
+               name="limitsSwitchModel.type"
+               [(ngModel)]="switchModel.type"
+               btnRadio="import">Import</label>
+    </div>
+
+    <div *ngIf="switchModel.type === 'create'">
+        <div class="mt-4">
+            <form #createForm="ngForm">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder='Account name' name="account-name"
+                                   #name="ngModel"
+                                   [ngClass]="{'is-invalid': name.invalid && name.dirty}"
+                                   [(ngModel)]="accountName"
+                                   required>
+                            <div class="invalid-feedback invalid-feedback--abs" *ngIf="name?.errors?.required">
+                                Field is required
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 text-center mt-3">
+                        <div class="d-flex">
+                            <button type="button" class="btn btn-sm btn-primary w-50 mr-1" routerLink="/home/account">Cancel</button>
+                            <button type="button" class="btn btn-sm btn-primary w-50 ml-1"
+                                    (click)="create()" [disabled]="!accountName.length">
+                                Create
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+    <div *ngIf="switchModel.type === 'import'">
+        <div class="mt-4">
+            <form #importForm="ngForm">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label for="private-key">Input your private key</label>
+                            <input type="password" class="form-control" id="private-key" placeholder='Private key' name="account-name"
+                                   #key="ngModel"
+                                   [ngClass]="{'is-invalid': key.invalid && key.dirty}"
+                                   [(ngModel)]="privateKey"
+                                   sumusAddress
+                                   minlength="60"
+                                   required>
+                            <div class="invalid-feedback invalid-feedback--abs" *ngIf="key?.errors?.required">
+                                Field is required
+                            </div>
+                            <div class="invalid-feedback invalid-feedback--abs"
+                                 *ngIf="!key?.errors?.required && (key?.errors?.sumus || key?.errors?.minlength)">
+                                Invalid key
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 text-center mt-3">
+                        <div class="d-flex">
+                            <button type="button" class="btn btn-sm btn-primary w-50 mr-1" routerLink="/home/account">Cancel</button>
+
+                            <button type="button" class="btn btn-sm btn-primary w-50 ml-1"
+                                     (click)="importKey()" [disabled]="importForm?.invalid">Import</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
