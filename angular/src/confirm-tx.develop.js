@@ -216,7 +216,7 @@
         brows.runtime.sendMessage({getIdentifier: true});
 
         chooseDomElements([
-           'infoFrom', 'infoTo', 'infoAmount', 'infoFee', 'infoNonce', 'btnClose', 'btnConfirm', 'btnDone'
+            'infoFrom', 'infoTo', 'infoAmount', 'infoFee', 'infoNonce', 'btnClose', 'btnConfirm', 'btnDone'
         ]);
 
         domElements.btnClose.addEventListener('click', cancel);
@@ -242,9 +242,19 @@
 
                             try {
                                 let encryptedKey;
-                                wallets.forEach(item => {
-                                    item.publicKey === tx.from && (encryptedKey = item.privateKey);
-                                });
+                                for (let i = 0; i < wallets.length; i++) {
+                                    if (wallets[i].publicKey === tx.from) {
+                                        encryptedKey = wallets[i].privateKey;
+
+                                        if (wallets[i].nonce < nonce) {
+                                            wallets[i].nonce = nonce;
+                                            brows.storage.local.set({['wallets']: wallets}, () => { });
+                                        } else {
+                                            nonce = wallets[i].nonce;
+                                        }
+                                        break;
+                                    }
+                                }
 
                                 currentUnconfirmedTx = tx;
                                 privateKey = cryptoJS.AES.decrypt(encryptedKey, identify).toString(cryptoJS.enc.Utf8);
