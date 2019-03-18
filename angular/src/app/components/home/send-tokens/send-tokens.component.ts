@@ -31,7 +31,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   public isAddressMatch: boolean = false;
   public balance = new AccountBalance();
   public txId = '';
-  public detailsLink: string = environment.detailsTxInfoLink;
+  public detailsLink: string = '';
   public nonce: number;
   public fee: number = 0;
   public accountName: string;
@@ -83,6 +83,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
       this.sendData.from = this.currentWallet.publicKey;
       this.accountName = this.currentWallet.name;
       this.network = result.currentNetwork;
+      this.detailsLink = environment.detailsTxInfoLink[this.network];
 
       if (this.currentWallet.tx) {
         clearInterval(this.interval);

@@ -4,12 +4,10 @@ import {Wallet} from "../../../interfaces/wallet";
 import {CommonService} from "../../../services/common.service";
 import {ApiService} from "../../../services/api.service";
 import {combineLatest} from "rxjs/internal/operators";
-import {TransactionList} from "../../../interfaces/transaction-list";
 import {environment} from "../../../../environments/environment";
 import {Subscription} from "rxjs/index";
 import {ChromeStorageService} from "../../../services/chrome-storage.service";
 import {MessageBoxService} from "../../../services/message-box.service";
-import {Transaction} from "../../../models/transaction";
 
 @Component({
   selector: 'app-account',
@@ -18,7 +16,7 @@ import {Transaction} from "../../../models/transaction";
 })
 export class AccountComponent implements OnInit, OnDestroy {
 
-  public detailsLink: string = environment.detailsTxInfoLink;
+  public detailsLink: string = '';
   public webWalletLink = environment.webWallet;
   public storageData: StorageData;
   public currentWallet: Wallet;
@@ -28,12 +26,13 @@ export class AccountComponent implements OnInit, OnDestroy {
   };
   public isDataLoaded: boolean = false;
   public loading: boolean = false;
-  public transactionList/*: TransactionList[]*/ = [];
+  public transactionList = [];
   public isEditing: boolean = false;
   public accountName: string;
 
   private chrome = window['chrome'];
   private sub1: Subscription;
+  private sub2: Subscription;
   private interval = null;
 
   constructor(
@@ -54,6 +53,11 @@ export class AccountComponent implements OnInit, OnDestroy {
       this.getStorageData(res);
       this.isEditing = false;
       this.ref.detectChanges();
+    });
+
+    this.sub2 = this.apiService.getCurrentNetwork.subscribe((network: any) => {
+      const currentNetwork = network || 'main';
+      this.detailsLink = environment.detailsTxInfoLink[currentNetwork];
     });
   }
 
@@ -127,6 +131,7 @@ export class AccountComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.sub1 && this.sub1.unsubscribe();
+    this.sub2 && this.sub2.unsubscribe();
     clearInterval(this.interval);
   }
 }

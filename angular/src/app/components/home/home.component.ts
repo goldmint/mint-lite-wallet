@@ -38,7 +38,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.getStorageData();
     });
     this.sub2 = this.apiService.getCurrentNetwork.subscribe((network: any) => {
-      this.selectedNetwork = network;
+      this.selectedNetwork = network || 'main';
     });
   }
 
