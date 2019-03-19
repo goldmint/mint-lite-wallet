@@ -22,7 +22,7 @@
                 <div class="col-12">
                     <div class="form-group">
                         <label class="mb-0" for="to">To</label>
-                        <input type="text" class="form-control" id="to" placeholder='Sumus wallet address' name="to"
+                        <input type="text" class="form-control" id="to" placeholder='Wallet address' name="to"
                                #to="ngModel"
                                [ngClass]="{'is-invalid': (to.invalid && to.dirty) || isAddressMatch}"
                                [(ngModel)]="sendData.to"

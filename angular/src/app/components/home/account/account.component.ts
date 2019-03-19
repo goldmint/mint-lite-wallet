@@ -80,6 +80,7 @@ export class AccountComponent implements OnInit, OnDestroy {
           return tx.transaction.name === "TransferAssetsTransaction";
         });
         this.transactionList = this.transactionList.slice(0, 4);
+        this.detailsLink = environment.detailsTxInfoLink[this.apiService.currentNetwork];
       }
 
       this.balance.mnt = data[1].res.balance.mint;

@@ -7,6 +7,7 @@ import {Subject} from "rxjs/index";
 export class ApiService {
 
   public getCurrentNetwork = new Subject();
+  public currentNetwork: string;
 
   private networkUrl = environment.networkUrl.main;
   private chrome = window['chrome'];
@@ -22,6 +23,7 @@ export class ApiService {
     });
 
     this.chrome.storage.local.get(null, (result) => {
+      this.currentNetwork = result.currentNetwork;
       this.getCurrentNetwork.next(result.currentNetwork);
     });
   }

@@ -62,6 +62,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   chooseNetwork() {
+    this.apiService.currentNetwork = this.selectedNetwork;
     this.apiService.getCurrentNetwork.next(this.selectedNetwork);
     this.commonService.chooseAccount$.next(true);
     this.isOpenSettingModal = false;

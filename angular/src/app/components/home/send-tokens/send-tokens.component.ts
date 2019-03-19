@@ -85,14 +85,14 @@ export class SendTokensComponent implements OnInit, OnDestroy {
       this.network = result.currentNetwork;
       this.detailsLink = environment.detailsTxInfoLink[this.network];
 
-      if (this.currentWallet.tx) {
-        clearInterval(this.interval);
-        this.checkTransactionStatus(this.currentWallet.tx.hash);
-
-        this.interval = setInterval(() => {
-          this.currentWallet.tx && this.checkTransactionStatus(this.currentWallet.tx.hash);
-        }, 5000);
-      }
+      // if (this.currentWallet.tx) {
+      //   clearInterval(this.interval);
+      //   this.checkTransactionStatus(this.currentWallet.tx.hash);
+      //
+      //   this.interval = setInterval(() => {
+      //     this.currentWallet.tx && this.checkTransactionStatus(this.currentWallet.tx.hash);
+      //   }, 5000);
+      // }
 
       this.apiService.getWalletBalance(this.currentWallet.publicKey).subscribe(data => {
         this.balance.mnt = data['res'].balance.mint;
