@@ -156,5 +156,27 @@ var actions = {
             }
         });
         brows.runtime.sendMessage({checkLoginStatus: true});
+    }),
+    openSendTokenPage: data => new Promise((resolve, reject) => {
+        brows.runtime.onMessage.addListener(function checkLogin(request, sender, sendResponse) {
+            if (request.hasOwnProperty('loginStatus')) {
+                isLoggedIn = request.loginStatus;
+
+                if (!isLoggedIn) {
+                    brows.runtime.onMessage.removeListener(checkLogin);
+                    return resolve(null);
+                }
+                const dataObj = {
+                    address: data.address,
+                    token: data.token
+                };
+                brows.storage.local.set({'openSendTokenPage': dataObj}, () => {
+                    brows.runtime.sendMessage({openSendTokenPage: data});
+                    brows.runtime.onMessage.removeListener(checkLogin);
+                    resolve(true);
+                });
+            }
+        });
+        brows.runtime.sendMessage({checkLoginStatus: true});
     })
 };

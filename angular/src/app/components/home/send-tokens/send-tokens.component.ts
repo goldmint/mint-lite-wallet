@@ -39,7 +39,6 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   public network: string;
 
   private sub1: Subscription;
-  private sub2: Subscription;
   private chrome = window['chrome'];
   private identify: string;
   private timeTxFailed = environment.timeTxFailed;
@@ -57,12 +56,16 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    this.sub1 = this.route.params.subscribe(params => {
-      this.sendData.token = params.id ? params.id : 'gold';
-      this.ref.detectChanges();
-    });
+    const id = this.route.snapshot.paramMap.get('id');
+    const address = this.route.snapshot.paramMap.get('address');
 
-    this.sub2 = this.commonService.chooseAccount$.subscribe(() => {
+    this.sendData.token = id ? id : 'gold';
+    if (address) {
+      this.sendData.to = address;
+      this.chrome.storage.local.remove('openSendTokenPage', () => {});
+    }
+
+    this.sub1 = this.commonService.chooseAccount$.subscribe(() => {
       this.currentPage === this.page[0] && this.getCurrentWallet();
     });
 
@@ -251,7 +254,6 @@ export class SendTokensComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.sub1 && this.sub1.unsubscribe();
-    this.sub2 && this.sub2.unsubscribe();
     clearInterval(this.interval);
   }
 }

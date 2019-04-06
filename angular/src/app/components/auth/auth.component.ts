@@ -36,6 +36,9 @@ export class AuthComponent implements OnInit {
           if (this.loggedIn) {
             if (this.result.unconfirmedTx && this.result.unconfirmedTx.length) {
               this.router.navigate(['/confirm-transaction']);
+            } else if (this.result.openSendTokenPage) {
+              const data = this.result.openSendTokenPage;
+              this.router.navigate(['/home/send-tokens', data.token, data.address]);
             } else {
               this.router.navigate(['/home/account']);
             }

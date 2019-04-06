@@ -5,5 +5,6 @@ export interface StorageData {
   currentWallet: number,
   wallets: Wallet[],
   unconfirmedTx: UnconfirmedTx[],
-  currentNetwork: string
+  currentNetwork: string;
+  openSendTokenPage: { address: string, token: string };
 }

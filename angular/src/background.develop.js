@@ -48,6 +48,8 @@ function actions(request, sender) {
     }
     // pass password
     request.getIdentifier && sendMessage('identifier', window.sessionStorage.getItem('identify'));
+    // open send gold page in wallet
+    request.openSendTokenPage && openSendTokenPage();
 }
 
 function login(request) {
@@ -143,4 +145,11 @@ function failedTxNotification(hash) {
 
 function createConfirmWindow(id, tabId) {
     brows.windows.create({url: `confirm-tx.html?id=${id}&tabId=${tabId}`, type: "popup", width: 300, height: 520}, (data) => { });
+}
+
+function openSendTokenPage() {
+    brows.tabs.create({
+        active: true,
+        url:  'index.html'
+    }, null);
 }
