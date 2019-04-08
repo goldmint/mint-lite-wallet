@@ -7,6 +7,7 @@ import {CommonService} from "../../../services/common.service";
 import {MessageBoxService} from "../../../services/message-box.service";
 import {GenerateWalletService} from "../../../services/generate-wallet.service";
 import {Backup} from "../../../models/backup";
+import {Nonce} from "../../../models/nonce";
 
 @Component({
   selector: 'app-backup',
@@ -147,7 +148,7 @@ export class BackupComponent implements OnInit {
               const data = {
                 id: wallets.length + 1,
                 name: accountName,
-                nonce: 0,
+                nonce: new Nonce(),
                 publicKey: publicKey,
                 privateKey: encryptedKey
               };

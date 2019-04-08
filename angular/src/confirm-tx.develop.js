@@ -69,7 +69,7 @@
             color: #7a7a7a;
         }
         .confirm-item.name {
-            max-width: 86px;
+            max-width: 100px;
             min-width: 86px;
             overflow: hidden;
         }
@@ -246,11 +246,11 @@
                                     if (wallets[i].publicKey === tx.from) {
                                         encryptedKey = wallets[i].privateKey;
 
-                                        if (wallets[i].nonce < nonce) {
-                                            wallets[i].nonce = nonce;
+                                        if (wallets[i].nonce[network] < nonce) {
+                                            wallets[i].nonce[network] = nonce;
                                             brows.storage.local.set({['wallets']: wallets}, () => { });
                                         } else {
-                                            nonce = wallets[i].nonce;
+                                            nonce = wallets[i].nonce[network];
                                         }
                                         break;
                                     }
@@ -297,9 +297,9 @@
     }
 
     function postWalletTransaction(data, name, hash) {
-        http('POST', config.networkUrl[network] + config.api.addTx, {data, name}).then(result => {
+        http('POST', config.networkUrl[network] + config.api.addTx, {name, data}).then(result => {
             result ? successTx(hash) : failedTx();
-        });
+        }).catch(() => failedTx());
     }
 
     function http(method, url, params = '') {
@@ -339,7 +339,7 @@
                         token: currentUnconfirmedTx.token.toUpperCase(),
                         network
                     };
-                    wallet.nonce = nonce + 1;
+                    wallet.nonce[network] = nonce + 1;
                 }
                 return wallet;
             });
@@ -432,6 +432,7 @@
 
         if (token.toUpperCase() === 'MNT') {
             fee = 0.02;
+            return noExp(fee);
         }
 
         if (amount < 10) {

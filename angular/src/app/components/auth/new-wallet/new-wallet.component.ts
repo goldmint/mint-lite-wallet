@@ -5,6 +5,10 @@ import {CommonService} from "../../../services/common.service";
 import {Wallet} from "../../../interfaces/wallet";
 import {ActivatedRoute, Router} from "@angular/router";
 import * as CryptoJS from 'crypto-js';
+import {Nonce} from "../../../models/nonce";
+import {combineLatest} from "rxjs";
+import {environment} from "../../../../environments/environment";
+import {ApiService} from "../../../services/api.service";
 
 @Component({
   selector: 'app-new-wallet',
@@ -24,9 +28,11 @@ export class NewWalletComponent implements OnInit {
   public isInvalidFile: boolean = false;
   public incorrectRestorePass: boolean = false;
   public selectedFile: any = null;
+  public loading: boolean = false;
 
   private chrome = window['chrome'];
   private keyStoreFile: string[];
+  private networkUrl = environment.networkUrl;
 
   constructor(
     private chromeStorage: ChromeStorageService,
@@ -34,7 +40,8 @@ export class NewWalletComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private ref: ChangeDetectorRef,
-    private commonService: CommonService
+    private commonService: CommonService,
+    private apiService: ApiService
   ) {
   }
 
@@ -53,9 +60,23 @@ export class NewWalletComponent implements OnInit {
   }
 
   addAccountToStorage() {
-    this.chromeStorage.save('wallets', this.wallets);
-    this.chromeStorage.save('currentWallet', this.wallets.length - 1);
-    this.router.navigate(['/home/account']);
+    this.loading = true;
+    this.ref.detectChanges();
+
+    combineLatest(
+      this.apiService.getBlock(1, this.networkUrl.main),
+      this.apiService.getBlock(1, this.networkUrl.test),
+    ).subscribe((data: any) => {
+      let timestampBlockchainReset = {
+        main: data[0].res ? data[0].res.timestamp : 0,
+        test: data[1].res ? data[1].res.timestamp : 0,
+      };
+
+      this.chromeStorage.save('wallets', this.wallets);
+      this.chromeStorage.save('currentWallet', this.wallets.length - 1);
+      this.chromeStorage.save('timestampBlockchainReset', timestampBlockchainReset);
+      this.router.navigate(['/home/account']);
+    });
   }
 
   create() {
@@ -67,7 +88,7 @@ export class NewWalletComponent implements OnInit {
     const data = {
       id: 1,
       name: name,
-      nonce: 0,
+      nonce: new Nonce(),
       publicKey: publicKey,
       privateKey: privateKey
     };
@@ -112,7 +133,7 @@ export class NewWalletComponent implements OnInit {
             const data = {
               id: this.wallets.length + 1,
               name: accountName,
-              nonce: 0,
+              nonce: new Nonce(),
               publicKey: publicKey,
               privateKey: encryptedKey
             };

@@ -2,7 +2,6 @@ import {Component, NgZone, OnInit} from '@angular/core';
 import {Router} from "@angular/router";
 import {ChromeStorageService} from "../../services/chrome-storage.service";
 import {CommonService} from "../../services/common.service";
-import {environment} from "../../../environments/environment";
 
 @Component({
   selector: 'app-auth',
@@ -10,8 +9,6 @@ import {environment} from "../../../environments/environment";
   styleUrls: ['./auth.component.scss']
 })
 export class AuthComponent implements OnInit {
-
-  public webWalletLink = environment.webWallet;
 
   private loggedIn;
   private chrome = window['chrome'];

@@ -77,11 +77,11 @@ export class ConfirmTransactionComponent implements OnInit {
       this.fee = this.sumusTransactionService.feeCalculate(this.currentTx.amount, this.currentTx.token)
       this.nonce = +data['res'].approved_nonce;
 
-      if (this.currentWallet.nonce < this.nonce) {
-        this.allWallets[this.currentWalletIndex].nonce = this.nonce;
+      if (this.currentWallet.nonce[this.network] < this.nonce) {
+        this.allWallets[this.currentWalletIndex].nonce[this.network] = this.nonce;
         this.chromeStorage.save('wallets', this.allWallets);
       } else {
-        this.nonce = this.currentWallet.nonce;
+        this.nonce = this.currentWallet.nonce[this.network];
       }
 
       this.loading = false;
@@ -139,7 +139,7 @@ export class ConfirmTransactionComponent implements OnInit {
       this.allWallets[this.currentWalletIndex].tx.token = this.currentTx.token.toUpperCase();
       this.allWallets[this.currentWalletIndex].tx.network = this.network;
 
-      this.allWallets[this.currentWalletIndex].nonce = this.nonce+1;
+      this.allWallets[this.currentWalletIndex].nonce[this.network] = this.nonce+1;
 
       this.chrome.storage.local.set({['wallets']: this.allWallets}, () => {
         this.chrome.runtime.sendMessage({sendTxResult: { hash: result.txDigest, id: this.currentTx.id, tabId: this.currentTx.tabId }});

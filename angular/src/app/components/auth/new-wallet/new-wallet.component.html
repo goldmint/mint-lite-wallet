@@ -39,7 +39,7 @@
                     <div class="col-12 text-center mt-3">
                         <div class="d-flex">
                             <button type="button" class="btn btn-sm btn-primary w-100"
-                                    (click)="create()" [disabled]="createForm?.invalid">
+                                    (click)="create()" [disabled]="createForm?.invalid || loading">
                                 Create
                             </button>
                         </div>
@@ -83,7 +83,7 @@
                     <div class="col-12 text-center mt-3">
                         <div class="d-flex">
                             <button type="button" class="btn btn-sm btn-primary w-100" (click)="restore()"
-                                    [disabled]="selectedFile === null || restorePassword.length < 6">Restore</button>
+                                    [disabled]="selectedFile === null || restorePassword.length < 6 || loading">Restore</button>
                         </div>
                     </div>
                 </div>

@@ -7,4 +7,5 @@ export interface StorageData {
   unconfirmedTx: UnconfirmedTx[],
   currentNetwork: string;
   openSendTokenPage: { address: string, token: string };
+  timestampBlockchainReset: { main: number, test: number };
 }

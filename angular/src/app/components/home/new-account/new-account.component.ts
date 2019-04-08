@@ -6,6 +6,7 @@ import {ChromeStorageService} from "../../../services/chrome-storage.service";
 import {GenerateWalletService} from "../../../services/generate-wallet.service";
 import {Subscription} from "rxjs/index";
 import {CommonService} from "../../../services/common.service";
+import {Nonce} from "../../../models/nonce";
 
 @Component({
   selector: 'app-new-account',
@@ -75,7 +76,7 @@ export class NewAccountComponent implements OnInit, OnDestroy {
     const data = {
       id: this.wallets.length + 1,
       name: name,
-      nonce: 0,
+      nonce: new Nonce(),
       publicKey: publicKey,
       privateKey: privateKey
     };
@@ -96,7 +97,7 @@ export class NewAccountComponent implements OnInit, OnDestroy {
       const data = {
         id: this.wallets.length + 1,
         name: 'Account ' + (this.wallets.length + 1),
-        nonce: 0,
+        nonce: new Nonce(),
         publicKey: publicKey,
         privateKey: encryptedKey
       };

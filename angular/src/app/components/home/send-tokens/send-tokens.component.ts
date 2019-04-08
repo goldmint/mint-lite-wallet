@@ -181,11 +181,11 @@ export class SendTokensComponent implements OnInit, OnDestroy {
       this.fee = this.sumusTransactionService.feeCalculate(this.sendData.amount, this.sendData.token);
       this.nonce = +data['res'].approved_nonce;
 
-      if (this.currentWallet.nonce < this.nonce) {
-        this.allWallets[this.currentWalletIndex].nonce = this.nonce;
+      if (this.currentWallet.nonce[this.network] < this.nonce) {
+        this.allWallets[this.currentWalletIndex].nonce[this.network] = this.nonce;
         this.chromeStorage.save('wallets', this.allWallets);
       } else {
-        this.nonce = this.currentWallet.nonce;
+        this.nonce = this.currentWallet.nonce[this.network];
       }
 
       this.currentPage = this.page[1];
@@ -229,7 +229,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
         this.allWallets[this.currentWalletIndex].tx.token = this.sendData.token.toUpperCase();
         this.allWallets[this.currentWalletIndex].tx.network = this.network;
 
-        this.allWallets[this.currentWalletIndex].nonce = this.nonce+1;
+        this.allWallets[this.currentWalletIndex].nonce[this.network] = this.nonce+1;
 
         this.chrome.storage.local.set({['wallets']: this.allWallets}, () => {
           this.chrome.runtime.sendMessage({newTransaction: true});
