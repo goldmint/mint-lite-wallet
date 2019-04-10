@@ -298,7 +298,7 @@
 
     function postWalletTransaction(data, name, hash) {
         http('POST', config.networkUrl[network] + config.api.addTx, {name, data}).then(result => {
-            result ? successTx(hash) : failedTx();
+            result ? successTx(hash, data, name) : failedTx();
         }).catch(() => failedTx());
     }
 
@@ -324,7 +324,7 @@
         });
     }
 
-    function successTx(hash) {
+    function successTx(hash, txData, txName) {
         brows.storage.local.get(null, (data) => {
             unconfirmedTx = data.unconfirmedTx;
             wallets = data.wallets;
@@ -337,7 +337,8 @@
                         endTime,
                         amount: currentUnconfirmedTx.amount,
                         token: currentUnconfirmedTx.token.toUpperCase(),
-                        network
+                        network,
+                        data: { data: txData, name: txName }
                     };
                     wallet.nonce[network] = nonce + 1;
                 }

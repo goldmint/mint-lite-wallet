@@ -12,6 +12,10 @@ export interface Wallet {
     endTime: number,
     amount: number,
     token: string,
-    network: string
+    network: string,
+    data: {
+      data: string,
+      name: string
+    }
   }
 }

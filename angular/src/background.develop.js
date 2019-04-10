@@ -6,7 +6,9 @@ const config = {
         test: 'https://service.goldmint.io/sumus/testnet/v1'
     },
     checkTxUrl: '/tx/',
+    addTxUrl: '/tx',
     successTxStatus: "approved",
+    staleTxStatus: "stale",
     checkTxTime: 30000
 };
 
@@ -69,13 +71,14 @@ function sendMessage(key, value) {
 }
 
 function watchTransactionStatus(firstLoad) {
-   brows.storage.local.get(null, (result) => {
+    brows.storage.local.get(null, (result) => {
         wallets = result.wallets;
         wallets && wallets.forEach(wallet => {
             if (wallet.tx) {
                 const hash = wallet.tx.hash,
-                      endTime = wallet.tx.endTime,
-                      network = wallet.tx.network;
+                    endTime = wallet.tx.endTime,
+                    network = wallet.tx.network,
+                    data = wallet.tx.data;
 
                 let isMatch = false;
                 Object.keys(txQueue).forEach(key => {
@@ -84,36 +87,58 @@ function watchTransactionStatus(firstLoad) {
 
                 if (!isMatch) {
                     const interval = setInterval(() => {
-                        checkTransactionStatus(hash, endTime, network);
+                        checkTransactionStatus(hash, endTime, network, data);
                     }, config.checkTxTime);
                     txQueue[hash] = interval;
-                    firstLoad && checkTransactionStatus(hash, endTime, network);
+                    firstLoad && checkTransactionStatus(hash, endTime, network, data);
                 }
             }
         });
     });
 }
 
-function checkTransactionStatus(hash, endTime, network) {
+function checkTransactionStatus(hash, endTime, network, data) {
     const time = new Date().getTime();
     if (time < endTime) {
-        xhr.open('GET', config.networkUrl[network] + config.checkTxUrl + hash, true);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.send();
-
-        xhr.onload = () => {
-            try {
-                const result = JSON.parse(xhr.responseText);
+        http('GET', config.networkUrl[network] + config.checkTxUrl + hash).then(result => {
+            if (result && result.res) {
                 if (result.res.status == config.successTxStatus) {
                     finishTx(hash);
                     successTxNotification(hash);
+                } else if (result.res.status == config.staleTxStatus) {
+                    http('POST', config.networkUrl[network] + config.addTxUrl, {name: data.name, data: data.data})
+                        .then(result => {
+                            !result && finishTx(hash);
+                        });
                 }
-            } catch (e) { }
-        };
+            }
+        });
     } else {
         finishTx(hash);
         failedTxNotification(hash);
     }
+}
+
+function http(method, url, params = '') {
+    let xhr = new XMLHttpRequest(),
+        currentUrl = method.toUpperCase() === "GET" ? url + params : url;
+    xhr.open(method.toUpperCase(), currentUrl, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    method.toUpperCase() === "GET" ? xhr.send() : xhr.send(JSON.stringify(params));
+
+    return new Promise((resolve, reject) => {
+        xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                    resolve(JSON.parse(xhr.responseText));
+                } catch (e) {
+                    resolve(null);
+                }
+            } else {
+                resolve(null);
+            }
+        };
+    });
 }
 
 function finishTx(hash) {

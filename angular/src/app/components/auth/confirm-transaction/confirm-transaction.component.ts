@@ -131,13 +131,19 @@ export class ConfirmTransactionComponent implements OnInit {
         endTime: null,
         amount: null,
         token: null,
-        network: null
+        network: null,
+        data: {
+          data: null,
+          name: null
+        }
       };
       this.allWallets[this.currentWalletIndex].tx.hash = result.txDigest;
       this.allWallets[this.currentWalletIndex].tx.endTime = timeEnd;
       this.allWallets[this.currentWalletIndex].tx.amount = this.currentTx.amount;
       this.allWallets[this.currentWalletIndex].tx.token = this.currentTx.token.toUpperCase();
       this.allWallets[this.currentWalletIndex].tx.network = this.network;
+      this.allWallets[this.currentWalletIndex].tx.data.data = result.txData;
+      this.allWallets[this.currentWalletIndex].tx.data.name = result.txName;
 
       this.allWallets[this.currentWalletIndex].nonce[this.network] = this.nonce+1;
 
