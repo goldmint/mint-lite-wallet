@@ -104,7 +104,7 @@ export class NewWalletComponent implements OnInit {
 
     if (this.selectedFile.size > 0 && this.selectedFile.type === "application/json") {
       var reader = new FileReader();
-      reader.onload = (reader => {
+      reader.onload = ((reader: any) => {
         return () => {
           const contents = JSON.parse(reader.result);
           try {
