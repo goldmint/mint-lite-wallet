@@ -259,11 +259,11 @@
                                 currentUnconfirmedTx = tx;
                                 privateKey = cryptoJS.AES.decrypt(encryptedKey, identify).toString(cryptoJS.enc.Utf8);
 
-                                domElements.infoFrom.innerHTML = reduction(tx.from);
-                                domElements.infoTo.innerHTML = reduction(tx.to);
-                                domElements.infoAmount.innerHTML = tx.amount + ' ' + tx.token.toUpperCase();
-                                domElements.infoFee.innerHTML = feeCalculate(tx.amount, tx.token) + ' ' + tx.token.toUpperCase();
-                                domElements.infoNonce.innerHTML = nonce + 1;
+                                domElements.infoFrom.textContent = reduction(tx.from);
+                                domElements.infoTo.textContent = reduction(tx.to);
+                                domElements.infoAmount.textContent = tx.amount + ' ' + tx.token.toUpperCase();
+                                domElements.infoFee.textContent = feeCalculate(tx.amount, tx.token) + ' ' + tx.token.toUpperCase();
+                                domElements.infoNonce.textContent = nonce + 1;
 
                                 enableBtn();
                             } catch (e) {
