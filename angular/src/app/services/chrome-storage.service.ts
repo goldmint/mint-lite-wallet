@@ -13,7 +13,7 @@ export class ChromeStorageService {
 
   public load(key) {
     this.chrome.storage.local.get(key, (res) => {
-      console.log(res);
+      // console.log(res);
     });
   }
 

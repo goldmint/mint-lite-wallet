@@ -47,4 +47,10 @@ export class ApiService {
       { headers: { 'Content-Type': 'application/json' } }
     );
   }
+
+  getBlock(blockNumber: number, network: string = this.networkUrl) {
+    return this.http.get(`${network}/block/${blockNumber}`,
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+  }
 }

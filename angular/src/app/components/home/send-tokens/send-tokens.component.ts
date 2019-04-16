@@ -39,7 +39,6 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   public network: string;
 
   private sub1: Subscription;
-  private sub2: Subscription;
   private chrome = window['chrome'];
   private identify: string;
   private timeTxFailed = environment.timeTxFailed;
@@ -57,12 +56,16 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    this.sub1 = this.route.params.subscribe(params => {
-      this.sendData.token = params.id ? params.id : 'gold';
-      this.ref.detectChanges();
-    });
+    const id = this.route.snapshot.paramMap.get('id');
+    const address = this.route.snapshot.paramMap.get('address');
 
-    this.sub2 = this.commonService.chooseAccount$.subscribe(() => {
+    this.sendData.token = id ? id : 'gold';
+    if (address) {
+      this.sendData.to = address;
+      this.chrome.storage.local.remove('openSendTokenPage', () => {});
+    }
+
+    this.sub1 = this.commonService.chooseAccount$.subscribe(() => {
       this.currentPage === this.page[0] && this.getCurrentWallet();
     });
 
@@ -178,11 +181,11 @@ export class SendTokensComponent implements OnInit, OnDestroy {
       this.fee = this.sumusTransactionService.feeCalculate(this.sendData.amount, this.sendData.token);
       this.nonce = +data['res'].approved_nonce;
 
-      if (this.currentWallet.nonce < this.nonce) {
-        this.allWallets[this.currentWalletIndex].nonce = this.nonce;
+      if (this.currentWallet.nonce[this.network] < this.nonce) {
+        this.allWallets[this.currentWalletIndex].nonce[this.network] = this.nonce;
         this.chromeStorage.save('wallets', this.allWallets);
       } else {
-        this.nonce = this.currentWallet.nonce;
+        this.nonce = this.currentWallet.nonce[this.network];
       }
 
       this.currentPage = this.page[1];
@@ -218,15 +221,21 @@ export class SendTokensComponent implements OnInit, OnDestroy {
           endTime: null,
           amount: null,
           token: null,
-          network: null
+          network: null,
+          data: {
+            data: null,
+            name: null
+          }
         };
         this.allWallets[this.currentWalletIndex].tx.hash = result.txDigest;
         this.allWallets[this.currentWalletIndex].tx.endTime = timeEnd;
         this.allWallets[this.currentWalletIndex].tx.amount = this.sendData.amount;
         this.allWallets[this.currentWalletIndex].tx.token = this.sendData.token.toUpperCase();
         this.allWallets[this.currentWalletIndex].tx.network = this.network;
+        this.allWallets[this.currentWalletIndex].tx.data.data = result.txData;
+        this.allWallets[this.currentWalletIndex].tx.data.name = result.txName;
 
-        this.allWallets[this.currentWalletIndex].nonce = this.nonce+1;
+        this.allWallets[this.currentWalletIndex].nonce[this.network] = this.nonce+1;
 
         this.chrome.storage.local.set({['wallets']: this.allWallets}, () => {
           this.chrome.runtime.sendMessage({newTransaction: true});
@@ -251,7 +260,6 @@ export class SendTokensComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.sub1 && this.sub1.unsubscribe();
-    this.sub2 && this.sub2.unsubscribe();
     clearInterval(this.interval);
   }
 }

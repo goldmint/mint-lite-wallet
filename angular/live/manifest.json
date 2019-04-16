@@ -1,7 +1,7 @@
 {
 	"name": "Sumus Wallet angular",
 	"description" : "Goldmint blockchain light wallet",
-	"version": "0.5.0",
+	"version": "0.5.5",
 	"manifest_version": 2,
 	"browser_action": {
 		"default_popup": "chrome/index.html",

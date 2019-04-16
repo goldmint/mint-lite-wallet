@@ -2,7 +2,6 @@ import {Component, NgZone, OnInit} from '@angular/core';
 import {Router} from "@angular/router";
 import {ChromeStorageService} from "../../services/chrome-storage.service";
 import {CommonService} from "../../services/common.service";
-import {environment} from "../../../environments/environment";
 
 @Component({
   selector: 'app-auth',
@@ -10,8 +9,6 @@ import {environment} from "../../../environments/environment";
   styleUrls: ['./auth.component.scss']
 })
 export class AuthComponent implements OnInit {
-
-  public webWalletLink = environment.webWallet;
 
   private loggedIn;
   private chrome = window['chrome'];
@@ -36,6 +33,9 @@ export class AuthComponent implements OnInit {
           if (this.loggedIn) {
             if (this.result.unconfirmedTx && this.result.unconfirmedTx.length) {
               this.router.navigate(['/confirm-transaction']);
+            } else if (this.result.openSendTokenPage) {
+              const data = this.result.openSendTokenPage;
+              this.router.navigate(['/home/send-tokens', data.token, data.address]);
             } else {
               this.router.navigate(['/home/account']);
             }

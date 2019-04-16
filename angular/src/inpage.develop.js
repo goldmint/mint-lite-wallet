@@ -34,6 +34,10 @@
         sendTransaction(to, token, amount) {
             return sendQuestion('sendTransaction', { to, token, amount });
         }
+
+        openSendTokenPage(address, token) {
+            return sendQuestion('openSendTokenPage', { address, token: token.toLowerCase() });
+        }
     }
 
     window.GoldMint = new GoldMint;

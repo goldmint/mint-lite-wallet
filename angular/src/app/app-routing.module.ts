@@ -26,13 +26,14 @@ const routes: Routes = [
       { path: 'new-account/:id', component: NewAccountComponent },
       { path: 'account-details', component: DetailsAccountComponent },
       { path: 'send-tokens/:id', component: SendTokensComponent },
+      { path: 'send-tokens/:id/:address', component: SendTokensComponent },
       { path: 'backup', component: BackupComponent }
     ]
   }
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { useHash: true})],
+  imports: [RouterModule.forRoot(routes, { useHash: false})],
   exports: [RouterModule]
 })
 export class AppRoutingModule {}

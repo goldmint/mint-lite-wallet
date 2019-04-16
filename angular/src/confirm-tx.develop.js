@@ -69,7 +69,7 @@
             color: #7a7a7a;
         }
         .confirm-item.name {
-            max-width: 86px;
+            max-width: 100px;
             min-width: 86px;
             overflow: hidden;
         }
@@ -246,11 +246,11 @@
                                     if (wallets[i].publicKey === tx.from) {
                                         encryptedKey = wallets[i].privateKey;
 
-                                        if (wallets[i].nonce < nonce) {
-                                            wallets[i].nonce = nonce;
+                                        if (wallets[i].nonce[network] < nonce) {
+                                            wallets[i].nonce[network] = nonce;
                                             brows.storage.local.set({['wallets']: wallets}, () => { });
                                         } else {
-                                            nonce = wallets[i].nonce;
+                                            nonce = wallets[i].nonce[network];
                                         }
                                         break;
                                     }
@@ -259,11 +259,11 @@
                                 currentUnconfirmedTx = tx;
                                 privateKey = cryptoJS.AES.decrypt(encryptedKey, identify).toString(cryptoJS.enc.Utf8);
 
-                                domElements.infoFrom.innerHTML = reduction(tx.from);
-                                domElements.infoTo.innerHTML = reduction(tx.to);
-                                domElements.infoAmount.innerHTML = tx.amount + ' ' + tx.token.toUpperCase();
-                                domElements.infoFee.innerHTML = feeCalculate(tx.amount, tx.token) + ' ' + tx.token.toUpperCase();
-                                domElements.infoNonce.innerHTML = nonce + 1;
+                                domElements.infoFrom.textContent = reduction(tx.from);
+                                domElements.infoTo.textContent = reduction(tx.to);
+                                domElements.infoAmount.textContent = tx.amount + ' ' + tx.token.toUpperCase();
+                                domElements.infoFee.textContent = feeCalculate(tx.amount, tx.token) + ' ' + tx.token.toUpperCase();
+                                domElements.infoNonce.textContent = nonce + 1;
 
                                 enableBtn();
                             } catch (e) {
@@ -297,9 +297,9 @@
     }
 
     function postWalletTransaction(data, name, hash) {
-        http('POST', config.networkUrl[network] + config.api.addTx, {data, name}).then(result => {
-            result ? successTx(hash) : failedTx();
-        });
+        http('POST', config.networkUrl[network] + config.api.addTx, {name, data}).then(result => {
+            result ? successTx(hash, data, name) : failedTx();
+        }).catch(() => failedTx());
     }
 
     function http(method, url, params = '') {
@@ -324,7 +324,7 @@
         });
     }
 
-    function successTx(hash) {
+    function successTx(hash, txData, txName) {
         brows.storage.local.get(null, (data) => {
             unconfirmedTx = data.unconfirmedTx;
             wallets = data.wallets;
@@ -337,9 +337,10 @@
                         endTime,
                         amount: currentUnconfirmedTx.amount,
                         token: currentUnconfirmedTx.token.toUpperCase(),
-                        network
+                        network,
+                        data: { data: txData, name: txName }
                     };
-                    wallet.nonce = nonce + 1;
+                    wallet.nonce[network] = nonce + 1;
                 }
                 return wallet;
             });
@@ -432,6 +433,7 @@
 
         if (token.toUpperCase() === 'MNT') {
             fee = 0.02;
+            return noExp(fee);
         }
 
         if (amount < 10) {
