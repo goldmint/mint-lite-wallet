@@ -1,6 +1,9 @@
 export const environment = {
   production: true,
-  webWallet: 'https://staging.goldmint.io/cabinet/#/scanner/address/',
+  webWallet: {
+    main: 'https://app.goldmint.io/#/scanner/address/',
+    test: 'https://staging.goldmint.io/cabinet/#/scanner/address/'
+  },
   networkUrl: {
     main: 'https://service.goldmint.io/sumus/mainnet/v1',
     test: 'https://service.goldmint.io/sumus/testnet/v1'

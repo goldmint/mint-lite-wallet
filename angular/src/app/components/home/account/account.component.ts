@@ -17,7 +17,7 @@ import {MessageBoxService} from "../../../services/message-box.service";
 export class AccountComponent implements OnInit, OnDestroy {
 
   public detailsLink: string = '';
-  public webWalletLink = environment.webWallet;
+  public webWalletLink: string = '';
   public storageData: StorageData;
   public currentWallet: Wallet;
   public balance = {
@@ -58,6 +58,8 @@ export class AccountComponent implements OnInit, OnDestroy {
     this.sub2 = this.apiService.getCurrentNetwork.subscribe((network: any) => {
       const currentNetwork = network || 'main';
       this.detailsLink = environment.detailsTxInfoLink[currentNetwork];
+      this.webWalletLink = environment.webWallet[currentNetwork];
+      this.ref.detectChanges();
     });
   }
 
@@ -101,6 +103,7 @@ export class AccountComponent implements OnInit, OnDestroy {
     this.chrome.storage.local.get(null, (result) => {
       this.storageData = result;
       this.currentWallet = this.storageData.wallets[this.storageData.currentWallet];
+      this.webWalletLink = environment.webWallet[this.storageData.currentNetwork];
       loadBalance && this.getBalanceAndTx(this.currentWallet.publicKey);
       this.ref.detectChanges();
     });
