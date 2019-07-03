@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import {Subject} from "rxjs/index";
+import {HttpClient} from "@angular/common/http";
 
 @Injectable()
 export class CommonService {
@@ -7,7 +8,9 @@ export class CommonService {
   public isLoggedIn: boolean = false;
   public chooseAccount$ = new Subject();
 
-  constructor() { }
+  constructor(
+    private http: HttpClient
+  ) { }
 
   copyText(val: string){
     let selBox = document.createElement('textarea');
@@ -21,6 +24,10 @@ export class CommonService {
     selBox.select();
     document.execCommand('copy');
     document.body.removeChild(selBox);
+  }
+
+  getManifest() {
+    return this.http.get('../../../manifest.json');
   }
 
 }

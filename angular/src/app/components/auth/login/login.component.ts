@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, NgZone, OnInit} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, NgZone, OnInit, ViewChild} from '@angular/core';
 import {ChromeStorageService} from "../../../services/chrome-storage.service";
 import {Router} from "@angular/router";
 import {GenerateWalletService} from "../../../services/generate-wallet.service";
@@ -14,7 +14,9 @@ import {ApiService} from "../../../services/api.service";
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, AfterViewInit {
+
+  @ViewChild('passwordRef') passwordRef;
 
   public userPassword: string;
   public invalidPass: boolean = false;
@@ -41,6 +43,12 @@ export class LoginComponent implements OnInit {
       this.unconfirmedTx = result.unconfirmedTx ? result.unconfirmedTx : [];
       this.ref.detectChanges();
     });
+  }
+
+  ngAfterViewInit() {
+    setTimeout(() => {
+      this.passwordRef.nativeElement.focus();
+    }, 0);
   }
 
   submit() {

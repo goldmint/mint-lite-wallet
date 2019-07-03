@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import {CommonService} from "../../services/common.service";
 
 @Component({
   selector: 'app-footer',
@@ -8,10 +9,16 @@ import { Component, OnInit } from '@angular/core';
 export class FooterComponent implements OnInit {
 
   public year = new Date().getFullYear();
+  public version: string = '';
 
-  constructor() { }
+  constructor(
+    private commonService: CommonService
+  ) { }
 
   ngOnInit() {
+    this.commonService.getManifest().subscribe((data: any) => {
+      this.version = data ? data.version : '';
+    });
   }
 
 }

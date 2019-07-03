@@ -1,1 +1,46 @@
 /* You can add global styles to this file, and also import other style files */
+.ss-wrapper {
+  overflow: hidden;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+  float: left;
+  width: 96%;
+}
+
+.ss-content {
+  height: 100%;
+  width: 106%;
+  position: relative;
+  overflow: auto;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.no-scroll .ss-content {
+  width: 100% !important;
+}
+
+.ss-scroll {
+  position: relative;
+  background: rgba(0, 0, 0, .1);
+  width: 9px;
+  border-radius: 4px;
+  top: 0;
+  z-index: 2;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.25s linear;
+}
+
+.ss-container:hover .ss-scroll {
+  opacity: 1;
+}
+
+.ss-grabbed {
+  user-select: none;
+  -o-user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+}

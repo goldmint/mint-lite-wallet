@@ -7,12 +7,12 @@ export class ReplaceZero implements PipeTransform {
       const position = value.toString().indexOf('.');
       let data;
       if (position >= 0) {
-        data = (value.toString().substr(0, position + 9)).replace(/0+$/, '');
-        return +data;
+        data = +(value.toString().substr(0, position + 4)).replace(/0+$/, '');
       } else {
-        data = value.replace(/0+$/, '');
-        return +data;
+        data = +value.replace(/0+$/, '');
       }
+
+      return data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
     }
   }
 }
