@@ -97,3 +97,15 @@
   min-width: auto;
   padding: 0 9px;
 }
+
+.img-container {
+  overflow: hidden;
+  height: 98px;
+  border-top: 2px solid $gold-color;
+  text-align: center;
+  padding-top: 3px;
+
+  img {
+    height: 100%;
+  }
+}

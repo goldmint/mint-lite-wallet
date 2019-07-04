@@ -84,4 +84,10 @@
             <div class="no-tx">No transactions</div>
         </ng-template>
     </div>
+
+    <div class="img-container" *ngIf="banner">
+        <a [href]="banner.url" target="_blank">
+            <img [src]="banner.image" alt="img">
+        </a>
+    </div>
 </div>

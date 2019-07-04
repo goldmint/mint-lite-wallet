@@ -67,4 +67,8 @@ export class ApiService {
     );
   }
 
+  getBanner() {
+    return this.http.get('https://www.goldmint.io/lite-wallet-banner.json');
+  }
+
 }

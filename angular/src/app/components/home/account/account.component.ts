@@ -34,6 +34,7 @@ export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
   public transactionList = [];
   public isEditing: boolean = false;
   public accountName: string;
+  public banner: any = null;
 
   private chrome = window['chrome'];
   private sub1: Subscription;
@@ -65,6 +66,10 @@ export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
       this.detailsLink = environment.detailsTxInfoLink[currentNetwork];
       this.webWalletLink = environment.webWallet[currentNetwork];
       this.ref.detectChanges();
+    });
+
+    this.apiService.getBanner().subscribe(data => {
+      this.banner = data;
     });
   }
 
