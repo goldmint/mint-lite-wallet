@@ -57,7 +57,7 @@
     </div>
 </div>
 
-<div class="mt-4 bd-top">
+<div class="tx-content">
     <div class="trs-container" [ngClass]="{'no-scroll': !transactionList || transactionList.length <= 6}">
         <div *ngIf="transactionList && transactionList.length && isDataLoaded; else noTx">
             <div *ngFor="let t of transactionList" class="trs-item">

@@ -71,4 +71,8 @@ export class ApiService {
     return this.http.get('https://www.goldmint.io/lite-wallet-banner.json');
   }
 
+  getBlockChainStatus() {
+    return this.http.get(`${this.networkUrl}/status`);
+  }
+
 }

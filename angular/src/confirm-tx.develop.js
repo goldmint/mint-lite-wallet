@@ -8,7 +8,8 @@
         },
         api: {
             getBalance: '/wallet/',
-            addTx: '/tx'
+            addTx: '/tx',
+            blockChainStatus: '/status'
         },
         timeTxFailed: 1800000, // 30 minutes,
     };
@@ -69,7 +70,7 @@
             color: #7a7a7a;
         }
         .confirm-item.name {
-            max-width: 100px;
+            max-width: 104px;
             min-width: 86px;
             overflow: hidden;
         }
@@ -155,6 +156,10 @@
         }
         .failed-icon {
             text-align: center;
+            margin-top: 24px;
+        }
+        .failed-text {
+            margin-bottom: 8px;
         }
         .btn-done {
             width: 100%;
@@ -197,7 +202,8 @@
         tabId = queryParams.tabId,
         network,
         identify,
-        domElements = {};
+        domElements = {},
+        retrySendTxCount = 0;
 
     onInit();
 
@@ -216,7 +222,7 @@
         brows.runtime.sendMessage({getIdentifier: true});
 
         chooseDomElements([
-            'infoFrom', 'infoTo', 'infoAmount', 'infoFee', 'infoNonce', 'btnClose', 'btnConfirm', 'btnDone'
+            'infoFrom', 'infoTo', 'infoAmount', 'infoFee', 'infoNonce', 'btnClose', 'btnConfirm', 'btnDone', 'errorMessage'
         ]);
 
         domElements.btnClose.addEventListener('click', cancel);
@@ -238,20 +244,13 @@
 
                     http('GET', config.networkUrl[network] + config.api.getBalance, tx.from).then(result => {
                         if (result) {
-                            nonce = +result['res'].approved_nonce;
+                            nonce = +result['res'].approved_nonce + 1;
 
                             try {
                                 let encryptedKey;
                                 for (let i = 0; i < wallets.length; i++) {
                                     if (wallets[i].publicKey === tx.from) {
                                         encryptedKey = wallets[i].privateKey;
-
-                                        if (wallets[i].nonce[network] < nonce) {
-                                            wallets[i].nonce[network] = nonce;
-                                            brows.storage.local.set({['wallets']: wallets}, () => { });
-                                        } else {
-                                            nonce = wallets[i].nonce[network];
-                                        }
                                         break;
                                     }
                                 }
@@ -263,7 +262,7 @@
                                 domElements.infoTo.textContent = reduction(tx.to);
                                 domElements.infoAmount.textContent = tx.amount + ' ' + tx.token.toUpperCase();
                                 domElements.infoFee.textContent = feeCalculate(tx.amount, tx.token) + ' ' + tx.token.toUpperCase();
-                                domElements.infoNonce.textContent = nonce + 1;
+                                domElements.infoNonce.textContent = nonce;
 
                                 enableBtn();
                             } catch (e) {
@@ -297,9 +296,44 @@
     }
 
     function postWalletTransaction(data, name, hash) {
-        http('POST', config.networkUrl[network] + config.api.addTx, {name, data}).then(result => {
-            result ? successTx(hash, data, name) : failedTx();
-        }).catch(() => failedTx());
+        http('GET', config.networkUrl[network] + config.api.blockChainStatus).then(result => {
+            if (!result || !result.res || !result.res.blockchain_state || !result.res.blockchain_state.block_count) {
+                failedTx();
+                return;
+            };
+
+            http('POST', config.networkUrl[network] + config.api.addTx, {name, data}).then(res => {
+                res ? successTx(hash, data, name, result.res.blockchain_state.block_count): failedTx();
+            }).catch((error) => {
+                let skip = false;
+                if (error.res) {
+                    if (!error.res.code) {
+                        domElements.errorMessage.textContent = 'Service is unavailable. Please retry later';
+                    } else if (error.res.code == 42 || error.res.code == 43) {
+                        domElements.errorMessage.textContent = 'Transaction pool overflow'
+                    } else if (error.res.code && error.res.wallet_inconsistency) {
+                        domElements.errorMessage.textContent = 'Not enough funds'
+                    } else if (error.res.code && error.res.nonce_ahead) {
+                        domElements.errorMessage.textContent = 'Transaction is out of range'
+                    } else if (error.res.code && res.nonce_behind) {
+                        // resend tx
+                        nonce++;
+                        setTimeout(() => {
+                            if (retrySendTxCount >= 10) {
+                                failedTx();
+                                return;
+                            }
+                            retrySendTxCount++;
+                            confirm();
+                        }, 200);
+                        skip = true;
+                    }
+                }
+                !skip && failedTx();
+            });
+        }).catch(() => {
+            failedTx();
+        });
     }
 
     function http(method, url, params = '') {
@@ -318,13 +352,17 @@
                         resolve(null);
                     }
                 } else {
-                    resolve(null);
+                    try {
+                        reject(JSON.parse(xhr.responseText));
+                    } catch (e) {
+                        resolve(null);
+                    }
                 }
             };
         });
     }
 
-    function successTx(hash, txData, txName) {
+    function successTx(hash, txData, txName, blocks) {
         brows.storage.local.get(null, (data) => {
             unconfirmedTx = data.unconfirmedTx;
             wallets = data.wallets;
@@ -332,15 +370,22 @@
 
             wallets = wallets.map(wallet => {
                 if (wallet.publicKey === currentUnconfirmedTx.from) {
-                    wallet.tx = {
+                    let tx = {
                         hash,
                         endTime,
                         amount: currentUnconfirmedTx.amount,
                         token: currentUnconfirmedTx.token.toUpperCase(),
                         network,
+                        nonce: nonce,
+                        blockId: blocks ? (+blocks - 1): null,
                         data: { data: txData, name: txName }
                     };
-                    wallet.nonce[network] = nonce + 1;
+
+                    if (wallet.tx) {
+                        wallet.tx.push(tx);
+                    } else {
+                        wallet.tx = [tx];
+                    }
                 }
                 return wallet;
             });
@@ -363,14 +408,12 @@
 
     function failedTx() {
         document.body.classList.add('failed');
-        brows.runtime.sendMessage({sendTxResult: {hash: null, id, tabId}}, () => {
-            cancel(false);
-        });
+        cancel(false);
     }
 
     function confirm() {
         disabledBtn();
-        const txAsset = makeTransferAssetTransaction(privateKey, currentUnconfirmedTx.to, currentUnconfirmedTx.token.toUpperCase(), currentUnconfirmedTx.amount, nonce+1);
+        const txAsset = makeTransferAssetTransaction(privateKey, currentUnconfirmedTx.to, currentUnconfirmedTx.token.toUpperCase(), currentUnconfirmedTx.amount, nonce);
         postWalletTransaction(txAsset.txData, txAsset.txName, txAsset.txDigest);
     }
 

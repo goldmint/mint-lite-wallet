@@ -7,7 +7,7 @@
 }
 
 .trs-container {
-  height: 160px;
+  height: 162px;
   overflow: auto;
   width: 104%;
 }
@@ -108,4 +108,9 @@
   img {
     height: 100%;
   }
+}
+
+.tx-content {
+  border-top: 2px solid $gold-color;
+  margin-top: 22px;
 }

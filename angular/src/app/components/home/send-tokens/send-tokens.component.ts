@@ -7,10 +7,8 @@ import {ApiService} from "../../../services/api.service";
 import {AccountBalance} from "../../../models/account-balance";
 import {environment} from "../../../../environments/environment";
 import {SumusTransactionService} from "../../../services/sumus-transaction.service";
-import {Wallet} from "../../../interfaces/wallet";
-import {MessageBoxService} from "../../../services/message-box.service";
+import {Tx, Wallet} from "../../../interfaces/wallet";
 import * as CryptoJS from 'crypto-js';
-import {ChromeStorageService} from "../../../services/chrome-storage.service";
 
 @Component({
   selector: 'app-send-tokens',
@@ -37,12 +35,14 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   public accountName: string;
   public isEmissionWallet: boolean = false;
   public network: string;
+  public errorMessage: string = '';
 
   private sub1: Subscription;
   private chrome = window['chrome'];
   private identify: string;
   private timeTxFailed = environment.timeTxFailed;
   private interval: any;
+  private retrySendTxCount: number = 0;
 
   constructor(
     private apiService: ApiService,
@@ -50,9 +50,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     private commonService: CommonService,
     private route: ActivatedRoute,
     private router: Router,
-    private sumusTransactionService: SumusTransactionService,
-    private messageBox: MessageBoxService,
-    private chromeStorage: ChromeStorageService
+    private sumusTransactionService: SumusTransactionService
   ) { }
 
   ngOnInit() {
@@ -87,15 +85,6 @@ export class SendTokensComponent implements OnInit, OnDestroy {
       this.accountName = this.currentWallet.name;
       this.network = result.currentNetwork;
       this.detailsLink = environment.detailsTxInfoLink[this.network];
-
-      // if (this.currentWallet.tx) {
-      //   clearInterval(this.interval);
-      //   this.checkTransactionStatus(this.currentWallet.tx.hash);
-      //
-      //   this.interval = setInterval(() => {
-      //     this.currentWallet.tx && this.checkTransactionStatus(this.currentWallet.tx.hash);
-      //   }, 5000);
-      // }
 
       this.apiService.getWalletBalance(this.currentWallet.publicKey).subscribe(data => {
         this.balance.mnt = data['res'].balance.mint;
@@ -156,21 +145,6 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     this.commonService.copyText(val);
   }
 
-  checkTransactionStatus(hash: string) {
-    this.chrome.storage.local.get(null, (result) => {
-      let wallet = result.wallets[result.currentWallet];
-
-      if (wallet.tx) {
-        this.currentPage !== this.page[2] && (this.currentPage = this.page[2]);
-      } else {
-        this.clearTxQueue();
-        this.txId = hash;
-        this.currentPage = this.page[0];
-      }
-      this.ref.detectChanges();
-    });
-  }
-
   clearTxQueue() {
     clearInterval(this.interval);
   }
@@ -179,14 +153,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.apiService.getWalletBalance(this.currentWallet.publicKey).subscribe(data => {
       this.fee = this.sumusTransactionService.feeCalculate(this.sendData.amount, this.sendData.token);
-      this.nonce = +data['res'].approved_nonce;
-
-      if (this.currentWallet.nonce[this.network] < this.nonce) {
-        this.allWallets[this.currentWalletIndex].nonce[this.network] = this.nonce;
-        this.chromeStorage.save('wallets', this.allWallets);
-      } else {
-        this.nonce = this.currentWallet.nonce[this.network];
-      }
+      this.nonce = +data['res'].approved_nonce + 1;
 
       this.currentPage = this.page[1];
       this.loading = false;
@@ -210,32 +177,40 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     }
 
     const result = this.sumusTransactionService.makeTransferAssetTransaction(
-      privateKey, this.sendData.to, this.sendData.token.toUpperCase(), this.sendData.amount, this.nonce+1
+      privateKey, this.sendData.to, this.sendData.token.toUpperCase(), this.sendData.amount, this.nonce
     );
 
-    this.apiService.postWalletTransaction(result.txData, result.txName).subscribe(() => {
+    this.apiService.getBlockChainStatus().subscribe((data: any) => {
+      this.errorMessage = '';
+      if (!data || !data.res || !data.res.blockchain_state || !data.res.blockchain_state.block_count) {
+        this.failedTx();
+        return;
+      };
+      const blockCount = data.res.blockchain_state.block_count;
+
+      this.apiService.postWalletTransaction(result.txData, result.txName).subscribe(() => {
         const timeEnd = (new Date().getTime() + this.timeTxFailed);
-
-        this.allWallets[this.currentWalletIndex].tx = {
-          hash: null,
-          endTime: null,
-          amount: null,
-          token: null,
-          network: null,
-          data: {
-            data: null,
-            name: null
-          }
+        let tx: Tx | any = {};
+        tx.data = {
+          data: null,
+          name: null
         };
-        this.allWallets[this.currentWalletIndex].tx.hash = result.txDigest;
-        this.allWallets[this.currentWalletIndex].tx.endTime = timeEnd;
-        this.allWallets[this.currentWalletIndex].tx.amount = this.sendData.amount;
-        this.allWallets[this.currentWalletIndex].tx.token = this.sendData.token.toUpperCase();
-        this.allWallets[this.currentWalletIndex].tx.network = this.network;
-        this.allWallets[this.currentWalletIndex].tx.data.data = result.txData;
-        this.allWallets[this.currentWalletIndex].tx.data.name = result.txName;
 
-        this.allWallets[this.currentWalletIndex].nonce[this.network] = this.nonce+1;
+        tx.hash = result.txDigest;
+        tx.endTime = timeEnd;
+        tx.amount = this.sendData.amount;
+        tx.token = this.sendData.token.toUpperCase();
+        tx.network = this.network;
+        tx.data.data = result.txData;
+        tx.data.name = result.txName;
+        tx.nonce = this.nonce;
+        tx.blockId = blockCount ? (+blockCount - 1) : null;
+
+        if (this.allWallets[this.currentWalletIndex].tx) {
+          this.allWallets[this.currentWalletIndex].tx.push(tx);
+        } else {
+          this.allWallets[this.currentWalletIndex].tx = [tx];
+        }
 
         this.chrome.storage.local.set({['wallets']: this.allWallets}, () => {
           this.chrome.runtime.sendMessage({newTransaction: true});
@@ -244,7 +219,37 @@ export class SendTokensComponent implements OnInit, OnDestroy {
         this.txId = result.txDigest;
         this.loading = false;
         this.currentPage = this.page[4];
-      this.ref.detectChanges();
+        this.ref.detectChanges();
+
+      }, (error) => {
+        let skip = false;
+        if (error && error.error && error.error.res) {
+          const res = error.error.res;
+          if (!res.code) {
+            this.errorMessage = 'Service is unavailable. Please retry later';
+          } else if (res.code == 42 || res.code == 43) {
+            this.errorMessage = 'Transaction pool overflow'
+          } else if (res.code && res.wallet_inconsistency) {
+            this.errorMessage = 'Not enough funds'
+          } else if (res.code && res.nonce_ahead) {
+            this.errorMessage = 'Transaction is out of range'
+          } else if (res.code && res.nonce_behind) {
+            // resend tx
+            this.nonce++;
+            setTimeout(() => {
+              if (this.retrySendTxCount >= 10) {
+                this.failedTx();
+                return;
+              }
+              this.retrySendTxCount++;
+              this.confirmTransfer();
+            }, 200);
+            skip = true;
+          }
+        }
+        !skip && this.failedTx();
+      });
+
     }, () => {
       this.failedTx();
     });
