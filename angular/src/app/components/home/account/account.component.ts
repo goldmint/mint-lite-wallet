@@ -17,8 +17,8 @@ import SimpleScrollbar from 'simple-scrollbar'
 })
 export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
 
-  public detailsLink: string = '';
-  public webWalletLink: string = '';
+  public detailsLink: string = environment.detailsTxInfoLink;
+  public webWalletLink: string = environment.webWallet;
   public storageData: StorageData;
   public currentWallet: Wallet;
   public balance = {
@@ -65,8 +65,6 @@ export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.sub2 = this.apiService.getCurrentNetwork.subscribe((network: any) => {
       const currentNetwork = network || 'main';
-      this.detailsLink = environment.detailsTxInfoLink[currentNetwork];
-      this.webWalletLink = environment.webWallet[currentNetwork];
       this.currentNetwork = currentNetwork;
       this.ref.detectChanges();
     });
@@ -103,7 +101,6 @@ export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
           return tx.transaction.name === "TransferAssetsTransaction";
         });
         this.transactionList = this.transactionList.slice(0, 14);
-        this.detailsLink = environment.detailsTxInfoLink[this.apiService.currentNetwork];
       }
 
       this.balance.mnt = data[1].res.balance.mint;
@@ -126,7 +123,6 @@ export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
     this.chrome.storage.local.get(null, (result) => {
       this.storageData = result;
       this.currentWallet = this.storageData.wallets[this.storageData.currentWallet];
-      this.webWalletLink = environment.webWallet[this.storageData.currentNetwork];
       loadBalance && this.getBalanceAndTx(this.currentWallet.publicKey);
       this.ref.detectChanges();
     });

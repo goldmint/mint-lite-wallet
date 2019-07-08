@@ -145,7 +145,7 @@
         </div>
 
         <div class="mt-4">
-            <a [href]="detailsLink + txId + '/' + (network == 'main' ? 'mainnet': 'testnet')" target="_blank">
+            <a [href]="detailsLink + txId + '/' + (network == 'test' ? '?network=testnet' : '')" target="_blank">
                 <button type="button" class="btn btn-sm btn-primary w-100">Check status</button>
             </a>
             <button type="button" class="btn btn-sm btn-primary mt-3 w-100" routerLink="/home/account">Done</button>
