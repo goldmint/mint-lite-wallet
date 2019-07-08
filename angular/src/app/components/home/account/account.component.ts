@@ -35,6 +35,7 @@ export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
   public isEditing: boolean = false;
   public accountName: string;
   public banner: any = null;
+  public currentNetwork: string;
 
   private chrome = window['chrome'];
   private sub1: Subscription;
@@ -50,6 +51,7 @@ export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
   ) { }
 
   ngOnInit() {
+    this.currentNetwork = this.apiService.currentNetwork;
     this.getStorageData(true);
 
     this.sub1 = this.commonService.chooseAccount$.subscribe((res: boolean) => {
@@ -65,6 +67,7 @@ export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
       const currentNetwork = network || 'main';
       this.detailsLink = environment.detailsTxInfoLink[currentNetwork];
       this.webWalletLink = environment.webWallet[currentNetwork];
+      this.currentNetwork = currentNetwork;
       this.ref.detectChanges();
     });
 

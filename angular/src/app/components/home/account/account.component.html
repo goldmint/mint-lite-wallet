@@ -62,7 +62,7 @@
         <div *ngIf="transactionList && transactionList.length && isDataLoaded; else noTx">
             <div *ngFor="let t of transactionList" class="trs-item">
                 <a class="d-flex align-items-center justify-content-between"
-                   [href]="detailsLink + t.transaction.digest" target="_blank">
+                   [href]="detailsLink + t.transaction.digest + '/' + (currentNetwork == 'main' ? 'mainnet': 'testnet')" target="_blank">
                     <div>
                         <svg width="15" height="15" class="icon-gold mr-2">
                             <use xlink:href="#export" *ngIf="t.transaction.from === currentWallet.publicKey; else incoming"></use>
