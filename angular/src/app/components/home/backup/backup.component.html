@@ -25,6 +25,7 @@
                                    [ngClass]="{'is-invalid': (backupPass.invalid || incorrectBackupPass) && backupPass.dirty}"
                                    [(ngModel)]="backupPassword"
                                    (ngModelChange)="incorrectBackupPass = false"
+                                   (keyup.enter)="backupForm.valid && !incorrectBackupPass && backupPassword.length >= 6 && backup()"
                                    required>
                             <div class="invalid-feedback invalid-feedback--abs" *ngIf="backupPass?.errors?.required">
                                 Field is required
@@ -65,6 +66,7 @@
                                    [ngClass]="{'is-invalid': (restorePass.invalid || isInvalidFile || incorrectRestorePass) && restorePass.dirty}"
                                    [(ngModel)]="restorePassword"
                                    (ngModelChange)="isInvalidFile = incorrectRestorePass = false"
+                                   (keyup.enter)="selectedFile !== null && restorePassword.length >= 6 && restore()"
                                    required>
                             <div class="invalid-feedback invalid-feedback--abs" *ngIf="restorePass?.errors?.required">
                                 Field is required

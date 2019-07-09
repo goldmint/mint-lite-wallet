@@ -76,7 +76,6 @@ export class NewAccountComponent implements OnInit, OnDestroy {
     const data = {
       id: this.wallets.length + 1,
       name: name,
-      nonce: new Nonce(),
       publicKey: publicKey,
       privateKey: privateKey
     };
@@ -97,7 +96,6 @@ export class NewAccountComponent implements OnInit, OnDestroy {
       const data = {
         id: this.wallets.length + 1,
         name: 'Account ' + (this.wallets.length + 1),
-        nonce: new Nonce(),
         publicKey: publicKey,
         privateKey: encryptedKey
       };

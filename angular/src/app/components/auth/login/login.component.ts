@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, NgZone, OnInit} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, NgZone, OnInit, ViewChild} from '@angular/core';
 import {ChromeStorageService} from "../../../services/chrome-storage.service";
 import {Router} from "@angular/router";
 import {GenerateWalletService} from "../../../services/generate-wallet.service";
@@ -14,7 +14,9 @@ import {ApiService} from "../../../services/api.service";
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, AfterViewInit {
+
+  @ViewChild('passwordRef') passwordRef;
 
   public userPassword: string;
   public invalidPass: boolean = false;
@@ -43,6 +45,12 @@ export class LoginComponent implements OnInit {
     });
   }
 
+  ngAfterViewInit() {
+    setTimeout(() => {
+      this.passwordRef.nativeElement.focus();
+    }, 0);
+  }
+
   submit() {
     let decrypted;
     try {
@@ -54,40 +62,8 @@ export class LoginComponent implements OnInit {
     if (decrypted) {
       this.commonService.isLoggedIn = true;
       this.chrome.runtime.sendMessage({identify: this.userPassword});
-
-      this.apiService.getBlock(1).subscribe((data: any) => {
-        const timestamp = data.res ? data.res.timestamp : 0,
-              currentNetwork = this.result.currentNetwork;
-
-        if (this.result.timestampBlockchainReset) {
-          if (timestamp && this.result.timestampBlockchainReset[currentNetwork] != timestamp) {
-            this.wallets = this.wallets.map(wallet => {
-              wallet.nonce[currentNetwork] = 0;
-              return wallet;
-            });
-            this.chrome.storage.local.set({['wallets']: this.wallets}, () => { });
-
-            let timestampBlockchainReset = this.result.timestampBlockchainReset;
-            timestampBlockchainReset[currentNetwork] = timestamp;
-            this.chrome.storage.local.set({['timestampBlockchainReset']: timestampBlockchainReset}, () => { });
-          }
-        } else {
-          const data = {
-            main: timestamp,
-            test: timestamp
-          }
-          this.chrome.storage.local.set({['timestampBlockchainReset']: data}, () => { });
-
-          this.wallets = this.wallets.map(wallet => {
-            wallet.nonce[currentNetwork] = 0;
-            return wallet;
-          });
-          this.chrome.storage.local.set({['wallets']: this.wallets}, () => { });
-        }
-
-        this.zone.run(() => {
-          this.unconfirmedTx.length ? this.router.navigate(['/confirm-transaction']) : this.router.navigate(['/home/account']);
-        });
+      this.zone.run(() => {
+        this.unconfirmedTx.length ? this.router.navigate(['/confirm-transaction']) : this.router.navigate(['/home/account']);
       });
     } else {
       this.invalidPass = true;

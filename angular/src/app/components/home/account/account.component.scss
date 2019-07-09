@@ -6,9 +6,15 @@
   text-align: center;
 }
 
+.trs-container {
+  height: 162px;
+  overflow: auto;
+  width: 104%;
+}
+
 .trs-item {
   font-size: 14px;
-  padding: 5px 0;
+  padding: 3px 0;
 
   &:hover {
     background: $color-gray-0;
@@ -22,6 +28,8 @@
 .no-tx {
   font-size: 14px;
   color: $color-gray-2;
+  text-align: center;
+  margin-top: 0.5rem;
 }
 
 .account-info-empty-el {
@@ -69,4 +77,40 @@
   max-width: 160px;
   max-height: 48px;
   text-align: center;
+}
+
+.token-name {
+  min-width: 50px;
+  display: inline-block;
+}
+
+.tx-status-text::first-letter {
+  text-transform: uppercase;
+}
+
+.usd-balance {
+  font-size: 13px;
+  color: $color-gray-2;
+}
+
+.send-btn {
+  min-width: auto;
+  padding: 0 9px;
+}
+
+.img-container {
+  overflow: hidden;
+  height: 98px;
+  border-top: 2px solid $gold-color;
+  text-align: center;
+  padding-top: 3px;
+
+  img {
+    height: 100%;
+  }
+}
+
+.tx-content {
+  border-top: 2px solid $gold-color;
+  margin-top: 22px;
 }

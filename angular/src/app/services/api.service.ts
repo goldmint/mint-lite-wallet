@@ -10,6 +10,7 @@ export class ApiService {
   public currentNetwork: string;
 
   private networkUrl = environment.networkUrl.main;
+  private rateUrl = environment.rateUrl;
   private chrome = window['chrome'];
 
   constructor(private http: HttpClient) {
@@ -53,4 +54,25 @@ export class ApiService {
       { headers: { 'Content-Type': 'application/json' } }
     );
   }
+
+  getGoldRate() {
+    return this.http.get(`${this.rateUrl}/gold`,
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
+  getMntpRate() {
+    return this.http.get(`${this.rateUrl}/mntp`,
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
+  getBanner() {
+    return this.http.get('https://www.goldmint.io/lite-wallet-banner.json');
+  }
+
+  getBlockChainStatus() {
+    return this.http.get(`${this.networkUrl}/status`);
+  }
+
 }

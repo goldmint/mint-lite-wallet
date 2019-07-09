@@ -23,7 +23,7 @@
                 {{ currentTx?.amount }} {{ currentTx?.token | uppercase }}
                 <div class="trs-fee">Fee: {{ fee | noexp }} {{ currentTx?.token | uppercase }}</div>
                 <div class="nonce-info">
-                    nonce: #{{ nonce + 1 }}
+                    nonce: #{{ nonce }}
                 </div>
             </div>
         </div>
@@ -35,8 +35,9 @@
     </div>
 
     <div *ngIf="currentPage === page[1]">
-        <h4 class="mb-3">Failed to send</h4>
-        <div class="text-center">
+        <h4 class="mb-2">Failed to send</h4>
+        <div>{{ errorMessage }}</div>
+        <div class="text-center mt-4">
             <svg class="icon-gold" width="50" height="50">
                 <use xlink:href="#error"></use>
             </svg>

@@ -1,31 +1,32 @@
 <div class="text-center">
-    <div>{{ currentWallet?.name }}</div>
-    <div>
-        <img src='https://chart.googleapis.com/chart?cht=qr&chs=175x175&chl={{ currentWallet?.publicKey }}' alt="">
-    </div>
+    <div [hidden]="currentView !== view[0]">
+        <div>
+            <img src='https://chart.googleapis.com/chart?cht=qr&chs=175x175&chl={{ currentWallet?.publicKey }}' alt="">
+        </div>
 
-    <div *ngIf="currentView === view[0]">
         <div class="mb-3">
             <label for="public">Public Key</label>
             <input type="text" class="form-control" id="public" [value]="currentWallet?.publicKey" readonly>
         </div>
         <div class="mb-3">
-            <button type="button" class="btn btn-sm btn-primary w-100" (click)="currentView = view[1]">Show Private Key</button>
+            <button type="button" class="btn btn-sm btn-primary w-100" (click)="showPrivateKey()">Show Private Key</button>
         </div>
         <button type="button" class="btn btn-sm btn-primary w-100" routerLink="/home/account">Back</button>
     </div>
 
-    <div *ngIf="currentView === view[1]">
+    <div [hidden]="currentView !== view[1]">
         <div class="mb-3">
             <label for="private">Private Key</label>
             <input type="password" class="form-control" id="private" *ngIf="!privateKey"
+                   #passwordRef
                    [(ngModel)]="password"
-                   [ngClass]="{'is-invalid': privateKey === ''}"
-                   placeholder="Type Your Password">
+                   [ngClass]="{'is-invalid': privateKey == '' || incorrectPass}"
+                   placeholder="Type Your Password"
+                   (keyup.enter)="password.length >= 6 && confirm()">
             <input type="text" class="form-control" id="private" *ngIf="privateKey" [value]="privateKey" readonly>
         </div>
         <div class="mb-3">
-            <button type="button" class="btn btn-sm btn-primary w-100" (click)="showPrivateKey()" [disabled]="password.length < 6 || privateKey">Confirm</button>
+            <button type="button" class="btn btn-sm btn-primary w-100" (click)="confirm()" [disabled]="password.length < 6 || privateKey">Confirm</button>
         </div>
         <button type="button" class="btn btn-sm btn-primary w-100" (click)="back()">Back</button>
     </div>

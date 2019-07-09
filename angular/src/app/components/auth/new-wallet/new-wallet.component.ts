@@ -60,23 +60,9 @@ export class NewWalletComponent implements OnInit {
   }
 
   addAccountToStorage() {
-    this.loading = true;
-    this.ref.detectChanges();
-
-    combineLatest(
-      this.apiService.getBlock(1, this.networkUrl.main),
-      this.apiService.getBlock(1, this.networkUrl.test),
-    ).subscribe((data: any) => {
-      let timestampBlockchainReset = {
-        main: data[0].res ? data[0].res.timestamp : 0,
-        test: data[1].res ? data[1].res.timestamp : 0,
-      };
-
-      this.chromeStorage.save('wallets', this.wallets);
-      this.chromeStorage.save('currentWallet', this.wallets.length - 1);
-      this.chromeStorage.save('timestampBlockchainReset', timestampBlockchainReset);
-      this.router.navigate(['/home/account']);
-    });
+    this.chromeStorage.save('wallets', this.wallets);
+    this.chromeStorage.save('currentWallet', this.wallets.length - 1);
+    this.router.navigate(['/home/account']);
   }
 
   create() {
@@ -88,7 +74,6 @@ export class NewWalletComponent implements OnInit {
     const data = {
       id: 1,
       name: name,
-      nonce: new Nonce(),
       publicKey: publicKey,
       privateKey: privateKey
     };
@@ -133,7 +118,6 @@ export class NewWalletComponent implements OnInit {
             const data = {
               id: this.wallets.length + 1,
               name: accountName,
-              nonce: new Nonce(),
               publicKey: publicKey,
               privateKey: encryptedKey
             };

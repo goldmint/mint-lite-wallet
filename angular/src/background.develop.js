@@ -7,6 +7,7 @@ const config = {
     },
     checkTxUrl: '/tx/',
     addTxUrl: '/tx',
+    blockChainStatus: '/status',
     successTxStatus: "approved",
     staleTxStatus: "stale",
     checkTxTime: 30000
@@ -15,9 +16,6 @@ const config = {
 let isFirefox = typeof InstallTrigger !== 'undefined';
 let brows = isFirefox ? browser : chrome;
 let xhr = new XMLHttpRequest();
-
-let wallets = [];
-let txQueue = {};
 
 if (isFirefox) {
     brows.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -30,7 +28,10 @@ if (isFirefox) {
 }
 
 // after load page
-watchTransactionStatus(true);
+watchTransactionStatus();
+setInterval(() => {
+    watchTransactionStatus();
+}, config.checkTxTime);
 
 function actions(request, sender) {
     request.identify && login(request);
@@ -38,16 +39,16 @@ function actions(request, sender) {
     // check login status
     request.checkLoginStatus && sendMessage('loginStatus', window.sessionStorage.getItem('identify') ? true : false);
     // after added new tx
-    request.newTransaction && watchTransactionStatus(false);
+    // request.newTransaction && watchTransactionStatus(false);
     // after send tx from lib
     request.sendTransaction && createConfirmWindow(request.sendTransaction, sender.tab.id);
     // after success confirm tx from lib
-    if (request.hasOwnProperty('sendTxResult')) {
-        brows.tabs.query({active: true, currentWindow: true}, (tabs) => {
-            brows.tabs.sendMessage(+request.sendTxResult.tabId, {sendTxResultContent: request.sendTxResult});
-        });
-        request.sendTxResult && watchTransactionStatus(false);
-    }
+    // if (request.hasOwnProperty('sendTxResult')) {
+    //     brows.tabs.query({active: true, currentWindow: true}, (tabs) => {
+    //         brows.tabs.sendMessage(+request.sendTxResult.tabId, {sendTxResultContent: request.sendTxResult});
+    //     });
+    //     request.sendTxResult && watchTransactionStatus(false);
+    // }
     // pass password
     request.getIdentifier && sendMessage('identifier', window.sessionStorage.getItem('identify'));
     // open send gold page in wallet
@@ -70,34 +71,50 @@ function sendMessage(key, value) {
     });
 }
 
-function watchTransactionStatus(firstLoad) {
+function watchTransactionStatus() {
     brows.storage.local.get(null, (result) => {
-        wallets = result.wallets;
+        let wallets = result.wallets;
+        let txListEmpty = true;
+        let blockCount = {
+            main: 0,
+            test: 0
+        };
+        let skip = false;
+
         wallets && wallets.forEach(wallet => {
-            if (wallet.tx) {
-                const hash = wallet.tx.hash,
-                    endTime = wallet.tx.endTime,
-                    network = wallet.tx.network,
-                    data = wallet.tx.data;
+            if (wallet.tx && wallet.tx.length) txListEmpty = false;
+        });
 
-                let isMatch = false;
-                Object.keys(txQueue).forEach(key => {
-                    key === hash && (isMatch = true);
+        if (txListEmpty) return;
+
+        const p1 = http('GET', config.networkUrl['main'] + config.blockChainStatus);
+        const p2 = http('GET', config.networkUrl['test'] + config.blockChainStatus);
+
+        Promise.all([p1, p2]).then(values => {
+            if (values) {
+                values.forEach((value, index) => {
+                    if (!value || !value.res || !value.res.blockchain_state || !value.res.blockchain_state.block_count) {
+                        skip = true;
+                    } else {
+                        blockCount[Object.keys(blockCount)[index]] = +value.res.blockchain_state.block_count - 1;
+                    }
                 });
+            }
+        });
 
-                if (!isMatch) {
-                    const interval = setInterval(() => {
-                        checkTransactionStatus(hash, endTime, network, data);
-                    }, config.checkTxTime);
-                    txQueue[hash] = interval;
-                    firstLoad && checkTransactionStatus(hash, endTime, network, data);
-                }
+        !skip && wallets && wallets.forEach(wallet => {
+            if (wallet.tx) {
+                wallet.tx.forEach(tx => {
+                    setTimeout(() => {
+                        checkTransactionStatus(tx.hash, tx.endTime, tx.network, tx.data, tx.blockId, blockCount[tx.network]);
+                    }, 200);
+                });
             }
         });
     });
 }
 
-function checkTransactionStatus(hash, endTime, network, data) {
+function checkTransactionStatus(hash, endTime, network, data, txBlockId, currentBlockId) {
     const time = new Date().getTime();
     if (time < endTime) {
         http('GET', config.networkUrl[network] + config.checkTxUrl + hash).then(result => {
@@ -105,11 +122,32 @@ function checkTransactionStatus(hash, endTime, network, data) {
                 if (result.res.status == config.successTxStatus) {
                     finishTx(hash);
                     successTxNotification(hash);
-                } else if (result.res.status == config.staleTxStatus) {
-                    http('POST', config.networkUrl[network] + config.addTxUrl, {name: data.name, data: data.data})
-                        .then(result => {
-                            !result && finishTx(hash);
+                } else {
+                    if (+txBlockId != +currentBlockId) {
+                        http('POST', config.networkUrl[network] + config.addTxUrl, {name: data.name, data: data.data}).then(() => {
+                            brows.storage.local.get(null, (res) => {
+                                let wallets = res.wallets;
+                                wallets = wallets.map(wallet => {
+                                    if (wallet.tx && wallet.tx.hash === hash) wallet.tx.blockId = currentBlockId;
+                                    return wallet;
+                                });
+                                brows.storage.local.set({['wallets']: wallets}, () => { });
+                            });
+                        }).catch((error) => {
+                            let skip = false;
+                            if (error.res) {
+                                if (!error.res.code) {
+                                    skip = true;
+                                } else if (error.res.code != 42 && error.res.code != 43) {
+                                    skip = true;
+                                }
+                            }
+                            if (!skip) {
+                                finishTx(hash);
+                                failedTxNotification(hash);
+                            }
                         });
+                    }
                 }
             }
         });
@@ -135,23 +173,29 @@ function http(method, url, params = '') {
                     resolve(null);
                 }
             } else {
-                resolve(null);
+                try {
+                    reject(JSON.parse(xhr.responseText));
+                } catch (e) {
+                    resolve(null);
+                }
             }
         };
     });
 }
 
 function finishTx(hash) {
-    clearInterval(txQueue[hash]);
-    delete txQueue[hash];
-
-    wallets = wallets.map(wallet => {
-        if (wallet.tx && wallet.tx.hash === hash) {
-            delete wallet.tx;
+    brows.storage.local.get(null, (result) => {
+        let wallets = result.wallets;
+        if (wallets) {
+            wallets = wallets.map(wallet => {
+                if (wallet.tx && wallet.tx.length) {
+                    wallet.tx = wallet.tx.filter((tx => tx.hash != hash));
+                }
+                return wallet;
+            });
+            brows.storage.local.set({['wallets']: wallets}, () => { });
         }
-        return wallet;
     });
-    brows.storage.local.set({['wallets']: wallets}, () => { });
 }
 
 function successTxNotification(hash) {

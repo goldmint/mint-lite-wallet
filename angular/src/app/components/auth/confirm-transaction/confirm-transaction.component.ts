@@ -3,7 +3,7 @@ import {Router} from "@angular/router";
 import {ChromeStorageService} from "../../../services/chrome-storage.service";
 import {ApiService} from "../../../services/api.service";
 import {SumusTransactionService} from "../../../services/sumus-transaction.service";
-import {Wallet} from "../../../interfaces/wallet";
+import {Tx, Wallet} from "../../../interfaces/wallet";
 import {environment} from "../../../../environments/environment";
 import * as CryptoJS from 'crypto-js';
 import {UnconfirmedTx} from "../../../interfaces/unconfirmed-tx";
@@ -27,10 +27,12 @@ export class ConfirmTransactionComponent implements OnInit {
   public unconfirmedTx: UnconfirmedTx[];
   public currentTx: UnconfirmedTx;
   public network: string;
+  public errorMessage: string = '';
 
   private chrome = window['chrome'];
   private identify: string;
   private timeTxFailed = environment.timeTxFailed;
+  private retrySendTxCount: number = 0;
 
   constructor(
     private apiService: ApiService,
@@ -75,14 +77,7 @@ export class ConfirmTransactionComponent implements OnInit {
 
     this.apiService.getWalletBalance(this.currentTx.from).subscribe(data => {
       this.fee = this.sumusTransactionService.feeCalculate(this.currentTx.amount, this.currentTx.token)
-      this.nonce = +data['res'].approved_nonce;
-
-      if (this.currentWallet.nonce[this.network] < this.nonce) {
-        this.allWallets[this.currentWalletIndex].nonce[this.network] = this.nonce;
-        this.chromeStorage.save('wallets', this.allWallets);
-      } else {
-        this.nonce = this.currentWallet.nonce[this.network];
-      }
+      this.nonce = +data['res'].approved_nonce + 1;
 
       this.loading = false;
       this.ref.detectChanges();
@@ -120,39 +115,78 @@ export class ConfirmTransactionComponent implements OnInit {
     }
 
     const result = this.sumusTransactionService.makeTransferAssetTransaction(
-      privateKey, this.currentTx.to, this.currentTx.token.toUpperCase(), this.currentTx.amount, this.nonce+1
+      privateKey, this.currentTx.to, this.currentTx.token.toUpperCase(), this.currentTx.amount, this.nonce
     );
 
-    this.apiService.postWalletTransaction(result.txData, result.txName).subscribe(() => {
-      const timeEnd = (new Date().getTime() + this.timeTxFailed);
+    this.apiService.getBlockChainStatus().subscribe((data: any) => {
+      this.errorMessage = '';
+      if (!data || !data.res || !data.res.blockchain_state || !data.res.blockchain_state.block_count) {
+        this.failedTx();
+        return;
+      };
+      const blockCount = data.res.blockchain_state.block_count;
 
-      this.allWallets[this.currentWalletIndex].tx = {
-        hash: null,
-        endTime: null,
-        amount: null,
-        token: null,
-        network: null,
-        data: {
+      this.apiService.postWalletTransaction(result.txData, result.txName).subscribe(() => {
+        const timeEnd = (new Date().getTime() + this.timeTxFailed);
+
+        let tx: Tx | any = {};
+        tx.data = {
           data: null,
           name: null
+        };
+
+        tx.hash = result.txDigest;
+        tx.endTime = timeEnd;
+        tx.amount = this.currentTx.amount;
+        tx.token = this.currentTx.token.toUpperCase();
+        tx.network = this.network;
+        tx.data.data = result.txData;
+        tx.data.name = result.txName;
+        tx.nonce = this.nonce;
+        tx.blockId = blockCount ? (+blockCount - 1) : null;
+
+        if (this.allWallets[this.currentWalletIndex].tx) {
+          this.allWallets[this.currentWalletIndex].tx.push(tx);
+        } else {
+          this.allWallets[this.currentWalletIndex].tx = [tx];
         }
-      };
-      this.allWallets[this.currentWalletIndex].tx.hash = result.txDigest;
-      this.allWallets[this.currentWalletIndex].tx.endTime = timeEnd;
-      this.allWallets[this.currentWalletIndex].tx.amount = this.currentTx.amount;
-      this.allWallets[this.currentWalletIndex].tx.token = this.currentTx.token.toUpperCase();
-      this.allWallets[this.currentWalletIndex].tx.network = this.network;
-      this.allWallets[this.currentWalletIndex].tx.data.data = result.txData;
-      this.allWallets[this.currentWalletIndex].tx.data.name = result.txName;
 
-      this.allWallets[this.currentWalletIndex].nonce[this.network] = this.nonce+1;
+        this.chrome.storage.local.set({['wallets']: this.allWallets}, () => {
+          this.chrome.runtime.sendMessage({sendTxResult: { hash: result.txDigest, id: this.currentTx.id, tabId: this.currentTx.tabId }});
+        });
 
-      this.chrome.storage.local.set({['wallets']: this.allWallets}, () => {
-        this.chrome.runtime.sendMessage({sendTxResult: { hash: result.txDigest, id: this.currentTx.id, tabId: this.currentTx.tabId }});
+        this.cancelTransfer(false);
+        this.ref.detectChanges();
+
+      }, (error) => {
+        let skip = false;
+        if (error && error.error && error.error.res) {
+          const res = error.error.res;
+          if (!res.code) {
+            this.errorMessage = 'Service is unavailable. Please retry later';
+          } else if (res.code == 42 || res.code == 43) {
+            this.errorMessage = 'Transaction pool overflow';
+          } else if (res.code && res.wallet_inconsistency) {
+            this.errorMessage = 'Not enough funds';
+          } else if (res.code && res.nonce_ahead) {
+            this.errorMessage = 'Transaction is out of range';
+          } else if (res.code && res.nonce_behind) {
+            // resend tx
+            this.nonce++;
+            setTimeout(() => {
+              if (this.retrySendTxCount >= 10) {
+                this.failedTx();
+                return;
+              }
+              this.retrySendTxCount++;
+              this.confirmTransfer();
+            }, 200);
+            skip = true;
+          }
+        }
+        !skip && this.failedTx();
       });
 
-      this.cancelTransfer(false);
-      this.ref.detectChanges();
     }, () => {
       this.failedTx();
     });

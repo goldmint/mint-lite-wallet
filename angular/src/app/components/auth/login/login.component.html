@@ -11,6 +11,7 @@
                 <div class="form-group position-relative">
                     <input type="password" class="form-control" placeholder='Password' name="password-field"
                            #password="ngModel"
+                           #passwordRef
                            [ngClass]="{'is-invalid': (password.invalid && password.dirty) || invalidPass}"
                            [(ngModel)]="userPassword"
                            (ngModelChange)="invalidPass = false"

@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {StorageData} from "../../../interfaces/storage-data";
 import {Wallet} from "../../../interfaces/wallet";
 import * as CryptoJS from 'crypto-js';
@@ -13,20 +13,22 @@ import {MessageBoxService} from "../../../services/message-box.service";
 })
 export class DetailsAccountComponent implements OnInit, OnDestroy {
 
+  @ViewChild('passwordRef') passwordRef;
+
   public storageData: StorageData;
   public currentWallet: Wallet;
   public view = ['public', 'private'];
   public currentView = this.view[0];
   public privateKey: string = null;
   public password: string = '';
+  public incorrectPass: boolean = false;
 
   private chrome = window['chrome'];
   private sub1: Subscription;
 
   constructor(
     private ref: ChangeDetectorRef,
-    private commonService: CommonService,
-    private messageBox: MessageBoxService
+    private commonService: CommonService
     ) { }
 
   ngOnInit() {
@@ -46,10 +48,20 @@ export class DetailsAccountComponent implements OnInit, OnDestroy {
   }
 
   showPrivateKey() {
+    this.currentView = this.view[1];
+    setTimeout(() => {
+      this.passwordRef.nativeElement.focus();
+      this.ref.detectChanges();
+    }, 0);
+  }
+
+  confirm() {
     try {
-      this.privateKey = CryptoJS.AES.decrypt(this.currentWallet.privateKey, this.password).toString(CryptoJS.enc.Utf8);
+      let result = CryptoJS.AES.decrypt(this.currentWallet.privateKey, this.password).toString(CryptoJS.enc.Utf8);
+      this.privateKey = (result && result.length > 50) ? result : '';
+      this.incorrectPass = false;
     } catch (e) {
-      this.messageBox.alert('Something went wrong');
+      this.incorrectPass = true;
     }
     this.ref.detectChanges();
   }
@@ -57,6 +69,7 @@ export class DetailsAccountComponent implements OnInit, OnDestroy {
   back() {
     this.privateKey = null;
     this.password = '';
+    this.incorrectPass = false;
     this.currentView = this.view[0];
     this.ref.detectChanges();
   }

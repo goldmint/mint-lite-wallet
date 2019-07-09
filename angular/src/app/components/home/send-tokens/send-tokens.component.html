@@ -102,7 +102,7 @@
                 {{ sendData.amount }} {{ sendData.token | uppercase }}
                 <div class="trs-fee">Fee: {{ fee | noexp }} {{ sendData.token | uppercase }}</div>
                 <div class="nonce-info">
-                    nonce: #{{ nonce + 1 }}
+                    nonce: #{{ nonce }}
                 </div>
             </div>
         </div>
@@ -118,8 +118,9 @@
     </div>
 
     <div *ngIf="currentPage === page[3]">
-        <h4 class="mb-3">Failed to send</h4>
-        <div class="text-center">
+        <h4 class="mb-2">Failed to send</h4>
+        <div>{{ errorMessage }}</div>
+        <div class="text-center mt-4">
             <svg class="icon-gold" width="50" height="50">
                 <use xlink:href="#error"></use>
             </svg>
@@ -144,7 +145,7 @@
         </div>
 
         <div class="mt-4">
-            <a [href]="detailsLink + txId" target="_blank">
+            <a [href]="detailsLink + txId + '/' + (network == 'test' ? '?network=testnet' : '')" target="_blank">
                 <button type="button" class="btn btn-sm btn-primary w-100">Check status</button>
             </a>
             <button type="button" class="btn btn-sm btn-primary mt-3 w-100" routerLink="/home/account">Done</button>
