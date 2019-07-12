@@ -8,13 +8,14 @@
 
 .trs-container {
   height: 162px;
-  overflow: auto;
-  width: 104%;
+  width: 100%;
+  position: relative;
 }
 
 .trs-item {
   font-size: 14px;
   padding: 3px 0;
+  text-align: right;
 
   &:hover {
     background: $color-gray-0;
