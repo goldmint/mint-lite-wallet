@@ -5,16 +5,24 @@
   position: relative;
   z-index: 1;
   float: left;
-  width: 96%;
+  width: 100%;
 }
 
 .ss-content {
   height: 100%;
-  width: 106%;
+  width: 100%;
   position: relative;
   overflow: auto;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
+
+  &::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+  & {
+    scrollbar-width: none;
+  }
 }
 
 .no-scroll .ss-content {
@@ -22,15 +30,15 @@
 }
 
 .ss-scroll {
-  position: relative;
   background: rgba(0, 0, 0, .1);
   width: 9px;
   border-radius: 4px;
-  top: 0;
   z-index: 2;
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.25s linear;
+  position: absolute;
+  left: 271px;
 }
 
 .ss-container:hover .ss-scroll {
