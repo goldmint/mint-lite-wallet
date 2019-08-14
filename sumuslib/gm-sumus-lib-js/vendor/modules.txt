@@ -1,0 +1,16 @@
+# github.com/gopherjs/gopherjs v0.0.0-20190812055157-5d271430af9f
+github.com/gopherjs/gopherjs/js
+# github.com/mr-tron/base58 v1.1.0
+github.com/mr-tron/base58/base58
+# github.com/void616/gm-sumuslib v1.0.3
+github.com/void616/gm-sumuslib
+github.com/void616/gm-sumuslib/signer
+github.com/void616/gm-sumuslib/amount
+github.com/void616/gm-sumuslib/transaction
+github.com/void616/gm-sumuslib/signer/ed25519
+github.com/void616/gm-sumuslib/serializer
+github.com/void616/gm-sumuslib/signer/ed25519/internal/edwards25519
+# golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
+golang.org/x/crypto/sha3
+# golang.org/x/sys v0.0.0-20190813064441-fde4db37ae7a
+golang.org/x/sys/cpu
