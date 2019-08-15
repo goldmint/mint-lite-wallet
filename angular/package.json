@@ -28,6 +28,8 @@
     "bs58": "^4.0.1",
     "core-js": "^3.0.1",
     "crc-32": "^1.2.0",
+    "lodash": "^4.17.15",
+    "lodash.mergewith": "^4.6.2",
     "ngx-bootstrap": "^3.0.1",
     "rxjs": "^6.4.0",
     "rxjs-compat": "^6.4.0",
