@@ -32,7 +32,9 @@
               "src/inpage.js",
               "src/manifest.json",
               "src/confirm-tx.html",
-              "src/confirm-tx.js"
+              "src/confirm-tx.js",
+              "src/sign-message.html",
+              "src/sign-message.js"
             ],
             "styles": [
               "node_modules/bootstrap/scss/bootstrap.scss",

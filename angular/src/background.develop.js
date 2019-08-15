@@ -27,6 +27,8 @@ if (isFirefox) {
     });
 }
 
+clearMessagesForSign();
+
 // after load page
 watchTransactionStatus();
 setInterval(() => {
@@ -36,21 +38,35 @@ setInterval(() => {
 function actions(request, sender) {
     request.identify && login(request);
     request.logout && logout();
+
     // check login status
     request.checkLoginStatus && sendMessage('loginStatus', window.sessionStorage.getItem('identify') ? true : false);
+
     // after added new tx
     // request.newTransaction && watchTransactionStatus(false);
+
     // after send tx from lib
     request.sendTransaction && createConfirmWindow(request.sendTransaction, sender.tab.id);
     // after success confirm tx from lib
-    // if (request.hasOwnProperty('sendTxResult')) {
-    //     brows.tabs.query({active: true, currentWindow: true}, (tabs) => {
-    //         brows.tabs.sendMessage(+request.sendTxResult.tabId, {sendTxResultContent: request.sendTxResult});
-    //     });
-    //     request.sendTxResult && watchTransactionStatus(false);
-    // }
+    if (request.hasOwnProperty('sendTxResult')) {
+        brows.tabs.query({active: true, currentWindow: true}, (tabs) => {
+            brows.tabs.sendMessage(+request.sendTxResult.tabId, {sendTxResultContent: request.sendTxResult});
+        });
+        // request.sendTxResult && watchTransactionStatus(false);
+    }
+
+    // after call sign message function from lib
+    request.signMessage && createSignMessageWindow(request.signMessage, sender.tab.id);
+    // after success sign message from lib
+    if (request.hasOwnProperty('sendSignResult')) {
+        brows.tabs.query({active: true, currentWindow: true}, (tabs) => {
+            brows.tabs.sendMessage(+request.sendSignResult.tabId, {sendSignResultContent: request.sendSignResult});
+        });
+    }
+
     // pass password
     request.getIdentifier && sendMessage('identifier', window.sessionStorage.getItem('identify'));
+
     // open send gold page in wallet
     request.openSendTokenPage && openSendTokenPage();
 }
@@ -157,6 +173,10 @@ function checkTransactionStatus(hash, endTime, network, data, txBlockId, current
     }
 }
 
+function clearMessagesForSign() {
+    brows.storage.local.set({'messagesForSign': []}, () => { });
+}
+
 function http(method, url, params = '') {
     let xhr = new XMLHttpRequest(),
         currentUrl = method.toUpperCase() === "GET" ? url + params : url;
@@ -214,6 +234,10 @@ function failedTxNotification(hash) {
 
 function createConfirmWindow(id, tabId) {
     brows.windows.create({url: `confirm-tx.html?id=${id}&tabId=${tabId}`, type: "popup", width: 300, height: 520}, (data) => { });
+}
+
+function createSignMessageWindow(id, tabId) {
+    brows.windows.create({url: `sign-message.html?id=${id}&tabId=${tabId}`, type: "popup", width: 300, height: 520}, (data) => { });
 }
 
 function openSendTokenPage() {

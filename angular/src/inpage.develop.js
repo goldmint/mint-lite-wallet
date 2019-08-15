@@ -38,6 +38,29 @@
         openSendTokenPage(address, token) {
             return sendQuestion('openSendTokenPage', { address, token: token.toLowerCase() });
         }
+
+        signMessage(bytes, publicKey = null) {
+            return sendQuestion('signMessage', { bytes, publicKey });
+        }
+
+        verifySignature(bytes, signature, publicKey) {
+            let result;
+            if (!bytes || typeof bytes !== 'object' || !signature || !publicKey) {
+                result = null;
+            }
+
+            if (window.SumusLib && window.SumusLib.Signer && window.SumusLib.Signer.Verify) {
+                try {
+                    result = window.SumusLib.Signer.Verify(bytes, signature, publicKey)
+                } catch (e) {
+                    result = null;
+                }
+            } else {
+                result = null;
+            }
+
+            return sendQuestion('verifySignature', { result });
+        }
     }
 
     window.GoldMint = new GoldMint;
