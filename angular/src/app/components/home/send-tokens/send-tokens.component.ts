@@ -59,7 +59,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     const address = this.route.snapshot.paramMap.get('address');
     if (this.route.snapshot.paramMap.get('amount')) {
       this.tokenAmount = this.route.snapshot.paramMap.get('amount');
-      this.sendData.amount = this.tokenAmount;
+      this.sendData.amount = +this.tokenAmount;
     }
 
     this.sendData.token = id ? id : 'gold';
