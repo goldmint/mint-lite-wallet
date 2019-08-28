@@ -60,6 +60,7 @@
                                [ngClass]="{'is-invalid': (amount.invalid || invalidBalance) && amount.dirty}"
                                ngModel
                                (input)="changeValue($event)"
+                               [(ngModel)]="tokenAmount"
                                [disabled]="loading"
                                required
                                autocomplete="off">

@@ -35,8 +35,8 @@
             return sendQuestion('sendTransaction', { to, token, amount });
         }
 
-        openSendTokenPage(address, token) {
-            return sendQuestion('openSendTokenPage', { address, token: token.toLowerCase() });
+        openSendTokenPage(address, token, amount = 0) {
+            return sendQuestion('openSendTokenPage', { address, token: token.toLowerCase(), amount });
         }
 
         signMessage(bytes, publicKey = null) {

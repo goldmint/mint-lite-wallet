@@ -35,7 +35,7 @@ export class AuthComponent implements OnInit {
               this.router.navigate(['/confirm-transaction']);
             } else if (this.result.openSendTokenPage) {
               const data = this.result.openSendTokenPage;
-              this.router.navigate(['/home/send-tokens', data.token, data.address]);
+              this.router.navigate(['/home/send-tokens', data.token, data.address, data.amount]);
             } else {
               this.router.navigate(['/home/account']);
             }

@@ -27,6 +27,7 @@ const routes: Routes = [
       { path: 'account-details', component: DetailsAccountComponent },
       { path: 'send-tokens/:id', component: SendTokensComponent },
       { path: 'send-tokens/:id/:address', component: SendTokensComponent },
+      { path: 'send-tokens/:id/:address/:amount', component: SendTokensComponent },
       { path: 'backup', component: BackupComponent }
     ]
   }

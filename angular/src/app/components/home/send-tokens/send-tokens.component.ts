@@ -36,6 +36,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   public isEmissionWallet: boolean = false;
   public network: string;
   public errorMessage: string = '';
+  public tokenAmount: string = null;
 
   private sub1: Subscription;
   private chrome = window['chrome'];
@@ -56,6 +57,10 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
     const address = this.route.snapshot.paramMap.get('address');
+    if (this.route.snapshot.paramMap.get('amount')) {
+      this.tokenAmount = this.route.snapshot.paramMap.get('amount');
+      this.sendData.amount = this.tokenAmount;
+    }
 
     this.sendData.token = id ? id : 'gold';
     if (address) {

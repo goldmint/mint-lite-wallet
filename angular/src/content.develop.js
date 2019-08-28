@@ -187,7 +187,8 @@ var actions = {
                 }
                 const dataObj = {
                     address: data.address,
-                    token: data.token
+                    token: data.token,
+                    amount: data.amount
                 };
                 brows.storage.local.set({'openSendTokenPage': dataObj}, () => {
                     brows.runtime.sendMessage({openSendTokenPage: data});
