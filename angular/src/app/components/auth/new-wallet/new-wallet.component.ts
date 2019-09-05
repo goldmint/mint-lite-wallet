@@ -29,6 +29,7 @@ export class NewWalletComponent implements OnInit {
   public incorrectRestorePass: boolean = false;
   public selectedFile: any = null;
   public loading: boolean = false;
+  public isPolicyAccepted: boolean = false;
 
   private chrome = window['chrome'];
   private keyStoreFile: string[];
@@ -46,9 +47,20 @@ export class NewWalletComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.chrome.storage.local.get(null, (result) => {
+      this.isPolicyAccepted = result.isPolicyAccepted;
+      this.ref.detectChanges();
+    });
+
     this.switchModel = {
       type: 'create'
     };
+  }
+
+  acceptPolicy() {
+    this.isPolicyAccepted = true;
+    this.chrome.storage.local.set({['isPolicyAccepted']: this.isPolicyAccepted}, () => { });
+    this.ref.detectChanges();
   }
 
   detect() {

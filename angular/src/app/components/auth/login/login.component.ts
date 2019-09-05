@@ -21,6 +21,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
   public userPassword: string;
   public invalidPass: boolean = false;
   public unconfirmedTx: UnconfirmedTx[];
+  public isPolicyAccepted: boolean = false;
 
   private wallets: Wallet[];
   private result: StorageData;
@@ -41,14 +42,13 @@ export class LoginComponent implements OnInit, AfterViewInit {
       this.result = result;
       this.wallets = result.wallets;
       this.unconfirmedTx = result.unconfirmedTx ? result.unconfirmedTx : [];
+      this.isPolicyAccepted = result.isPolicyAccepted;
       this.ref.detectChanges();
     });
   }
 
   ngAfterViewInit() {
-    setTimeout(() => {
-      this.passwordRef.nativeElement.focus();
-    }, 0);
+    setTimeout(() => this.passwordRef.nativeElement.focus(), 0);
   }
 
   submit() {
@@ -68,6 +68,13 @@ export class LoginComponent implements OnInit, AfterViewInit {
     } else {
       this.invalidPass = true;
     }
+    this.ref.detectChanges();
+  }
+
+  acceptPolicy() {
+    this.isPolicyAccepted = true;
+    this.chrome.storage.local.set({['isPolicyAccepted']: this.isPolicyAccepted}, () => { });
+    setTimeout(() => this.passwordRef.nativeElement.focus(), 0);
     this.ref.detectChanges();
   }
 

@@ -35,6 +35,7 @@ import {SubstrPipe} from "./pipes/substr.pipe";
 import {NoexpPipe} from "./pipes/noexp.pipe";
 import {ReplaceZero} from "./pipes/replace-zero";
 import { ConfirmTransactionComponent } from './components/auth/confirm-transaction/confirm-transaction.component';
+import { PrivacyPolicyComponent } from './blocks/privacy-policy/privacy-policy.component';
 
 @NgModule({
   declarations: [
@@ -56,7 +57,8 @@ import { ConfirmTransactionComponent } from './components/auth/confirm-transacti
     ReplaceZero,
     BackupComponent,
     NewWalletComponent,
-    ConfirmTransactionComponent
+    ConfirmTransactionComponent,
+    PrivacyPolicyComponent
   ],
   imports: [
     BrowserModule,

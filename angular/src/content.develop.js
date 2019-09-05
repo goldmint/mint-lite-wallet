@@ -73,7 +73,7 @@ function addSumusLib() {
         var script = document.createElement('script');
         script.setAttribute('type', 'text/javascript');
         script.setAttribute('src', brows.extension.getURL('assets/libs/sumus-lib/sumuslib.js'));
-        document.head.appendChild(script);
+        document.head && document.head.appendChild(script);
     }
 }
 

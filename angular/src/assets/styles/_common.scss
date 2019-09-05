@@ -52,6 +52,14 @@ a {
     text-decoration: none;
     color: inherit;
   }
+
+  &.a-link {
+    color: #0093e5;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
 
 .pointer {
