@@ -1,0 +1,40 @@
+<!doctype html>
+<!--
+Copyright 2018 The Go Authors. All rights reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+-->
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Go wasm</title>
+</head>
+
+<body>
+	<script src="gowasm.js"></script>
+	<script>
+		const go = new Go();
+		
+		// polyfill
+		if (!WebAssembly.instantiateStreaming) {
+			WebAssembly.instantiateStreaming = async (resp, importObject) => {
+				const source = await (await resp).arrayBuffer();
+				return await WebAssembly.instantiate(source, importObject);
+			};
+		}
+
+		WebAssembly.instantiateStreaming(fetch("mint.wasm"), go.importObject)
+			.then((result) => {
+				console.log("Mint Loaded");
+				let mod = result.module;
+				let inst = result.instance;
+				go.run(inst);
+			})
+			.catch((err) => {
+				console.error(err);
+			})
+		;
+	</script>
+</body>
+</html>
