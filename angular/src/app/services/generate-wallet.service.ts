@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as CryptoJS from 'crypto-js';
-import * as sumus from '../../../../sumuslib/sumuslib.js';
+import * as sumus from '../../assets/libs/sumus-lib/sumuslib.js';
 
 @Injectable()
 export class GenerateWalletService {

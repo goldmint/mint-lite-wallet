@@ -6,7 +6,6 @@ import {ApiService} from "../../../services/api.service";
 import {environment} from "../../../../environments/environment";
 import {Subscription} from "rxjs/index";
 import {ChromeStorageService} from "../../../services/chrome-storage.service";
-import {MessageBoxService} from "../../../services/message-box.service";
 import {combineLatest} from 'rxjs';
 import SimpleScrollbar from 'simple-scrollbar'
 
@@ -36,6 +35,7 @@ export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
   public accountName: string;
   public banner: any = null;
   public currentNetwork: string;
+  public isServiceUnavailable: boolean;
 
   private chrome = window['chrome'];
   private sub1: Subscription;
@@ -46,8 +46,7 @@ export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
     private ref: ChangeDetectorRef,
     private commonService: CommonService,
     private apiService: ApiService,
-    private chromeStorage: ChromeStorageService,
-    private messageBox: MessageBoxService
+    private chromeStorage: ChromeStorageService
   ) { }
 
   ngOnInit() {
@@ -112,9 +111,10 @@ export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.isDataLoaded = true;
       this.loading = false;
+      this.isServiceUnavailable = false;
       this.ref.detectChanges();
     }, () => {
-      this.messageBox.alert('Service is temporary unavailable');
+      this.isServiceUnavailable = true;
       this.ref.detectChanges();
     });
   }
