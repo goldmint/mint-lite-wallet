@@ -12,7 +12,20 @@
     </div>
 
     <div>
-        <div class="account-name" >
+        <div class="account-name">
+            <div [ngStyle]="{'visibility': loading ? 'hidden' : 'visible'}">
+              <div class="wallet-status approved" *ngIf="isWalletApproved" title="This address is approved to send GOLD">
+                <svg width="20" height="20">
+                  <use xlink:href="#approved"></use>
+                </svg>
+              </div>
+              <div class="wallet-status not-approved" *ngIf="!isWalletApproved" title="This address isn't approved. GOLD transactions are forbidden">
+                <svg width="20" height="20">
+                  <use xlink:href="#not-approved"></use>
+                </svg>
+              </div>
+            </div>
+
             <div *ngIf="!isEditing" class="account-name-text">
                 {{ currentWallet?.name }}
                 <div class="edit-account-btn" (click)="!loading && editAccountName()">
@@ -64,7 +77,9 @@
           </ng-container>
           <span class="service-error-message" *ngIf="isServiceUnavailable">Updating...</span>
         </div>
-        <button type="button" class="btn btn-sm btn-primary send-btn" routerLink="/home/send-tokens/gold" [disabled]="loading">Send</button>
+        <button type="button" class="btn btn-sm btn-primary send-btn" routerLink="/home/send-tokens/gold"
+                [disabled]="loading || !isWalletApproved"
+                [title]="!isWalletApproved ? 'This address isn\'t approved. GOLD transactions are forbidden' : ''">Send</button>
     </div>
 </div>
 

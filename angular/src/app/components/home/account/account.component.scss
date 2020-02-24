@@ -40,8 +40,22 @@
 
 .account-name {
   display: flex;
-  padding: 0 25px;
+  padding: 0 20px;
   position: relative;
+  max-width: 220px;
+
+  .wallet-status {
+    margin-right: 5px;
+    margin-top: -3px;
+
+    &.approved {
+      fill: #3bb54a;
+    }
+
+    &.not-approved {
+      fill: #e04f5f;
+    }
+  }
 }
 
 .account-name:hover .edit-account-btn {
@@ -78,6 +92,8 @@
   max-width: 160px;
   max-height: 48px;
   text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .token-name {

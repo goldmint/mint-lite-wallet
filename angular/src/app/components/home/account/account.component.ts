@@ -36,6 +36,7 @@ export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
   public banner: any = null;
   public currentNetwork: string;
   public isServiceUnavailable: boolean;
+  public isWalletApproved: boolean;
 
   private chrome = window['chrome'];
   private sub1: Subscription;
@@ -79,7 +80,7 @@ export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
     this.ref.detectChanges();
   }
 
-  setUpdateDataInterval(publicKey: string) {
+  setUpdateDataInterval() {
     this.interval = setInterval(() => {
       this.getStorageData(true);
     }, 15000);
@@ -107,7 +108,9 @@ export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
       this.usdRate.mnt = (data[2] && data[2].result) ? data[2].result.usd : 0;
       this.usdRate.gold = (data[3] && data[3].result) ? data[3].result.usd : 0;
 
-      this.setUpdateDataInterval(publicKey);
+      this.isWalletApproved = data[1].res.tags && data[1].res.tags.indexOf('approved') >= 0;
+
+      this.setUpdateDataInterval();
 
       this.isDataLoaded = true;
       this.loading = false;

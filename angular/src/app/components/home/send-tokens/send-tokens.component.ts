@@ -34,6 +34,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   public fee: number = 0;
   public accountName: string;
   public isEmissionWallet: boolean = false;
+  public isWalletApproved: boolean;
   public network: string;
   public errorMessage: string = '';
   public tokenAmount: string = null;
@@ -94,6 +95,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
         this.balance.mnt = data['res'].balance.mint;
         this.balance.gold = data['res'].balance.gold;
         this.isEmissionWallet = data['res'].tags.indexOf('EmissionWallet') >= 0;
+        this.isWalletApproved = data['res'].tags.indexOf('approved') >= 0;
 
         this.checkAddressMatch();
         this.checkAmount();
