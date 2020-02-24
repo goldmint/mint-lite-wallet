@@ -29,7 +29,7 @@
 
 <div class="setting-modal p-3" *ngIf="isOpenSettingModal">
     <div class="setting-actions">
-        <div>
+        <!--<div>
           <div class="form-group mb-3">
             <select class="form-control custom-select black mb-0 header-select-account border-0"
                     [(ngModel)]="selectedNetwork" (change)="chooseNetwork()">
@@ -37,7 +37,7 @@
               <option value="test">Test network</option>
             </select>
           </div>
-        </div>
+        </div>-->
 
         <div class="d-flex align-items-center pointer" (click)="createAccount()">
             <svg class="icon-gold" width="15" height="15">
@@ -66,20 +66,6 @@
             </svg>
             <span class="ml-2">Backup / Restore</span>
         </div>
-
-        <!--<div class="d-flex align-items-center pointer mt-2" (click)="clearStorage()">-->
-            <!--<svg class="icon-gold" width="15" height="15">-->
-                <!--<use xlink:href="#import"></use>-->
-            <!--</svg>-->
-            <!--<span class="ml-2">Clear storage</span>-->
-        <!--</div>-->
-
-<!--        <div class="d-flex align-items-center pointer mt-2" (click)="getItem()">-->
-<!--            <svg class="icon-gold" width="15" height="15">-->
-<!--                <use xlink:href="#import"></use>-->
-<!--            </svg>-->
-<!--            <span class="ml-2">Show</span>-->
-<!--        </div>-->
 
         <div class="d-flex align-items-center pointer mt-2" (click)="logOut()">
             <svg class="icon-gold" width="15" height="15">

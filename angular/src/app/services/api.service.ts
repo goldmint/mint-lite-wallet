@@ -14,19 +14,19 @@ export class ApiService {
   private chrome = window['chrome'];
 
   constructor(private http: HttpClient) {
-    this.getCurrentNetwork.subscribe((network: any) => {
-      if (network) {
-        this.networkUrl = environment.networkUrl[network];
-        this.chrome.storage.local.set({['currentNetwork']: network}, () => { });
-      } else {
-        this.chrome.storage.local.set({['currentNetwork']: 'main'}, () => { });
-      }
-    });
+    // this.getCurrentNetwork.subscribe((network: any) => {
+    //   if (network) {
+    //     this.networkUrl = environment.networkUrl[network];
+    //     this.chrome.storage.local.set({['currentNetwork']: network}, () => { });
+    //   } else {
+    //     this.chrome.storage.local.set({['currentNetwork']: 'main'}, () => { });
+    //   }
+    // });
 
-    this.chrome.storage.local.get(null, (result) => {
-      this.currentNetwork = result.currentNetwork;
-      this.getCurrentNetwork.next(result.currentNetwork);
-    });
+    // this.chrome.storage.local.get(null, (result) => {
+    //   this.currentNetwork = result.currentNetwork;
+    //   this.getCurrentNetwork.next(result.currentNetwork);
+    // });
   }
 
   getWalletBalance(address: string) {
