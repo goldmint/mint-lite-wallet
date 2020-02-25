@@ -1,20 +1,20 @@
 'use strict';
 
-!function() {
-    const config = {
-        networkUrl: {
-            main: 'https://service.goldmint.io/sumus/mainnet/v1',
-            test: 'https://service.goldmint.io/sumus/testnet/v1'
-        },
-        api: {
-            getBalance: '/wallet/',
-            addTx: '/tx',
-            blockChainStatus: '/status'
-        },
-        timeTxFailed: 1800000, // 30 minutes,
-    };
+!function () {
+  const config = {
+    networkUrl: {
+      main: 'https://service.goldmint.io/mint/mainnet/v1',
+      test: 'https://service.goldmint.io/mint/testnet/v1'
+    },
+    api: {
+      getBalance: '/wallet/',
+      addTx: '/tx',
+      blockChainStatus: '/status'
+    },
+    timeTxFailed: 1800000, // 30 minutes,
+  };
 
-    let css = `
+  let css = `
         body, html {
             margin: 0;
             padding: 0;
@@ -183,346 +183,345 @@
             display: block;
         }
     `
-    let queryParams = {};
-    window.location.search.replace(/^\?/, '').split('&').forEach(item => {
-        let param = item.split('=');
-        queryParams[decodeURIComponent(param[0])] = param.length > 1 ? decodeURIComponent(param[1]) : '';
-    });
+  let queryParams = {};
+  window.location.search.replace(/^\?/, '').split('&').forEach(item => {
+    let param = item.split('=');
+    queryParams[decodeURIComponent(param[0])] = param.length > 1 ? decodeURIComponent(param[1]) : '';
+  });
 
-    let isFirefox = typeof InstallTrigger !== 'undefined',
-        brows = isFirefox ? browser : chrome,
-        nonce,
-        privateKey,
-        unconfirmedTx,
-        currentUnconfirmedTx,
-        wallets,
-        sumusLib = window['SumusLib'],
-        cryptoJS = CryptoJS,
-        id = queryParams.id,
-        tabId = queryParams.tabId,
-        network,
-        identify,
-        domElements = {},
-        retrySendTxCount = 0;
+  let isFirefox = typeof InstallTrigger !== 'undefined',
+    brows = isFirefox ? browser : chrome,
+    nonce,
+    privateKey,
+    unconfirmedTx,
+    currentUnconfirmedTx,
+    wallets,
+    mintLib = window['mint'],
+    cryptoJS = CryptoJS,
+    id = queryParams.id,
+    tabId = queryParams.tabId,
+    network,
+    identify,
+    domElements = {},
+    retrySendTxCount = 0;
 
-    onInit();
+  onInit();
 
-    function onInit() {
-        initCSS();
+  function onInit() {
+    initCSS();
 
-        if (isFirefox) {
-            brows.runtime.onMessage.addListener((request, sender, sendResponse) => {
-                actions(request);
-            });
-        } else {
-            brows.extension.onMessage.addListener((request, sender, sendResponse) => {
-                actions(request);
-            });
-        }
-        brows.runtime.sendMessage({getIdentifier: true});
+    if (isFirefox) {
+      brows.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        actions(request);
+      });
+    } else {
+      brows.extension.onMessage.addListener((request, sender, sendResponse) => {
+        actions(request);
+      });
+    }
+    brows.runtime.sendMessage({getIdentifier: true});
 
-        chooseDomElements([
-            'infoFrom', 'infoTo', 'infoAmount', 'infoFee', 'infoNonce', 'btnClose', 'btnConfirm', 'btnDone', 'errorMessage'
-        ]);
+    chooseDomElements([
+      'infoFrom', 'infoTo', 'infoAmount', 'infoFee', 'infoNonce', 'btnClose', 'btnConfirm', 'btnDone', 'errorMessage'
+    ]);
 
-        domElements.btnClose.addEventListener('click', cancel);
-        domElements.btnConfirm.addEventListener('click', confirm);
-        domElements.btnDone.addEventListener('click', close);
+    domElements.btnClose.addEventListener('click', cancel);
+    domElements.btnConfirm.addEventListener('click', confirm);
+    domElements.btnDone.addEventListener('click', close);
 
-        disabledBtn();
+    disabledBtn();
 
-        brows.storage.local.get(null, data => {
-            wallets = data.wallets;
-            unconfirmedTx = data.unconfirmedTx;
+    brows.storage.local.get(null, data => {
+      wallets = data.wallets;
+      unconfirmedTx = data.unconfirmedTx;
 
-            unconfirmedTx.forEach(tx => {
-                if (tx.id == id) {
+      unconfirmedTx.forEach(tx => {
+        if (tx.id == id) {
 
-                    tx.tabId = tabId;
-                    network = tx.network;
-                    brows.storage.local.set({['unconfirmedTx']: unconfirmedTx}, () => { });
+          tx.tabId = tabId;
+          network = tx.network;
+          brows.storage.local.set({['unconfirmedTx']: unconfirmedTx}, () => {
+          });
 
-                    http('GET', config.networkUrl[network] + config.api.getBalance, tx.from).then(result => {
-                        if (result) {
-                            nonce = +result['res'].approved_nonce + 1;
+          http('GET', config.networkUrl[network] + config.api.getBalance, tx.from).then(result => {
+            if (result) {
+              nonce = +result['res'].approved_nonce + 1;
 
-                            try {
-                                let encryptedKey;
-                                for (let i = 0; i < wallets.length; i++) {
-                                    if (wallets[i].publicKey === tx.from) {
-                                        encryptedKey = wallets[i].privateKey;
-                                        break;
-                                    }
-                                }
-
-                                currentUnconfirmedTx = tx;
-                                privateKey = cryptoJS.AES.decrypt(encryptedKey, identify).toString(cryptoJS.enc.Utf8);
-
-                                domElements.infoFrom.textContent = reduction(tx.from);
-                                domElements.infoTo.textContent = reduction(tx.to);
-                                domElements.infoAmount.textContent = tx.amount + ' ' + tx.token.toUpperCase();
-                                domElements.infoFee.textContent = feeCalculate(tx.amount, tx.token) + ' ' + tx.token.toUpperCase();
-                                domElements.infoNonce.textContent = nonce;
-
-                                enableBtn();
-                            } catch (e) {
-                                failedTx();
-                            }
-                        } else {
-                            failedTx();
-                        }
-                    });
+              try {
+                let encryptedKey;
+                for (let i = 0; i < wallets.length; i++) {
+                  if (wallets[i].publicKey === tx.from) {
+                    encryptedKey = wallets[i].privateKey;
+                    break;
+                  }
                 }
-            });
-        });
-    }
 
-    function actions(request) {
-        request.identifier && (identify = request.identifier);
-    }
+                currentUnconfirmedTx = tx;
+                privateKey = cryptoJS.AES.decrypt(encryptedKey, identify).toString(cryptoJS.enc.Utf8);
 
-    function makeTransferAssetTransaction(signerPrivateKey, toAddress, token, amount, nonce) {
-        let tx = sumusLib.Transaction.TransferAsset(signerPrivateKey, nonce, toAddress, token, amount.toPrecision(18));
+                domElements.infoFrom.textContent = reduction(tx.from);
+                domElements.infoTo.textContent = reduction(tx.to);
+                domElements.infoAmount.textContent = tx.amount + ' ' + tx.token.toUpperCase();
+                domElements.infoFee.textContent = feeCalculate(tx.amount, tx.token) + ' ' + tx.token.toUpperCase();
+                domElements.infoNonce.textContent = nonce;
 
-        let txData = tx.Data(),
-            txDigest = tx.Digest(),
-            txName = tx.Name()
-
-        return {
-            txData,
-            txDigest,
-            txName
+                enableBtn();
+              } catch (e) {
+                failedTx();
+              }
+            } else {
+              failedTx();
+            }
+          });
         }
-    }
+      });
+    });
+  }
 
-    function postWalletTransaction(data, name, hash) {
-        http('GET', config.networkUrl[network] + config.api.blockChainStatus).then(result => {
-            if (!result || !result.res || !result.res.blockchain_state || !result.res.blockchain_state.block_count) {
+  function actions(request) {
+    request.identifier && (identify = request.identifier);
+  }
+
+  function makeTransferAssetTransaction(signerPrivateKey, toAddress, token, amount, nonce) {
+    const singer = mintLib.Signer.FromPK(signerPrivateKey);
+    const tx = singer.SignTransferAssetTx(nonce, toAddress, token, amount.toPrecision(18));
+
+    return {
+      txData: tx.Data,
+      txDigest: tx.Digest,
+      txName: tx.Name
+    }
+  }
+
+  function postWalletTransaction(data, name, hash) {
+    http('GET', config.networkUrl[network] + config.api.blockChainStatus).then(result => {
+      if (!result || !result.res || !result.res.blockchain_state || !result.res.blockchain_state.block_count) {
+        failedTx();
+        return;
+      }
+      ;
+
+      http('POST', config.networkUrl[network] + config.api.addTx, {name, data}).then(res => {
+        res ? successTx(hash, data, name, result.res.blockchain_state.block_count) : failedTx();
+      }).catch((error) => {
+        let skip = false;
+        if (error.res) {
+          if (!error.res.code) {
+            domElements.errorMessage.textContent = 'Service is unavailable. Please retry later';
+          } else if (error.res.code == 42 || error.res.code == 43) {
+            domElements.errorMessage.textContent = 'Transaction pool overflow'
+          } else if (error.res.code && error.res.wallet_inconsistency) {
+            domElements.errorMessage.textContent = 'Not enough funds'
+          } else if (error.res.code && error.res.nonce_ahead) {
+            domElements.errorMessage.textContent = 'Transaction is out of range'
+          } else if (error.res.code && res.nonce_behind) {
+            // resend tx
+            nonce++;
+            setTimeout(() => {
+              if (retrySendTxCount >= 10) {
                 failedTx();
                 return;
-            };
+              }
+              retrySendTxCount++;
+              confirm();
+            }, 200);
+            skip = true;
+          }
+        }
+        !skip && failedTx();
+      });
+    }).catch(() => {
+      failedTx();
+    });
+  }
 
-            http('POST', config.networkUrl[network] + config.api.addTx, {name, data}).then(res => {
-                res ? successTx(hash, data, name, result.res.blockchain_state.block_count): failedTx();
-            }).catch((error) => {
-                let skip = false;
-                if (error.res) {
-                    if (!error.res.code) {
-                        domElements.errorMessage.textContent = 'Service is unavailable. Please retry later';
-                    } else if (error.res.code == 42 || error.res.code == 43) {
-                        domElements.errorMessage.textContent = 'Transaction pool overflow'
-                    } else if (error.res.code && error.res.wallet_inconsistency) {
-                        domElements.errorMessage.textContent = 'Not enough funds'
-                    } else if (error.res.code && error.res.nonce_ahead) {
-                        domElements.errorMessage.textContent = 'Transaction is out of range'
-                    } else if (error.res.code && res.nonce_behind) {
-                        // resend tx
-                        nonce++;
-                        setTimeout(() => {
-                            if (retrySendTxCount >= 10) {
-                                failedTx();
-                                return;
-                            }
-                            retrySendTxCount++;
-                            confirm();
-                        }, 200);
-                        skip = true;
-                    }
-                }
-                !skip && failedTx();
-            });
-        }).catch(() => {
-            failedTx();
-        });
-    }
+  function http(method, url, params = '') {
+    let xhr = new XMLHttpRequest(),
+      currentUrl = method.toUpperCase() === "GET" ? url + params : url;
+    xhr.open(method.toUpperCase(), currentUrl, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    method.toUpperCase() === "GET" ? xhr.send() : xhr.send(JSON.stringify(params));
 
-    function http(method, url, params = '') {
-        let xhr = new XMLHttpRequest(),
-            currentUrl = method.toUpperCase() === "GET" ? url + params : url;
-        xhr.open(method.toUpperCase(), currentUrl, true);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        method.toUpperCase() === "GET" ? xhr.send() : xhr.send(JSON.stringify(params));
-
-        return new Promise((resolve, reject) => {
-            xhr.onload = () => {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    try {
-                        resolve(JSON.parse(xhr.responseText));
-                    } catch (e) {
-                        resolve(null);
-                    }
-                } else {
-                    try {
-                        reject(JSON.parse(xhr.responseText));
-                    } catch (e) {
-                        resolve(null);
-                    }
-                }
-            };
-        });
-    }
-
-    function successTx(hash, txData, txName, blocks) {
-        brows.storage.local.get(null, (data) => {
-            unconfirmedTx = data.unconfirmedTx;
-            wallets = data.wallets;
-            let endTime = (new Date().getTime() + config.timeTxFailed);
-
-            wallets = wallets.map(wallet => {
-                if (wallet.publicKey === currentUnconfirmedTx.from) {
-                    let tx = {
-                        hash,
-                        endTime,
-                        amount: currentUnconfirmedTx.amount,
-                        token: currentUnconfirmedTx.token.toUpperCase(),
-                        network,
-                        nonce: nonce,
-                        blockId: blocks ? (+blocks - 1): null,
-                        data: { data: txData, name: txName }
-                    };
-
-                    if (wallet.tx) {
-                        wallet.tx.push(tx);
-                    } else {
-                        wallet.tx = [tx];
-                    }
-                }
-                return wallet;
-            });
-
-            unconfirmedTx.forEach((tx, index) => {
-                if (tx.id == id) {
-                    unconfirmedTx.splice(index, 1);
-                }
-            });
-
-            brows.storage.local.set({['wallets']: wallets}, () => {
-                brows.storage.local.set({['unconfirmedTx']: unconfirmedTx}, () => {
-                    brows.runtime.sendMessage({sendTxResult: {hash, id, tabId}});
-                    close();
-                });
-            });
-
-        });
-    }
-
-    function failedTx() {
-        document.body.classList.add('failed');
-        cancel(false);
-    }
-
-    function confirm() {
-        disabledBtn();
-        const txAsset = makeTransferAssetTransaction(privateKey, currentUnconfirmedTx.to, currentUnconfirmedTx.token.toUpperCase(), currentUnconfirmedTx.amount, nonce);
-        postWalletTransaction(txAsset.txData, txAsset.txName, txAsset.txDigest);
-    }
-
-    function cancel(isClose = true) {
-        brows.storage.local.get(null, (data) => {
-            unconfirmedTx = data.unconfirmedTx;
-            unconfirmedTx.forEach((tx, index) => {
-                if (tx.id == id) {
-                    unconfirmedTx.splice(index, 1);
-                }
-            });
-
-            brows.storage.local.set({['unconfirmedTx']: unconfirmedTx}, () => {
-                brows.runtime.sendMessage({sendTxResult: {hash: null, id, tabId}});
-                isClose && close();
-            });
-        });
-    }
-
-    function close() {
-        brows.windows.getCurrent((window) => {
-            brows.windows.remove(window.id);
-        });
-    }
-
-    function reduction(value) {
-        return value.slice(0, 6) + '....' + value.slice(-4);
-    }
-
-    function noExp(value) {
-        const amount = getNoExpValue(value);
-        const position = amount.toString().indexOf('.');
-        if (position >= 0) {
-            return (amount.toString().substr(0, position + 9)).replace(/0+$/, '');
+    return new Promise((resolve, reject) => {
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            resolve(JSON.parse(xhr.responseText));
+          } catch (e) {
+            resolve(null);
+          }
         } else {
-            return amount;
+          try {
+            reject(JSON.parse(xhr.responseText));
+          } catch (e) {
+            resolve(null);
+          }
         }
+      };
+    });
+  }
 
-        function getNoExpValue(value) {
-            let data = String(value).split(/[eE]/);
-            if(data.length== 1) return data[0];
+  function successTx(hash, txData, txName, blocks) {
+    brows.storage.local.get(null, (data) => {
+      unconfirmedTx = data.unconfirmedTx;
+      wallets = data.wallets;
+      let endTime = (new Date().getTime() + config.timeTxFailed);
 
-            let z= '', sign = value<0? '-':'',
-                str= data[0].replace('.', ''),
-                mag= Number(data[1])+ 1;
+      wallets = wallets.map(wallet => {
+        if (wallet.publicKey === currentUnconfirmedTx.from) {
+          let tx = {
+            hash,
+            endTime,
+            amount: currentUnconfirmedTx.amount,
+            token: currentUnconfirmedTx.token.toUpperCase(),
+            network,
+            nonce: nonce,
+            blockId: blocks ? (+blocks - 1) : null,
+            data: {data: txData, name: txName}
+          };
 
-            if(mag<0){
-                z= sign + '0.';
-                while(mag++) z += '0';
-                return z + str.replace(/^\-/,'');
-            }
-            mag -= str.length;
-            while(mag--) z += '0';
-            return str + z;
+          if (wallet.tx) {
+            wallet.tx.push(tx);
+          } else {
+            wallet.tx = [tx];
+          }
         }
-    }
+        return wallet;
+      });
 
-    function feeCalculate(amount, token) {
-        let fee;
-
-        if (token.toUpperCase() === 'MNT') {
-            fee = 0.02;
-            return noExp(fee);
+      unconfirmedTx.forEach((tx, index) => {
+        if (tx.id == id) {
+          unconfirmedTx.splice(index, 1);
         }
+      });
 
-        if (amount < 10) {
-            fee = 1 * amount / 100;
-        } else if (amount >= 10 && amount < 1000) {
-            fee = 0.3 * amount / 100;
-        } else if (amount >= 1000 && amount < 10000) {
-            fee = 0.03 * amount / 100;
-        } else if (amount >= 10000) {
-            const value = 0.03 * amount / 100;
-
-            if (value >= 0.002) {
-                fee = 0.002
-            } else if (value <= 0.0002) {
-                fee = 0.0002
-            } else {
-                fee = value;
-            }
-        }
-        return noExp(fee);
-    }
-
-    function chooseDomElement(id) {
-        domElements[id] = document.getElementById(id);
-    }
-
-    function chooseDomElements(ids) {
-        ids.forEach(id => {
-            domElements[id] = document.getElementById(id);
+      brows.storage.local.set({['wallets']: wallets}, () => {
+        brows.storage.local.set({['unconfirmedTx']: unconfirmedTx}, () => {
+          brows.runtime.sendMessage({sendTxResult: {hash, id, tabId}});
+          close();
         });
+      });
+
+    });
+  }
+
+  function failedTx() {
+    document.body.classList.add('failed');
+    cancel(false);
+  }
+
+  function confirm() {
+    disabledBtn();
+    const txAsset = makeTransferAssetTransaction(privateKey, currentUnconfirmedTx.to, currentUnconfirmedTx.token.toUpperCase(), currentUnconfirmedTx.amount, nonce);
+    postWalletTransaction(txAsset.txData, txAsset.txName, txAsset.txDigest);
+  }
+
+  function cancel(isClose = true) {
+    brows.storage.local.get(null, (data) => {
+      unconfirmedTx = data.unconfirmedTx;
+      unconfirmedTx.forEach((tx, index) => {
+        if (tx.id == id) {
+          unconfirmedTx.splice(index, 1);
+        }
+      });
+
+      brows.storage.local.set({['unconfirmedTx']: unconfirmedTx}, () => {
+        brows.runtime.sendMessage({sendTxResult: {hash: null, id, tabId}});
+        isClose && close();
+      });
+    });
+  }
+
+  function close() {
+    brows.windows.getCurrent((window) => {
+      brows.windows.remove(window.id);
+    });
+  }
+
+  function reduction(value) {
+    return value.slice(0, 6) + '....' + value.slice(-4);
+  }
+
+  function noExp(value) {
+    const amount = getNoExpValue(value);
+    const position = amount.toString().indexOf('.');
+    if (position >= 0) {
+      return (amount.toString().substr(0, position + 9)).replace(/0+$/, '');
+    } else {
+      return amount;
     }
 
-    function disabledBtn() {
-        domElements.btnConfirm.setAttribute("disabled", "disabled");
-        domElements.btnClose.setAttribute("disabled", "disabled");
+    function getNoExpValue(value) {
+      let data = String(value).split(/[eE]/);
+      if (data.length == 1) return data[0];
+
+      let z = '', sign = value < 0 ? '-' : '',
+        str = data[0].replace('.', ''),
+        mag = Number(data[1]) + 1;
+
+      if (mag < 0) {
+        z = sign + '0.';
+        while (mag++) z += '0';
+        return z + str.replace(/^\-/, '');
+      }
+      mag -= str.length;
+      while (mag--) z += '0';
+      return str + z;
+    }
+  }
+
+  function feeCalculate(amount, token) {
+    let fee;
+
+    if (token.toUpperCase() === 'MNT') {
+      fee = 0.02;
+      return noExp(fee);
     }
 
-    function enableBtn() {
-        domElements.btnConfirm.removeAttribute("disabled");
-        domElements.btnClose.removeAttribute("disabled");
-    }
+    if (amount < 10) {
+      fee = 1 * amount / 100;
+    } else if (amount >= 10 && amount < 1000) {
+      fee = 0.3 * amount / 100;
+    } else if (amount >= 1000 && amount < 10000) {
+      fee = 0.03 * amount / 100;
+    } else if (amount >= 10000) {
+      const value = 0.03 * amount / 100;
 
-    function initCSS() {
-        let style = document.createElement('style');
-        style.type = 'text/css';
-        style.appendChild(document.createTextNode(css));
-        document.head.appendChild(style);
+      if (value >= 0.002) {
+        fee = 0.002
+      } else if (value <= 0.0002) {
+        fee = 0.0002
+      } else {
+        fee = value;
+      }
     }
+    return noExp(fee);
+  }
+
+  function chooseDomElement(id) {
+    domElements[id] = document.getElementById(id);
+  }
+
+  function chooseDomElements(ids) {
+    ids.forEach(id => {
+      domElements[id] = document.getElementById(id);
+    });
+  }
+
+  function disabledBtn() {
+    domElements.btnConfirm.setAttribute("disabled", "disabled");
+    domElements.btnClose.setAttribute("disabled", "disabled");
+  }
+
+  function enableBtn() {
+    domElements.btnConfirm.removeAttribute("disabled");
+    domElements.btnClose.removeAttribute("disabled");
+  }
+
+  function initCSS() {
+    let style = document.createElement('style');
+    style.type = 'text/css';
+    style.appendChild(document.createTextNode(css));
+    document.head.appendChild(style);
+  }
 }();

@@ -1,20 +1,7 @@
 'use strict';
 
-!function() {
-    // const config = {
-    //     networkUrl: {
-    //         main: 'https://service.goldmint.io/sumus/mainnet/v1',
-    //         test: 'https://service.goldmint.io/sumus/testnet/v1'
-    //     },
-    //     api: {
-    //         getBalance: '/wallet/',
-    //         addTx: '/tx',
-    //         blockChainStatus: '/status'
-    //     },
-    //     timeTxFailed: 1800000, // 30 minutes,
-    // };
-
-    let css = `
+!function () {
+  let css = `
         body, html {
             margin: 0;
             padding: 0;
@@ -165,146 +152,147 @@
             opacity: .65;
         }
     `
-    let queryParams = {};
-    window.location.search.replace(/^\?/, '').split('&').forEach(item => {
-        let param = item.split('=');
-        queryParams[decodeURIComponent(param[0])] = param.length > 1 ? decodeURIComponent(param[1]) : '';
+  let queryParams = {};
+  window.location.search.replace(/^\?/, '').split('&').forEach(item => {
+    let param = item.split('=');
+    queryParams[decodeURIComponent(param[0])] = param.length > 1 ? decodeURIComponent(param[1]) : '';
+  });
+
+  let isFirefox = typeof InstallTrigger !== 'undefined',
+    brows = isFirefox ? browser : chrome,
+    privateKey,
+    mintLib = window['mint'],
+    cryptoJS = CryptoJS,
+    id = queryParams.id,
+    tabId = queryParams.tabId,
+    identify,
+    messages,
+    currentMessage,
+    wallets,
+    domElements = {};
+
+  onInit();
+
+  function onInit() {
+    initCSS();
+
+    if (isFirefox) {
+      brows.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        getIdentifier(request);
+      });
+    } else {
+      brows.extension.onMessage.addListener((request, sender, sendResponse) => {
+        getIdentifier(request);
+      });
+    }
+    brows.runtime.sendMessage({getIdentifier: true});
+
+    chooseDomElements([
+      'sourceHost', 'sourceIconBlock', 'sourceIcon', 'messageLength', 'btnClose', 'btnConfirm'
+    ]);
+
+    domElements.btnClose.addEventListener('click', cancel);
+    domElements.btnConfirm.addEventListener('click', sign);
+  }
+
+  function getMessage() {
+    brows.storage.local.get(null, data => {
+      messages = data.messagesForSign;
+      wallets = data.wallets;
+
+      messages.forEach(message => {
+        if (message.id == id) {
+          currentMessage = message;
+
+          let bytes = [];
+          for (let key in currentMessage.bytes) {
+            bytes.push(currentMessage.bytes[key]);
+          }
+          currentMessage.bytes = bytes;
+
+          let encryptedKey;
+          for (let i = 0; i < wallets.length; i++) {
+            if (wallets[i].publicKey === message.publicKey) {
+              encryptedKey = wallets[i].privateKey;
+              break;
+            }
+          }
+
+          privateKey = cryptoJS.AES.decrypt(encryptedKey, identify).toString(cryptoJS.enc.Utf8);
+          domElements.sourceHost.textContent = message.host;
+          domElements.messageLength.textContent = currentMessage.bytes ? currentMessage.bytes.length : 0;
+
+          if (message.iconUrl) {
+            domElements.sourceIconBlock.style.display = 'block';
+            domElements.sourceIcon.setAttribute('src', message.iconUrl);
+          }
+        }
+      });
     });
+  }
 
-    let isFirefox = typeof InstallTrigger !== 'undefined',
-        brows = isFirefox ? browser : chrome,
-        privateKey,
-        sumusLib = window['SumusLib'],
-        cryptoJS = CryptoJS,
-        id = queryParams.id,
-        tabId = queryParams.tabId,
-        identify,
-        messages,
-        currentMessage,
-        wallets,
-        domElements = {};
+  function getIdentifier(request) {
+    if (request.identifier) {
+      identify = request.identifier;
+      getMessage();
+    }
+  }
 
-    onInit();
-
-    function onInit() {
-        initCSS();
-
-        if (isFirefox) {
-            brows.runtime.onMessage.addListener((request, sender, sendResponse) => {
-                getIdentifier(request);
-            });
-        } else {
-            brows.extension.onMessage.addListener((request, sender, sendResponse) => {
-                getIdentifier(request);
-            });
-        }
-        brows.runtime.sendMessage({getIdentifier: true});
-
-        chooseDomElements([
-            'sourceHost', 'sourceIconBlock', 'sourceIcon', 'messageLength', 'btnClose', 'btnConfirm'
-        ]);
-
-        domElements.btnClose.addEventListener('click', cancel);
-        domElements.btnConfirm.addEventListener('click', sign);
+  function sign() {
+    let result;
+    try {
+      const singer = mintLib.Signer.FromPK(privateKey);
+      result = singer.SignMessage(currentMessage.bytes);
+    } catch (e) {
+      cancel();
     }
 
-    function getMessage() {
-        brows.storage.local.get(null, data => {
-            messages = data.messagesForSign;
-            wallets = data.wallets;
+    brows.storage.local.get(null, (data) => {
+      messages = data.messagesForSign;
+      messages.forEach((message, index) => {
+        if (message.id == id) messages.splice(index, 1);
+      });
 
-            messages.forEach(message => {
-                if (message.id == id) {
-                    currentMessage = message;
+      brows.storage.local.set({['messagesForSign']: messages}, () => {
+        brows.runtime.sendMessage({sendSignResult: {result, id, tabId}});
+        close();
+      });
+    });
+  }
 
-                    let bytes = [];
-                    for (let key in currentMessage.bytes) {
-                        bytes.push(currentMessage.bytes[key]);
-                    }
-                    currentMessage.bytes = bytes;
+  function cancel() {
+    brows.storage.local.get(null, (data) => {
+      messages = data.messagesForSign;
+      messages.forEach((message, index) => {
+        if (message.id == id) messages.splice(index, 1);
+      });
 
-                    let encryptedKey;
-                    for (let i = 0; i < wallets.length; i++) {
-                        if (wallets[i].publicKey === message.publicKey) {
-                            encryptedKey = wallets[i].privateKey;
-                            break;
-                        }
-                    }
+      brows.storage.local.set({['messagesForSign']: messages}, () => {
+        brows.runtime.sendMessage({sendSignResult: {result: null, id, tabId}});
+        close();
+      });
+    });
+  }
 
-                    privateKey = cryptoJS.AES.decrypt(encryptedKey, identify).toString(cryptoJS.enc.Utf8);
-                    domElements.sourceHost.textContent = message.host;
-                    domElements.messageLength.textContent = currentMessage.bytes ? currentMessage.bytes.length : 0;
+  function close() {
+    brows.windows.getCurrent((window) => {
+      brows.windows.remove(window.id);
+    });
+  }
 
-                    if (message.iconUrl) {
-                        domElements.sourceIconBlock.style.display = 'block';
-                        domElements.sourceIcon.setAttribute('src', message.iconUrl);
-                    }
-                }
-            });
-        });
-    }
+  function chooseDomElement(id) {
+    domElements[id] = document.getElementById(id);
+  }
 
-    function getIdentifier(request) {
-        if (request.identifier) {
-            identify = request.identifier;
-            getMessage();
-        }
-    }
+  function chooseDomElements(ids) {
+    ids.forEach(id => {
+      domElements[id] = document.getElementById(id);
+    });
+  }
 
-    function sign() {
-        let result;
-        try {
-            result = sumusLib.Signer.Sign(currentMessage.bytes, privateKey);
-        } catch (e) {
-            cancel();
-        }
-
-        brows.storage.local.get(null, (data) => {
-            messages = data.messagesForSign;
-            messages.forEach((message, index) => {
-                if (message.id == id) messages.splice(index, 1);
-            });
-
-            brows.storage.local.set({['messagesForSign']: messages}, () => {
-                brows.runtime.sendMessage({sendSignResult: {result, id, tabId}});
-                close();
-            });
-        });
-    }
-
-    function cancel() {
-        brows.storage.local.get(null, (data) => {
-            messages = data.messagesForSign;
-            messages.forEach((message, index) => {
-                if (message.id == id) messages.splice(index, 1);
-            });
-
-            brows.storage.local.set({['messagesForSign']: messages}, () => {
-                brows.runtime.sendMessage({sendSignResult: {result: null, id, tabId}});
-                close();
-            });
-        });
-    }
-
-    function close() {
-        brows.windows.getCurrent((window) => {
-            brows.windows.remove(window.id);
-        });
-    }
-
-    function chooseDomElement(id) {
-        domElements[id] = document.getElementById(id);
-    }
-
-    function chooseDomElements(ids) {
-        ids.forEach(id => {
-            domElements[id] = document.getElementById(id);
-        });
-    }
-
-    function initCSS() {
-        let style = document.createElement('style');
-        style.appendChild(document.createTextNode(css));
-        document.head.appendChild(style);
-    }
+  function initCSS() {
+    let style = document.createElement('style');
+    style.appendChild(document.createTextNode(css));
+    document.head.appendChild(style);
+  }
 }();

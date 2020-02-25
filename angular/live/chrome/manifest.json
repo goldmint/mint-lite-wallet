@@ -1,36 +1,48 @@
 {
-	"name": "Goldmint Lite Wallet",
-	"description" : "Goldmint blockchain lite wallet",
-    "short_name": "Goldmint wallet",
-	"version": "0.6.1",
-	"manifest_version": 2,
-      "icons": {
-        "16": "assets/logo/logo16.png",
-        "48": "assets/logo/logo48.png",
-        "128": "assets/logo/logo128.png"
-    },
-    "background": {
-      "scripts": ["background.js"]
-    },
-    "content_scripts": [{
-      "matches": ["http://*/*", "https://*/*"],
-      "js": ["content.js"],
+  "name": "Goldmint Lite Wallet",
+  "description": "Goldmint blockchain lite wallet",
+  "short_name": "Goldmint wallet",
+  "version": "0.6.1",
+  "manifest_version": 2,
+  "icons": {
+    "16": "assets/logo/logo16.png",
+    "48": "assets/logo/logo48.png",
+    "128": "assets/logo/logo128.png"
+  },
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "content.js"
+      ],
       "all_frames": true,
       "run_at": "document_start"
-    }],
-	"browser_action": {
-		"default_popup": "index.html",
-		"default_icon": "assets/icon.png"
-	},
-	"permissions": [
-	  "storage",
-      "tabs",
-      "activeTab",
-      "notifications",
-      "*://*/*"
-	],
-    "web_accessible_resources": [
-      "inpage.js",
-      "assets/libs/sumus-lib/sumuslib.js"
-    ]
+    }
+  ],
+  "browser_action": {
+    "default_popup": "index.html",
+    "default_icon": "assets/icon.png"
+  },
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab",
+    "notifications",
+    "*://*/*"
+  ],
+  "web_accessible_resources": [
+    "inpage.js",
+    "assets/libs/mint/gowasm.js",
+    "assets/libs/mint/mint.wasm",
+    "assets/libs/mint/mint.js"
+  ],
+  "content_security_policy": "script-src 'self' 'wasm-eval'; object-src 'self';"
 }
