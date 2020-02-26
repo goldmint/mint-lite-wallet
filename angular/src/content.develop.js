@@ -47,8 +47,6 @@ window.addEventListener("message", (data) => {
   }
 });
 
-console.warn('INIT');
-
 function http(method, url, params = '') {
   let xhr = new XMLHttpRequest(),
     currentUrl = method.toUpperCase() === "GET" ? url + params : url;
