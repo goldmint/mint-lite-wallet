@@ -88,19 +88,19 @@ var actions = {
     brows.runtime.sendMessage({checkLoginStatus: true});
   }),
 
-  // getCurrentNetwork: data => new Promise((resolve, reject) => {
-  //   brows.runtime.onMessage.addListener(function checkLogin(request, sender, sendResponse) {
-  //     if (request.hasOwnProperty('loginStatus')) {
-  //       isLoggedIn = request.loginStatus;
-  //
-  //       brows.storage.local.get(null, (result) => {
-  //         resolve(isLoggedIn && result.currentNetwork ? result.currentNetwork : null);
-  //         brows.runtime.onMessage.removeListener(checkLogin);
-  //       });
-  //     }
-  //   });
-  //   brows.runtime.sendMessage({checkLoginStatus: true});
-  // }),
+  getCurrentNetwork: data => new Promise((resolve, reject) => {
+    brows.runtime.onMessage.addListener(function checkLogin(request, sender, sendResponse) {
+      if (request.hasOwnProperty('loginStatus')) {
+        isLoggedIn = request.loginStatus;
+
+        brows.storage.local.get(null, (result) => {
+          resolve(isLoggedIn ? (result.currentNetwork || 'main') : null);
+          brows.runtime.onMessage.removeListener(checkLogin);
+        });
+      }
+    });
+    brows.runtime.sendMessage({checkLoginStatus: true});
+  }),
 
   getBalance: data => new Promise((resolve, reject) => {
     brows.runtime.onMessage.addListener(function checkLogin(request, sender, sendResponse) {
