@@ -7,17 +7,17 @@ const config = {
   },
   api: {
     getBalance: '/wallet/'
-  }
+  },
+  forbiddenDomains: [
+    'google.com'
+  ]
 };
 
 var isLoggedIn = false;
 var isFirefox = typeof InstallTrigger !== 'undefined';
 var brows = isFirefox ? browser : chrome;
 
-var script = document.createElement('script');
-script.setAttribute('type', 'text/javascript');
-script.setAttribute('src', brows.extension.getURL('inpage.js'));
-document.documentElement.insertBefore(script, document.head);
+injectInpageJs();
 
 brows.runtime.onMessage.addListener((request, sender, sendResponse) => {
   request.hasOwnProperty('loginStatus') && isLoggedIn !== request.loginStatus && (isLoggedIn = request.loginStatus);
@@ -46,6 +46,24 @@ window.addEventListener("message", (data) => {
     });
   }
 });
+
+function injectInpageJs() {
+  let allowScriptInject = true;
+  config.forbiddenDomains.forEach(domain => {
+    if (window.location.href.indexOf(domain) >= 0) {
+      allowScriptInject = false;
+    }
+  });
+
+  if (allowScriptInject) {
+    var script = document.createElement('script');
+    script.setAttribute('type', 'text/javascript');
+    script.setAttribute('src', brows.extension.getURL('inpage.js'));
+    document.documentElement.insertBefore(script, document.head);
+  } else {
+    console.log('Goldmint Lite Wallet library not used');
+  }
+}
 
 function http(method, url, params = '') {
   let xhr = new XMLHttpRequest(),
@@ -223,7 +241,7 @@ var actions = {
           });
 
           let message = {id, bytes: data.bytes, publicKey, host, iconUrl: iconUrl || null},
-              messagesForSign = [];
+            messagesForSign = [];
 
           storage.messagesForSign && (messagesForSign = storage.messagesForSign);
           messagesForSign.push(message);
