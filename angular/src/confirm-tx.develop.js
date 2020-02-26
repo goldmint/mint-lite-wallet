@@ -282,7 +282,13 @@
 
   function makeTransferAssetTransaction(signerPrivateKey, toAddress, token, amount, nonce) {
     const singer = window.mint.Signer.FromPK(signerPrivateKey);
-    const tx = singer.SignTransferAssetTx(nonce, toAddress, token, amount.toPrecision(18));
+    let tx;
+    try {
+      amount = +amount;
+      tx = singer.SignTransferAssetTx(nonce, toAddress, token, amount.toPrecision(18));
+    } catch (e) {
+      return failedTx();
+    }
 
     return {
       txData: tx.Data,
@@ -410,6 +416,7 @@
 
   function confirm() {
     disabledBtn();
+
     const txAsset = makeTransferAssetTransaction(privateKey, currentUnconfirmedTx.to, currentUnconfirmedTx.token.toUpperCase(), currentUnconfirmedTx.amount, nonce);
     postWalletTransaction(txAsset.txData, txAsset.txName, txAsset.txDigest);
   }

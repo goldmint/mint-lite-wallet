@@ -98,7 +98,7 @@ export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
       let txs = data[0].res.list;
       if (txs) {
         this.transactionList = txs.filter(tx => {
-          return tx.transaction.name === "TransferAssetsTransaction";
+          return tx.transaction.name === "transfer_asset";
         });
         this.transactionList = this.transactionList.slice(0, 14);
       }

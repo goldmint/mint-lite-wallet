@@ -135,11 +135,12 @@ var actions = {
 
   sendTransaction: data => new Promise((resolve, reject) => {
     brows.runtime.onMessage.addListener(function checkLogin(request, sender, sendResponse) {
+      brows.runtime.onMessage.removeListener(checkLogin);
+
       if (request.hasOwnProperty('loginStatus')) {
         isLoggedIn = request.loginStatus;
 
         if (!isLoggedIn) {
-          brows.runtime.onMessage.removeListener(checkLogin);
           return resolve(null);
         }
         brows.storage.local.get(null, (storage) => {
@@ -154,13 +155,13 @@ var actions = {
 
           brows.storage.local.set({'unconfirmedTx': unconfirmedTx}, () => {
             brows.runtime.sendMessage({sendTransaction: id});
-            brows.runtime.onMessage.removeListener(checkLogin);
           });
 
           brows.runtime.onMessage.addListener(function answer(request, sender, sendResponse) {
+            brows.runtime.onMessage.removeListener(answer);
+
             if (request.hasOwnProperty('sendTxResultContent') && request.sendTxResultContent.id === id) {
               resolve(request.sendTxResultContent.hash);
-              brows.runtime.onMessage.removeListener(answer);
             }
           });
         });
@@ -171,11 +172,12 @@ var actions = {
 
   openSendTokenPage: data => new Promise((resolve, reject) => {
     brows.runtime.onMessage.addListener(function checkLogin(request, sender, sendResponse) {
+      brows.runtime.onMessage.removeListener(checkLogin);
+
       if (request.hasOwnProperty('loginStatus')) {
         isLoggedIn = request.loginStatus;
 
         if (!isLoggedIn) {
-          brows.runtime.onMessage.removeListener(checkLogin);
           return resolve(null);
         }
         const dataObj = {
@@ -185,7 +187,6 @@ var actions = {
         };
         brows.storage.local.set({'openSendTokenPage': dataObj}, () => {
           brows.runtime.sendMessage({openSendTokenPage: data});
-          brows.runtime.onMessage.removeListener(checkLogin);
           resolve(true);
         });
       }
@@ -195,11 +196,12 @@ var actions = {
 
   signMessage: data => new Promise((resolve, reject) => {
     brows.runtime.onMessage.addListener(function checkLogin(request, sender, sendResponse) {
+      brows.runtime.onMessage.removeListener(checkLogin);
+
       if (request.hasOwnProperty('loginStatus')) {
         isLoggedIn = request.loginStatus;
 
         if (!isLoggedIn) {
-          brows.runtime.onMessage.removeListener(checkLogin);
           return resolve(null);
         }
 
@@ -221,20 +223,20 @@ var actions = {
           });
 
           let message = {id, bytes: data.bytes, publicKey, host, iconUrl: iconUrl || null},
-            messagesForSign = [];
+              messagesForSign = [];
 
           storage.messagesForSign && (messagesForSign = storage.messagesForSign);
           messagesForSign.push(message);
 
           brows.storage.local.set({'messagesForSign': messagesForSign}, () => {
             brows.runtime.sendMessage({signMessage: id});
-            brows.runtime.onMessage.removeListener(checkLogin);
           });
 
           brows.runtime.onMessage.addListener(function answer(request, sender, sendResponse) {
+            brows.runtime.onMessage.removeListener(answer);
+
             if (request.hasOwnProperty('sendSignResultContent') && request.sendSignResultContent.id === id) {
               resolve(request.sendSignResultContent.result);
-              brows.runtime.onMessage.removeListener(answer);
             }
           });
         });
