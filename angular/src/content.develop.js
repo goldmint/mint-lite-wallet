@@ -47,6 +47,8 @@ window.addEventListener("message", (data) => {
   }
 });
 
+console.warn('INIT');
+
 function http(method, url, params = '') {
   let xhr = new XMLHttpRequest(),
     currentUrl = method.toUpperCase() === "GET" ? url + params : url;
@@ -76,12 +78,13 @@ function generateId() {
 var actions = {
   getAccount: data => new Promise((resolve, reject) => {
     brows.runtime.onMessage.addListener(function checkLogin(request, sender, sendResponse) {
+      brows.runtime.onMessage.removeListener(checkLogin);
+
       if (request.hasOwnProperty('loginStatus')) {
         isLoggedIn = request.loginStatus;
 
         brows.storage.local.get(null, (result) => {
           resolve(isLoggedIn ? [result.wallets[result.currentWallet].publicKey] : []);
-          brows.runtime.onMessage.removeListener(checkLogin);
         });
       }
     });
@@ -90,12 +93,13 @@ var actions = {
 
   getCurrentNetwork: data => new Promise((resolve, reject) => {
     brows.runtime.onMessage.addListener(function checkLogin(request, sender, sendResponse) {
+      brows.runtime.onMessage.removeListener(checkLogin);
+
       if (request.hasOwnProperty('loginStatus')) {
         isLoggedIn = request.loginStatus;
 
         brows.storage.local.get(null, (result) => {
           resolve(isLoggedIn ? (result.currentNetwork || 'main') : null);
-          brows.runtime.onMessage.removeListener(checkLogin);
         });
       }
     });
@@ -104,6 +108,8 @@ var actions = {
 
   getBalance: data => new Promise((resolve, reject) => {
     brows.runtime.onMessage.addListener(function checkLogin(request, sender, sendResponse) {
+      brows.runtime.onMessage.removeListener(checkLogin);
+
       if (request.hasOwnProperty('loginStatus')) {
         isLoggedIn = request.loginStatus;
 
@@ -116,15 +122,12 @@ var actions = {
                   gold: result.res.balance.gold,
                   mint: result.res.balance.mint
                 });
-                brows.runtime.onMessage.removeListener(checkLogin);
               } else {
                 resolve(null);
-                brows.runtime.onMessage.removeListener(checkLogin);
               }
             });
           } else {
             resolve(null);
-            brows.runtime.onMessage.removeListener(checkLogin);
           }
         });
       }
