@@ -56,9 +56,9 @@
       return sendQuestion('getAccount');
     }
 
-    getCurrentNetwork() {
-      return sendQuestion('getCurrentNetwork');
-    }
+    // getCurrentNetwork() {
+    //   return sendQuestion('getCurrentNetwork');
+    // }
 
     getBalance(address) {
       return sendQuestion('getBalance', {address});

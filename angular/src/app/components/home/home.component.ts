@@ -46,7 +46,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.chrome.storage.local.get(null, (result) => {
       this.storageData = result;
       this.selectedAccount = this.storageData.currentWallet;
-      this.selectedNetwork = result.currentNetwork;
+      this.selectedNetwork = result.currentNetwork || 'main';
       this.ref.detectChanges();
     });
   }

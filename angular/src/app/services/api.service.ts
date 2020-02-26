@@ -7,7 +7,7 @@ import {Subject} from "rxjs/index";
 export class ApiService {
 
   public getCurrentNetwork = new Subject();
-  public currentNetwork: string;
+  public currentNetwork: string = 'main';
 
   private networkUrl = environment.networkUrl.main;
   private rateUrl = environment.rateUrl;

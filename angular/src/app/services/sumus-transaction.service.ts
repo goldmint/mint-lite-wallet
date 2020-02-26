@@ -3,12 +3,10 @@ import { Injectable } from '@angular/core';
 @Injectable()
 export class SumusTransactionService {
 
-  private mintLib = window['mint'];
-
   constructor() {}
 
   makeTransferAssetTransaction(signerPrivateKey: string, toAddress: string, token: string, amount: number, nonce: number) {
-    const singer = this.mintLib.Signer.FromPK(signerPrivateKey);
+    const singer = window['mint'].Signer.FromPK(signerPrivateKey);
     const tx = singer.SignTransferAssetTx(nonce, toAddress, token, amount.toPrecision(18));
 
     return {

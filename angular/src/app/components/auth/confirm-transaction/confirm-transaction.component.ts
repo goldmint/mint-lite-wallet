@@ -47,7 +47,7 @@ export class ConfirmTransactionComponent implements OnInit {
     this.chrome.storage.local.get(null, (result) => {
       this.unconfirmedTx = result.unconfirmedTx;
       this.allWallets = result.wallets;
-      this.network = result.currentNetwork;
+      this.network = result.currentNetwork || 'main';
       this.getTxData();
     });
 

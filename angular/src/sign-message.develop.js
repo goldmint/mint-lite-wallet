@@ -42,6 +42,12 @@
         #sourceIconBlock {
             display: none;
             text-align: center;
+            margin-right: 5px;
+        }
+        .source-block {
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
         .source-host {
             text-align: center;
@@ -51,15 +57,13 @@
         }
         .confirm-text {
             text-align: center;
-        }
-        .message-length {
-            text-align: center;
-            font-size: .875em;
-            color: #ababab;
-            margin: 10px;
+            font-size: 14px;
+            line-height: 1.4;
         }
         .attention-text {
             text-align: center;
+            font-size: 14px;
+            line-height: 1.4;
         }
         .attention-text b {
             color: #fa3c00;
@@ -141,7 +145,6 @@
         .btn-primary.focus, .btn-primary:focus, .btn-primary:not(:disabled):not(.disabled).active:focus, .btn-primary:not(:disabled):not(.disabled):active:focus, .show>.btn-primary.dropdown-toggle:focus {
             box-shadow: 0 0 0 0.2rem rgba(233,203,107,.5);
         }
-
         .btn-primary.disabled, .btn-primary:disabled {
             color: #212529;
             background-color: #e9cb6b;
@@ -150,6 +153,48 @@
         }
         .btn.disabled, .btn:disabled {
             opacity: .65;
+        }
+        .message-block {
+          border-bottom: 2px solid #e9cb6b;
+        }
+        .message-details {
+          max-height: 151px;
+          overflow: auto;
+          min-height: 151px;
+        }
+        .message-view-btn {
+          text-align: right;
+          margin-bottom: 5px
+        }
+        .btn-text, .btn-hex {
+          background: transparent;
+          border: 2px solid #cfcfcf;
+          outline: none;
+          cursor: pointer;
+        }
+        .message-block.text .btn-text {
+          background: rgba(171, 171, 171, 0.3);
+        }
+        .message-block.text .message-text {
+          display: block;
+        }
+        .message-block.text .message-hex {
+          display: none;
+        }
+        .message-block.text .btn-hex {
+          background: transparent;
+        }
+        .message-block.hex .btn-hex {
+          background: rgba(171, 171, 171, 0.3);
+        }
+        .message-block.hex .message-hex {
+          display: block;
+        }
+        .message-block.hex .message-text {
+          display: none;
+        }
+        .message-block.hex .btn-text {
+          background: transparent;
         }
     `
   let queryParams = {};
@@ -161,7 +206,6 @@
   let isFirefox = typeof InstallTrigger !== 'undefined',
     brows = isFirefox ? browser : chrome,
     privateKey,
-    mintLib = window['mint'],
     cryptoJS = CryptoJS,
     id = queryParams.id,
     tabId = queryParams.tabId,
@@ -188,11 +232,17 @@
     brows.runtime.sendMessage({getIdentifier: true});
 
     chooseDomElements([
-      'sourceHost', 'sourceIconBlock', 'sourceIcon', 'messageLength', 'btnClose', 'btnConfirm'
+      'sourceHost', 'sourceIconBlock', 'sourceIcon', 'messageLength', 'btnClose', 'btnConfirm', 'messageBlock', 'btnText', 'btnHex', 'messageText', 'messageHex'
     ]);
 
     domElements.btnClose.addEventListener('click', cancel);
     domElements.btnConfirm.addEventListener('click', sign);
+    domElements.btnText.addEventListener('click', displayTextMessage);
+    domElements.btnHex.addEventListener('click', displayHexMessage);
+  }
+
+  function buf2hex(buffer) {
+    return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
   }
 
   function getMessage() {
@@ -210,6 +260,16 @@
           }
           currentMessage.bytes = bytes;
 
+          if (bytes && bytes.length) {
+            currentMessage.utf8 = new TextDecoder('utf-8').decode(new Uint8Array(currentMessage.bytes));
+
+            const buffer = new Uint8Array(currentMessage.bytes).buffer;
+            currentMessage.hex = '0x' + buf2hex(buffer);
+
+            domElements.messageText.textContent = currentMessage.utf8;
+            domElements.messageHex.textContent = currentMessage.hex;
+          }
+
           let encryptedKey;
           for (let i = 0; i < wallets.length; i++) {
             if (wallets[i].publicKey === message.publicKey) {
@@ -226,6 +286,8 @@
             domElements.sourceIconBlock.style.display = 'block';
             domElements.sourceIcon.setAttribute('src', message.iconUrl);
           }
+
+          displayTextMessage();
         }
       });
     });
@@ -240,9 +302,10 @@
 
   function sign() {
     let result;
+
     try {
-      const singer = mintLib.Signer.FromPK(privateKey);
-      result = singer.SignMessage(currentMessage.bytes);
+      const singer = window.mint.Signer.FromPK(privateKey);
+      result = singer.SignMessage(new Uint8Array(currentMessage.bytes));
     } catch (e) {
       cancel();
     }
@@ -278,6 +341,16 @@
     brows.windows.getCurrent((window) => {
       brows.windows.remove(window.id);
     });
+  }
+
+  function displayTextMessage() {
+    domElements.messageBlock.classList.remove('hex');
+    domElements.messageBlock.classList.add('text');
+  }
+
+  function displayHexMessage() {
+    domElements.messageBlock.classList.remove('text');
+    domElements.messageBlock.classList.add('hex');
   }
 
   function chooseDomElement(id) {

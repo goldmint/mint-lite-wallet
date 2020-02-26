@@ -89,7 +89,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
       this.allWallets = result.wallets;
       this.sendData.from = this.currentWallet.publicKey;
       this.accountName = this.currentWallet.name;
-      this.network = result.currentNetwork;
+      this.network = result.currentNetwork || 'main';
 
       this.apiService.getWalletBalance(this.currentWallet.publicKey).subscribe(data => {
         this.balance.mnt = data['res'].balance.mint;

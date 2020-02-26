@@ -196,7 +196,6 @@
     unconfirmedTx,
     currentUnconfirmedTx,
     wallets,
-    mintLib = window['mint'],
     cryptoJS = CryptoJS,
     id = queryParams.id,
     tabId = queryParams.tabId,
@@ -240,8 +239,7 @@
 
           tx.tabId = tabId;
           network = tx.network;
-          brows.storage.local.set({['unconfirmedTx']: unconfirmedTx}, () => {
-          });
+          brows.storage.local.set({['unconfirmedTx']: unconfirmedTx}, () => {});
 
           http('GET', config.networkUrl[network] + config.api.getBalance, tx.from).then(result => {
             if (result) {
@@ -283,7 +281,7 @@
   }
 
   function makeTransferAssetTransaction(signerPrivateKey, toAddress, token, amount, nonce) {
-    const singer = mintLib.Signer.FromPK(signerPrivateKey);
+    const singer = window.mint.Signer.FromPK(signerPrivateKey);
     const tx = singer.SignTransferAssetTx(nonce, toAddress, token, amount.toPrecision(18));
 
     return {
