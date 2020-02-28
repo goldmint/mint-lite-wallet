@@ -18,7 +18,7 @@
         body, html {
             margin: 0;
             padding: 0;
-            max-width: 300px;
+            min-width: 300px;
             width: 100%;
             height: 520px;
             overflow: hidden;
@@ -50,6 +50,7 @@
             margin-bottom: 1rem;
             font-weight: 500;
             line-height: 1.2;
+            text-align: center;
         }
         .confirm-info-block {
             border-bottom: 2px solid #e9cb6b;
@@ -59,6 +60,7 @@
         .button-block {
             display: flex;
             margin-top: 1.5rem;
+            justify-content: center;
         }
         .confirm-address-block {
             display: flex;
@@ -123,6 +125,7 @@
             background-color: #e9cb6b;
             border-color: #e9cb6b;
             color: #1c1c1c;
+            max-width: 250px;
         }
         .btn-cancel {
             margin-right: 0.25rem;

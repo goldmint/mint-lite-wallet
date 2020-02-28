@@ -235,8 +235,8 @@ function createConfirmWindow(id, tabId) {
   brows.windows.create({
     url: `confirm-tx.html?id=${id}&tabId=${tabId}`,
     type: "popup",
-    width: 300,
-    height: 520
+    width: 320,
+    height: 551
   }, (data) => {
   });
 }
@@ -245,8 +245,8 @@ function createSignMessageWindow(id, tabId) {
   brows.windows.create({
     url: `sign-message.html?id=${id}&tabId=${tabId}`,
     type: "popup",
-    width: 300,
-    height: 520
+    width: 320,
+    height: 551
   }, (data) => {
   });
 }

@@ -5,7 +5,7 @@
         body, html {
             margin: 0;
             padding: 0;
-            max-width: 300px;
+            min-width: 300px;
             width: 100%;
             height: 520px;
             overflow: hidden;
@@ -21,8 +21,19 @@
             display: flex;
             align-items: center;
         }
+        header svg {
+          min-width: 25px;
+        }
+        header > div {
+            width: 100%;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-left: 15px;
+        }
         .confirm-container {
-            padding: 1rem;
+            margin: 1rem;
         }
         .confirm-block {
             margin-top: 0.5rem;
@@ -33,6 +44,7 @@
             margin-bottom: 1rem;
             font-weight: 500;
             line-height: 1.2;
+            text-align: center;
         }
         .confirm-info-block {
             border-bottom: 2px solid #e9cb6b;
@@ -75,6 +87,7 @@
         .button-block {
             display: flex;
             margin-top: 1.5rem;
+            justify-content: center;
         }
         .btn:not(:disabled):not(.disabled) {
             cursor: pointer;
@@ -114,6 +127,7 @@
             background-color: #e9cb6b;
             border-color: #e9cb6b;
             color: #1c1c1c;
+            max-width: 250px;
         }
         .btn-cancel {
             margin-right: 0.25rem;
@@ -205,6 +219,7 @@
 
   let isFirefox = typeof InstallTrigger !== 'undefined',
     brows = isFirefox ? browser : chrome,
+    accountName,
     privateKey,
     cryptoJS = CryptoJS,
     id = queryParams.id,
@@ -232,7 +247,18 @@
     brows.runtime.sendMessage({getIdentifier: true});
 
     chooseDomElements([
-      'sourceHost', 'sourceIconBlock', 'sourceIcon', 'messageLength', 'btnClose', 'btnConfirm', 'messageBlock', 'btnText', 'btnHex', 'messageText', 'messageHex'
+      'sourceHost',
+      'sourceIconBlock',
+      'sourceIcon',
+      'messageLength',
+      'btnClose',
+      'btnConfirm',
+      'messageBlock',
+      'btnText',
+      'btnHex',
+      'messageText',
+      'messageHex',
+      'accountName'
     ]);
 
     domElements.btnClose.addEventListener('click', cancel);
@@ -274,6 +300,7 @@
           for (let i = 0; i < wallets.length; i++) {
             if (wallets[i].publicKey === message.publicKey) {
               encryptedKey = wallets[i].privateKey;
+              accountName = wallets[i].name;
               break;
             }
           }
@@ -281,6 +308,7 @@
           privateKey = cryptoJS.AES.decrypt(encryptedKey, identify).toString(cryptoJS.enc.Utf8);
           domElements.sourceHost.textContent = message.host;
           domElements.messageLength.textContent = currentMessage.bytes ? currentMessage.bytes.length : 0;
+          domElements.accountName.textContent = accountName || '';
 
           if (message.iconUrl) {
             domElements.sourceIconBlock.style.display = 'block';
@@ -368,4 +396,5 @@
     style.appendChild(document.createTextNode(css));
     document.head.appendChild(style);
   }
+
 }();
