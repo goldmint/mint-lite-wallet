@@ -34,6 +34,17 @@
             display: flex;
             align-items: center;
         }
+        header svg {
+          min-width: 25px;
+        }
+        header > div {
+            width: 100%;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-left: 15px;
+        }
         .icon-gold {
             color: #e9cb6b;
             fill: #e9cb6b;
@@ -164,6 +175,9 @@
         .failed-text {
             margin-bottom: 8px;
         }
+        #errorMessage {
+          text-align: center;
+        }
         .btn-done {
             width: 100%;
         }
@@ -195,6 +209,7 @@
   let isFirefox = typeof InstallTrigger !== 'undefined',
     brows = isFirefox ? browser : chrome,
     nonce,
+    accountName,
     privateKey,
     unconfirmedTx,
     currentUnconfirmedTx,
@@ -224,7 +239,7 @@
     brows.runtime.sendMessage({getIdentifier: true});
 
     chooseDomElements([
-      'infoFrom', 'infoTo', 'infoAmount', 'infoFee', 'infoNonce', 'btnClose', 'btnConfirm', 'btnDone', 'errorMessage'
+      'infoFrom', 'infoTo', 'infoAmount', 'infoFee', 'infoNonce', 'btnClose', 'btnConfirm', 'btnDone', 'errorMessage', 'accountName'
     ]);
 
     domElements.btnClose.addEventListener('click', cancel);
@@ -253,6 +268,7 @@
                 for (let i = 0; i < wallets.length; i++) {
                   if (wallets[i].publicKey === tx.from) {
                     encryptedKey = wallets[i].privateKey;
+                    accountName = wallets[i].name;
                     break;
                   }
                 }
@@ -265,6 +281,7 @@
                 domElements.infoAmount.textContent = tx.amount + ' ' + tx.token.toUpperCase();
                 domElements.infoFee.textContent = feeCalculate(tx.amount, tx.token) + ' ' + tx.token.toUpperCase();
                 domElements.infoNonce.textContent = nonce;
+                domElements.accountName.textContent = accountName;
 
                 enableBtn();
               } catch (e) {
