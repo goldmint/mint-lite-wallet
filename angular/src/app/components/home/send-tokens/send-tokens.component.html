@@ -66,7 +66,7 @@
                     <div class="d-flex">
                         <button type="button" class="btn btn-sm btn-primary w-50 mr-1" routerLink="/home/account">Cancel</button>
                         <button type="button" class="btn btn-sm btn-primary w-50 ml-1" (click)="sendTransaction()"
-                                [disabled]="form.invalid || loading || invalidBalance || isAddressMatch || !sendData.amount || (!isWalletApproved && sendData.token == 'gold')"
+                                [disabled]="form.invalid || loading || invalidBalance || isAddressMatch || !+sendData.amount || (!isWalletApproved && sendData.token == 'gold')"
                                 [title]="(!isWalletApproved && sendData.token == 'gold') ? 'This address isn\'t approved. GOLD transactions are forbidden' : ''">
                           Send
                         </button>

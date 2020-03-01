@@ -146,6 +146,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
 
     this.tokenAmount = valueStr;
     this.sendData.amount = valueStr;
+    this.checkAmount();
     this.ref.detectChanges();
   }
 
