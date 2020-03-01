@@ -79,7 +79,7 @@ function logout() {
 
 function sendMessage(key, value) {
   brows.tabs.query({active: true, currentWindow: true}, (tabs) => {
-    brows.tabs.sendMessage(tabs[0].id, {[key]: value});
+    tabs[0] && brows.tabs.sendMessage(tabs[0].id, {[key]: value});
   });
 }
 
@@ -100,9 +100,9 @@ function watchTransactionStatus() {
     if (txListEmpty) return;
 
     const p1 = http('GET', config.networkUrl['main'] + config.blockChainStatus);
-    const p2 = http('GET', config.networkUrl['test'] + config.blockChainStatus);
+    // const p2 = http('GET', config.networkUrl['test'] + config.blockChainStatus);
 
-    Promise.all([p1, p2]).then(values => {
+    Promise.all([p1/*, p2*/]).then(values => {
       if (values) {
         values.forEach((value, index) => {
           if (!value || !value.res || !value.res.blockchain_state || !value.res.blockchain_state.block_count) {
