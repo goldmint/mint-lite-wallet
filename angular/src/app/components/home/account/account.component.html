@@ -61,7 +61,7 @@
           <span class="token-name">MNT</span>
           <ng-container *ngIf="!isServiceUnavailable">
             {{ balance.mnt | replaceZero }}
-            <span class="usd-balance" *ngIf="usdRate.mnt">(${{ balance.mnt * usdRate.mnt | substr:2:true }})</span>
+            <span class="usd-balance" *ngIf="usdRate.mnt">(${{ usdBalance.mnt }})</span>
           </ng-container>
           <span class="service-error-message" *ngIf="isServiceUnavailable">Updating...</span>
         </div>
@@ -73,7 +73,7 @@
           <span class="token-name">GOLD</span>
           <ng-container *ngIf="!isServiceUnavailable">
             {{ balance.gold | replaceZero }}
-            <span class="usd-balance" *ngIf="usdRate.gold">(${{ balance.gold * usdRate.gold | substr:2:true }})</span>
+            <span class="usd-balance" *ngIf="usdRate.gold">(${{ usdBalance.gold }})</span>
           </ng-container>
           <span class="service-error-message" *ngIf="isServiceUnavailable">Updating...</span>
         </div>

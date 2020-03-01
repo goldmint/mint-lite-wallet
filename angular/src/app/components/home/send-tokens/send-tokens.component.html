@@ -9,18 +9,6 @@
             <div class="row">
                 <div class="col-12">
                     <div class="form-group">
-                        <label class="mb-0" for="from">From</label>
-                        <input type="text" class="form-control" id="from" placeholder='Main account' name="from"
-                               #from="ngModel"
-                               [ngClass]="{'is-invalid': from.invalid && from.dirty}"
-                               [(ngModel)]="accountName"
-                               required
-                               readonly>
-                    </div>
-                </div>
-
-                <div class="col-12">
-                    <div class="form-group">
                         <label class="mb-0" for="to">To</label>
                         <input type="text" class="form-control" id="to" placeholder='Wallet address' name="to"
                                #to="ngModel"
@@ -54,7 +42,8 @@
 
                 <div class="col-12">
                     <div class="form-group">
-                        <label class="mb-0" for="amount">Amount <span *ngIf="!isEmissionWallet">(Fee: {{ fee | noexp }} {{ sendData.token | uppercase }})</span></label>
+                        <label class="amount-label mb-0" for="amount">Amount <span *ngIf="!isEmissionWallet">(Fee: {{ fee | noexp }} {{ sendData.token | uppercase }})</span>
+                          <a class="send-all-btn" (click)="setAllValue()">Send all</a></label>
                         <input type="text" class="form-control" id="amount" placeholder='Amount' name="amount"
                                #amount="ngModel"
                                [ngClass]="{'is-invalid': (amount.invalid || invalidBalance) && amount.dirty}"
@@ -104,7 +93,7 @@
                 </div>
             </div>
             <div class="text-center mt-2">
-                {{ sendData.amount }} {{ sendData.token | uppercase }}
+                {{ tokenResult }} {{ sendData.token | uppercase }}
                 <div class="trs-fee">Fee: {{ fee | noexp }} {{ sendData.token | uppercase }}</div>
                 <div class="nonce-info">
                     nonce: #{{ nonce }}

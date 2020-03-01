@@ -304,8 +304,7 @@
     const singer = window.mint.Signer.FromPK(signerPrivateKey);
     let tx;
     try {
-      amount = +amount;
-      tx = singer.SignTransferAssetTx(nonce, toAddress, token, amount.toPrecision(18));
+      tx = singer.SignTransferAssetTx(nonce, toAddress, token, amount);
     } catch (e) {
       return failedTx();
     }

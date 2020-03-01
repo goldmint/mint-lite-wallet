@@ -7,7 +7,8 @@ import {environment} from "../../../../environments/environment";
 import {Subscription} from "rxjs/index";
 import {ChromeStorageService} from "../../../services/chrome-storage.service";
 import {combineLatest} from 'rxjs';
-import SimpleScrollbar from 'simple-scrollbar'
+import SimpleScrollbar from 'simple-scrollbar';
+import { BigNumber } from 'bignumber.js';
 
 @Component({
   selector: 'app-account',
@@ -23,6 +24,10 @@ export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
   public balance = {
     mnt: 0,
     gold: 0
+  };
+  usdBalance = {
+    mnt: "0",
+    gold: "0"
   };
   public usdRate = {
     mnt: 0,
@@ -107,6 +112,11 @@ export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
       this.balance.gold = data[1].res.balance.gold;
       this.usdRate.mnt = (data[2] && data[2].result) ? data[2].result.usd : 0;
       this.usdRate.gold = (data[3] && data[3].result) ? data[3].result.usd : 0;
+
+      this.usdBalance = {
+        mnt: new BigNumber(this.balance.mnt).multipliedBy(this.usdRate.mnt).decimalPlaces(2).toString(10),
+        gold: new BigNumber(this.balance.gold).multipliedBy(this.usdRate.gold).decimalPlaces(2).toString(10)
+      }
 
       this.isWalletApproved = data[1].res.tags && data[1].res.tags.indexOf('approved') >= 0;
 

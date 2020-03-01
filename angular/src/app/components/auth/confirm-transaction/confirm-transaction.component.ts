@@ -6,6 +6,7 @@ import {SumusTransactionService} from "../../../services/sumus-transaction.servi
 import {Tx, Wallet} from "../../../interfaces/wallet";
 import {environment} from "../../../../environments/environment";
 import * as CryptoJS from 'crypto-js';
+import { BigNumber } from 'bignumber.js';
 import {UnconfirmedTx} from "../../../interfaces/unconfirmed-tx";
 
 @Component({
@@ -114,8 +115,9 @@ export class ConfirmTransactionComponent implements OnInit {
       return;
     }
 
+    const amount = new BigNumber(this.currentTx.amount).toString(10);
     const result = this.sumusTransactionService.makeTransferAssetTransaction(
-      privateKey, this.currentTx.to, this.currentTx.token.toUpperCase(), this.currentTx.amount, this.nonce
+      privateKey, this.currentTx.to, this.currentTx.token.toUpperCase(), amount, this.nonce
     );
 
     this.apiService.getBlockChainStatus().subscribe((data: any) => {

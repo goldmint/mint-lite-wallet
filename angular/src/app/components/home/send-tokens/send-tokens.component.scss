@@ -1,0 +1,14 @@
+.amount-label {
+  position: relative;
+  width: 100%;
+
+  .send-all-btn {
+    position: absolute;
+    right: 0;
+    color: #0093e5;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

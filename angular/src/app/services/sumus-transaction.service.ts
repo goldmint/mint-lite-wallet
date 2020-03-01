@@ -5,9 +5,9 @@ export class SumusTransactionService {
 
   constructor() {}
 
-  makeTransferAssetTransaction(signerPrivateKey: string, toAddress: string, token: string, amount: number, nonce: number) {
+  makeTransferAssetTransaction(signerPrivateKey: string, toAddress: string, token: string, amount: string, nonce: number) {
     const singer = window['mint'].Signer.FromPK(signerPrivateKey);
-    const tx = singer.SignTransferAssetTx(nonce, toAddress, token, amount.toPrecision(18));
+    const tx = singer.SignTransferAssetTx(nonce, toAddress, token, amount);
 
     return {
       txData: tx.Data,
@@ -31,9 +31,9 @@ export class SumusTransactionService {
       const value = 0.03 * amount / 100;
 
       if (value >= 0.002) {
-        return 0.002
+        return 0.002;
       } else if (value <= 0.0002) {
-        return 0.0002
+        return 0.0002;
       } else {
         return value;
       }

@@ -9,6 +9,7 @@ import {environment} from "../../../../environments/environment";
 import {SumusTransactionService} from "../../../services/sumus-transaction.service";
 import {Tx, Wallet} from "../../../interfaces/wallet";
 import * as CryptoJS from 'crypto-js';
+import { BigNumber } from 'bignumber.js';
 
 @Component({
   selector: 'app-send-tokens',
@@ -38,6 +39,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   public network: string;
   public errorMessage: string = '';
   public tokenAmount: string = null;
+  public tokenResult: string;
 
   private sub1: Subscription;
   private chrome = window['chrome'];
@@ -59,8 +61,9 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     const id = this.route.snapshot.paramMap.get('id');
     const address = this.route.snapshot.paramMap.get('address');
     if (this.route.snapshot.paramMap.get('amount')) {
-      this.tokenAmount = this.route.snapshot.paramMap.get('amount');
-      this.sendData.amount = +this.tokenAmount;
+      const amount = this.route.snapshot.paramMap.get('amount');
+      this.tokenAmount = this.substrValue(amount);
+      this.sendData.amount = this.substrValue(amount);
     }
 
     this.sendData.token = id ? id : 'gold';
@@ -108,9 +111,10 @@ export class SendTokensComponent implements OnInit, OnDestroy {
 
   checkAmount() {
     this.fee = this.sumusTransactionService.feeCalculate(this.sendData.amount, this.sendData.token);
-    let balance = this.balance[this.sendData.token] - this.fee;
+    const tokenBalance = this.balance[this.sendData.token];
+    const balance = (+tokenBalance - this.fee) > 0 ? new BigNumber(tokenBalance).minus(this.fee) : new BigNumber(0);
 
-    if (!this.isEmissionWallet && (this.sendData.amount === 0 || this.sendData.amount > balance)) {
+    if (!this.isEmissionWallet && (!+this.sendData.amount || balance.isLessThan(new BigNumber(this.sendData.amount)))) {
       this.invalidBalance = true;
     } else {
       this.invalidBalance = false;
@@ -120,13 +124,13 @@ export class SendTokensComponent implements OnInit, OnDestroy {
 
   changeValue(event) {
     event.target.value = this.substrValue(event.target.value);
-    this.sendData.amount = +event.target.value;
-    event.target.setSelectionRange(event.target.value.length, event.target.value.length);
+    this.sendData.amount = event.target.value;
 
     this.fee = this.sumusTransactionService.feeCalculate(this.sendData.amount, this.sendData.token);
-    let balance = this.balance[this.sendData.token] - this.fee;
+    const tokenBalance = this.balance[this.sendData.token];
+    const balance = (+tokenBalance - this.fee) > 0 ? new BigNumber(tokenBalance).minus(this.fee) : new BigNumber(0);
 
-    if (!this.isEmissionWallet && (this.sendData.amount === 0 || this.sendData.amount > balance)) {
+    if (!this.isEmissionWallet && (!+this.sendData.amount || balance.isLessThan(new BigNumber(this.sendData.amount)))) {
       this.invalidBalance = true;
     } else {
       this.invalidBalance = false;
@@ -134,11 +138,22 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     this.ref.detectChanges();
   }
 
+  setAllValue() {
+    const tokenBalance = this.balance[this.sendData.token];
+    this.fee = this.sumusTransactionService.feeCalculate(tokenBalance, this.sendData.token);
+    const allValue = (+tokenBalance - this.fee) > 0 ? new BigNumber(tokenBalance).minus(this.fee) : new BigNumber(0);
+    const valueStr = this.substrValue(allValue.toString(10));
+
+    this.tokenAmount = valueStr;
+    this.sendData.amount = valueStr;
+    this.ref.detectChanges();
+  }
+
   substrValue(value: number|string) {
     return value.toString()
       .replace(',', '.')
       .replace(/([^\d.])|(^\.)/g, '')
-      .replace(/^(\d{1,6})\d*(?:(\.\d{0,6})[\d.]*)?/, '$1$2')
+      .replace(/^(\d{1,6})\d*(?:(\.\d{0,18})[\d.]*)?/, '$1$2')
       .replace(/^0+(\d)/, '$1');
   }
 
@@ -147,7 +162,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     this.ref.detectChanges();
   }
 
-  copyText(val: string){
+  copyText(val: string) {
     this.commonService.copyText(val);
   }
 
@@ -159,6 +174,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.apiService.getWalletBalance(this.currentWallet.publicKey).subscribe(data => {
       this.fee = this.sumusTransactionService.feeCalculate(this.sendData.amount, this.sendData.token);
+      this.tokenResult = new BigNumber(this.sendData.amount).toString(10);
       this.nonce = +data['res'].approved_nonce + 1;
 
       this.currentPage = this.page[1];
@@ -182,8 +198,9 @@ export class SendTokensComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const amount = new BigNumber(this.sendData.amount).toString(10);
     const result = this.sumusTransactionService.makeTransferAssetTransaction(
-      privateKey, this.sendData.to, this.sendData.token.toUpperCase(), this.sendData.amount, this.nonce
+      privateKey, this.sendData.to, this.sendData.token.toUpperCase(), amount, this.nonce
     );
 
     this.apiService.getBlockChainStatus().subscribe((data: any) => {
