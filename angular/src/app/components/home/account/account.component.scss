@@ -10,6 +10,10 @@
   height: 162px;
   width: 100%;
   position: relative;
+
+  &.full-height {
+    height: 248px;
+  }
 }
 
 .trs-item {
