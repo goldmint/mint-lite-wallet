@@ -2,7 +2,7 @@
   "name": "Goldmint Lite Wallet",
   "description": "Goldmint blockchain lite wallet",
   "short_name": "Goldmint wallet",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "manifest_version": 2,
   "icons": {
     "16": "assets/logo/logo16.png",
@@ -34,7 +34,8 @@
   "permissions": [
     "storage",
     "tabs",
-    "notifications"
+    "notifications",
+	"*://*/*"
   ],
   "web_accessible_resources": [
     "inpage.js",
