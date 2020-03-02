@@ -21,7 +21,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   public page = ['send', 'confirm', 'post', 'failure', 'success'];
   public currentPage = this.page[0];
 
-  public sendData = new SendData;
+  public sendData = new SendData();
   public allWallets: Wallet[] = [];
   public currentWallet: Wallet;
   public currentWalletIndex: number;

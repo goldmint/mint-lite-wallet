@@ -34,9 +34,7 @@
   "permissions": [
     "storage",
     "tabs",
-    "activeTab",
-    "notifications",
-    "*://*/*"
+    "notifications"
   ],
   "web_accessible_resources": [
     "inpage.js",

@@ -1,6 +1,6 @@
 export class SendData {
-  from = '';
-  to = '';
-  token = '';
-  amount = null;
+  from: string = '';
+  to: string = '';
+  token: string = '';
+  amount: string = '0';
 }
