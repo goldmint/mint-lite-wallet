@@ -1,8 +1,8 @@
 {
   "name": "Goldmint Lite Wallet",
-  "description": "Goldmint blockchain lite wallet",
-  "short_name": "Goldmint wallet",
-  "version": "1.0.1",
+  "description": "Send and receive MNT/GOLD in Mint blockchain",
+  "short_name": "Goldmint Lite Wallet",
+  "version": "1.0.2",
   "manifest_version": 2,
   "icons": {
     "16": "assets/logo/logo16.png",
@@ -32,10 +32,11 @@
     "default_icon": "assets/icon.png"
   },
   "permissions": [
+    "https://service.goldmint.io/*",
+    "activeTab",
     "storage",
-    "tabs",
-    "notifications",
-	"*://*/*"
+    "clipboardWrite",
+    "notifications"
   ],
   "web_accessible_resources": [
     "inpage.js",
