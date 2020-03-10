@@ -2,7 +2,7 @@
   "name": "Goldmint Lite Wallet",
   "description": "Send and receive MNT/GOLD in Mint blockchain",
   "short_name": "Goldmint Lite Wallet",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "manifest_version": 2,
   "icons": {
     "16": "assets/logo/logo16.png",
@@ -17,8 +17,8 @@
   "content_scripts": [
     {
       "matches": [
-        "http://*/*",
-        "https://*/*"
+        "*://*.goldmint.io/*",
+        "*://*.cryptopi.fund/*"
       ],
       "js": [
         "content.js"
