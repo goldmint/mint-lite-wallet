@@ -1,7 +1,7 @@
 'use strict';
 
 !function () {
-  let css = `
+	let css = `
         body, html {
             margin: 0;
             padding: 0;
@@ -216,190 +216,190 @@
           background: transparent;
         }
     `
-  let queryParams = {};
-  window.location.search.replace(/^\?/, '').split('&').forEach(item => {
-    let param = item.split('=');
-    queryParams[decodeURIComponent(param[0])] = param.length > 1 ? decodeURIComponent(param[1]) : '';
-  });
+	let queryParams = {};
+	window.location.search.replace(/^\?/, '').split('&').forEach(item => {
+		let param = item.split('=');
+		queryParams[decodeURIComponent(param[0])] = param.length > 1 ? decodeURIComponent(param[1]) : '';
+	});
 
-  let isFirefox = typeof InstallTrigger !== 'undefined',
-    brows = isFirefox ? browser : chrome,
-    accountName,
-    privateKey,
-    cryptoJS = CryptoJS,
-    id = queryParams.id,
-    tabId = queryParams.tabId,
-    identify,
-    messages,
-    currentMessage,
-    wallets,
-    domElements = {};
+	let isFirefox = typeof InstallTrigger !== 'undefined',
+		brows = isFirefox ? browser : chrome,
+		accountName,
+		privateKey,
+		cryptoJS = CryptoJS,
+		id = queryParams.id,
+		tabId = queryParams.tabId,
+		identify,
+		messages,
+		currentMessage,
+		wallets,
+		domElements = {};
 
-  onInit();
+	onInit();
 
-  function onInit() {
-    initCSS();
+	function onInit() {
+		initCSS();
 
-    if (isFirefox) {
-      brows.runtime.onMessage.addListener((request, sender, sendResponse) => {
-        getIdentifier(request);
-      });
-    } else {
-      brows.extension.onMessage.addListener((request, sender, sendResponse) => {
-        getIdentifier(request);
-      });
-    }
-    brows.runtime.sendMessage({getIdentifier: true});
+		if (isFirefox) {
+			brows.runtime.onMessage.addListener((request, sender, sendResponse) => {
+				getIdentifier(request);
+			});
+		} else {
+			brows.extension.onMessage.addListener((request, sender, sendResponse) => {
+				getIdentifier(request);
+			});
+		}
+		brows.runtime.sendMessage({ getIdentifier: true });
 
-    chooseDomElements([
-      'sourceHost',
-      'sourceIconBlock',
-      'sourceIcon',
-      'messageLength',
-      'btnClose',
-      'btnConfirm',
-      'messageBlock',
-      'btnText',
-      'btnHex',
-      'messageText',
-      'messageHex',
-      'accountName'
-    ]);
+		chooseDomElements([
+			'sourceHost',
+			'sourceIconBlock',
+			'sourceIcon',
+			'messageLength',
+			'btnClose',
+			'btnConfirm',
+			'messageBlock',
+			'btnText',
+			'btnHex',
+			'messageText',
+			'messageHex',
+			'accountName'
+		]);
 
-    domElements.btnClose.addEventListener('click', cancel);
-    domElements.btnConfirm.addEventListener('click', sign);
-    domElements.btnText.addEventListener('click', displayTextMessage);
-    domElements.btnHex.addEventListener('click', displayHexMessage);
-  }
+		domElements.btnClose.addEventListener('click', cancel);
+		domElements.btnConfirm.addEventListener('click', sign);
+		domElements.btnText.addEventListener('click', displayTextMessage);
+		domElements.btnHex.addEventListener('click', displayHexMessage);
+	}
 
-  function buf2hex(buffer) {
-    return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
-  }
+	function buf2hex(buffer) {
+		return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
+	}
 
-  function getMessage() {
-    brows.storage.local.get(null, data => {
-      messages = data.messagesForSign;
-      wallets = data.wallets;
+	function getMessage() {
+		brows.storage.local.get(null, data => {
+			messages = data.messagesForSign;
+			wallets = data.wallets;
 
-      messages.forEach(message => {
-        if (message.id == id) {
-          currentMessage = message;
+			messages.forEach(message => {
+				if (message.id == id) {
+					currentMessage = message;
 
-          let bytes = [];
-          for (let key in currentMessage.bytes) {
-            bytes.push(currentMessage.bytes[key]);
-          }
-          currentMessage.bytes = bytes;
+					let bytes = [];
+					for (let key in currentMessage.bytes) {
+						bytes.push(currentMessage.bytes[key]);
+					}
+					currentMessage.bytes = bytes;
 
-          if (bytes && bytes.length) {
-            currentMessage.utf8 = new TextDecoder('utf-8').decode(new Uint8Array(currentMessage.bytes));
+					if (bytes && bytes.length) {
+						currentMessage.utf8 = new TextDecoder('utf-8').decode(new Uint8Array(currentMessage.bytes));
 
-            const buffer = new Uint8Array(currentMessage.bytes).buffer;
-            currentMessage.hex = '0x' + buf2hex(buffer);
+						const buffer = new Uint8Array(currentMessage.bytes).buffer;
+						currentMessage.hex = '0x' + buf2hex(buffer);
 
-            domElements.messageText.textContent = currentMessage.utf8;
-            domElements.messageHex.textContent = currentMessage.hex;
-          }
+						domElements.messageText.textContent = currentMessage.utf8;
+						domElements.messageHex.textContent = currentMessage.hex;
+					}
 
-          let encryptedKey;
-          for (let i = 0; i < wallets.length; i++) {
-            if (wallets[i].publicKey === message.publicKey) {
-              encryptedKey = wallets[i].privateKey;
-              accountName = wallets[i].name;
-              break;
-            }
-          }
+					let encryptedKey;
+					for (let i = 0; i < wallets.length; i++) {
+						if (wallets[i].publicKey === message.publicKey) {
+							encryptedKey = wallets[i].privateKey;
+							accountName = wallets[i].name;
+							break;
+						}
+					}
 
-          privateKey = cryptoJS.AES.decrypt(encryptedKey, identify).toString(cryptoJS.enc.Utf8);
-          domElements.sourceHost.textContent = message.host;
-          domElements.messageLength.textContent = currentMessage.bytes ? currentMessage.bytes.length : 0;
-          domElements.accountName.textContent = accountName || '';
+					privateKey = cryptoJS.AES.decrypt(encryptedKey, identify).toString(cryptoJS.enc.Utf8);
+					domElements.sourceHost.textContent = message.host;
+					domElements.messageLength.textContent = currentMessage.bytes ? currentMessage.bytes.length : 0;
+					domElements.accountName.textContent = accountName || '';
 
-          if (message.iconUrl) {
-            domElements.sourceIconBlock.style.display = 'block';
-            domElements.sourceIcon.setAttribute('src', message.iconUrl);
-          }
+					if (message.iconUrl) {
+						domElements.sourceIconBlock.style.display = 'block';
+						domElements.sourceIcon.setAttribute('src', message.iconUrl);
+					}
 
-          displayTextMessage();
-        }
-      });
-    });
-  }
+					displayTextMessage();
+				}
+			});
+		});
+	}
 
-  function getIdentifier(request) {
-    if (request.identifier) {
-      identify = request.identifier;
-      getMessage();
-    }
-  }
+	function getIdentifier(request) {
+		if (request.identifier) {
+			identify = request.identifier;
+			getMessage();
+		}
+	}
 
-  function sign() {
-    let result;
+	function sign() {
+		let result;
 
-    try {
-      const singer = window.mint.Signer.FromPK(privateKey);
-      result = singer.SignMessage(new Uint8Array(currentMessage.bytes));
-    } catch (e) {
-      cancel();
-    }
+		try {
+			const singer = window.mint.Signer.FromPK(privateKey);
+			result = singer.SignMessage(new Uint8Array(currentMessage.bytes));
+		} catch (e) {
+			cancel();
+		}
 
-    brows.storage.local.get(null, (data) => {
-      messages = data.messagesForSign;
-      messages.forEach((message, index) => {
-        if (message.id == id) messages.splice(index, 1);
-      });
+		brows.storage.local.get(null, (data) => {
+			messages = data.messagesForSign;
+			messages.forEach((message, index) => {
+				if (message.id == id) messages.splice(index, 1);
+			});
 
-      brows.storage.local.set({['messagesForSign']: messages}, () => {
-        brows.runtime.sendMessage({sendSignResult: {result, id, tabId}});
-        close();
-      });
-    });
-  }
+			brows.storage.local.set({ ['messagesForSign']: messages }, () => {
+				brows.runtime.sendMessage({ sendSignResult: { result, id, tabId } });
+				close();
+			});
+		});
+	}
 
-  function cancel() {
-    brows.storage.local.get(null, (data) => {
-      messages = data.messagesForSign;
-      messages.forEach((message, index) => {
-        if (message.id == id) messages.splice(index, 1);
-      });
+	function cancel() {
+		brows.storage.local.get(null, (data) => {
+			messages = data.messagesForSign;
+			messages.forEach((message, index) => {
+				if (message.id == id) messages.splice(index, 1);
+			});
 
-      brows.storage.local.set({['messagesForSign']: messages}, () => {
-        brows.runtime.sendMessage({sendSignResult: {result: null, id, tabId}});
-        close();
-      });
-    });
-  }
+			brows.storage.local.set({ ['messagesForSign']: messages }, () => {
+				brows.runtime.sendMessage({ sendSignResult: { result: null, id, tabId } });
+				close();
+			});
+		});
+	}
 
-  function close() {
-    brows.windows.getCurrent((window) => {
-      brows.windows.remove(window.id);
-    });
-  }
+	function close() {
+		brows.windows.getCurrent((window) => {
+			brows.windows.remove(window.id);
+		});
+	}
 
-  function displayTextMessage() {
-    domElements.messageBlock.classList.remove('hex');
-    domElements.messageBlock.classList.add('text');
-  }
+	function displayTextMessage() {
+		domElements.messageBlock.classList.remove('hex');
+		domElements.messageBlock.classList.add('text');
+	}
 
-  function displayHexMessage() {
-    domElements.messageBlock.classList.remove('text');
-    domElements.messageBlock.classList.add('hex');
-  }
+	function displayHexMessage() {
+		domElements.messageBlock.classList.remove('text');
+		domElements.messageBlock.classList.add('hex');
+	}
 
-  function chooseDomElement(id) {
-    domElements[id] = document.getElementById(id);
-  }
+	function chooseDomElement(id) {
+		domElements[id] = document.getElementById(id);
+	}
 
-  function chooseDomElements(ids) {
-    ids.forEach(id => {
-      domElements[id] = document.getElementById(id);
-    });
-  }
+	function chooseDomElements(ids) {
+		ids.forEach(id => {
+			domElements[id] = document.getElementById(id);
+		});
+	}
 
-  function initCSS() {
-    let style = document.createElement('style');
-    style.appendChild(document.createTextNode(css));
-    document.head.appendChild(style);
-  }
+	function initCSS() {
+		let style = document.createElement('style');
+		style.appendChild(document.createTextNode(css));
+		document.head.appendChild(style);
+	}
 
 }();

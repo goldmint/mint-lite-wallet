@@ -1,1 +1,105 @@
-"use strict";!function(){var e={},t=(t,n)=>new Promise((a,r)=>{let s=Math.random().toString(36).substr(2,9);e[s]=[a,r],window.postMessage({type:"question",id:s,resource:t,data:JSON.stringify(n)},"*")});window.addEventListener("message",t=>{t&&t.data&&"answer"===t.data.type&&t.data.id in e&&(e[t.data.id][t.data.isSuccess?0:1](t.data.data),delete e[t.data.id])}),Promise.all([t("getGoWasmJsPath"),t("getMintWasmPath")]).then(e=>{let t=document.createElement("script");t.setAttribute("type","text/javascript"),t.setAttribute("src",e[0]),document.head&&document.head.appendChild(t);const n=setInterval(()=>{if(window.Go){clearInterval(n);const t=new Go;WebAssembly.instantiateStreaming||(WebAssembly.instantiateStreaming=(async(e,t)=>{const n=await(await e).arrayBuffer();return await WebAssembly.instantiate(n,t)})),WebAssembly.instantiateStreaming(fetch(e[1]),t.importObject).then(e=>{t.run(e.instance)}).catch(e=>{console.error(e)})}},50)});window.GoldMint=new class{constructor(){}getAccount(){return t("getAccount")}getCurrentNetwork(){return t("getCurrentNetwork")}getBalance(e){return t("getBalance",{address:e})}sendTransaction(e,n,a){return t("sendTransaction",{to:e,token:n,amount:a})}openSendTokenPage(e,n,a=0){return t("openSendTokenPage",{address:e,token:n.toLowerCase(),amount:a})}signMessage(e,n=null){return t("signMessage",{bytes:e,publicKey:n})}verifySignature(e,n,a){let r;if(e&&"object"==typeof e&&n&&a||(r=null),window.mint&&window.mint.Verify)try{r=window.mint.Verify(e,n,a)}catch(e){r=null}else r=null;return t("verifySignature",{result:r})}}}();
+"use strict"
+
+!function () {
+	if (window['GoldMint']) {
+		return;
+	}
+	
+	var questions = {};
+	var sendQuestion = (resource, data) => new Promise((resolve, reject) => {
+		let id = Math.random().toString(36).substr(2, 9);
+		questions[id] = [resolve, reject];
+		window.postMessage({ type: 'question', id, resource, data: JSON.stringify(data) }, "*");
+	});
+
+	window.addEventListener("message", (data) => {
+		if (data && data.data && data.data.type === 'answer' && data.data.id in questions) {
+			questions[data.data.id][data.data.isSuccess ? 0 : 1](data.data.data);
+			delete questions[data.data.id];
+		}
+	});
+
+	Promise.all([
+		sendQuestion('getGoWasmJsPath'),
+		sendQuestion('getMintWasmPath')
+	]).then(res => {
+		let script = document.createElement('script');
+		script.setAttribute('type', 'text/javascript');
+		script.setAttribute('src', res[0]);
+		document.head && document.head.appendChild(script);
+
+		const interval = setInterval(() => {
+			if (window.Go) {
+				clearInterval(interval);
+				const go = new Go();
+
+				// polyfill
+				if (!WebAssembly.instantiateStreaming) {
+					WebAssembly.instantiateStreaming = async (resp, importObject) => {
+						const source = await (await resp).arrayBuffer();
+						return await WebAssembly.instantiate(source, importObject);
+					};
+				}
+
+				WebAssembly.instantiateStreaming(fetch(res[1]), go.importObject)
+					.then((result) => {
+						go.run(result.instance);
+					})
+					.catch((err) => {
+						console.error(err);
+					});
+			}
+		}, 50);
+	});
+
+	class GoldMint {
+
+		constructor() { }
+
+		getAccount() {
+			return sendQuestion('getAccount');
+		}
+
+		getCurrentNetwork() {
+			return sendQuestion('getCurrentNetwork');
+		}
+
+		getBalance(address) {
+			return sendQuestion('getBalance', { address });
+		}
+
+		sendTransaction(to, token, amount) {
+			return sendQuestion('sendTransaction', { to, token, amount });
+		}
+
+		openSendTokenPage(address, token, amount = 0) {
+			return sendQuestion('openSendTokenPage', { address, token: token.toLowerCase(), amount });
+		}
+
+		signMessage(bytes, publicKey = null) {
+			return sendQuestion('signMessage', { bytes, publicKey });
+		}
+
+		verifySignature(bytes, signature, publicKey) {
+			let result;
+			if (!bytes || typeof bytes !== 'object' || !signature || !publicKey) {
+				result = null;
+			}
+
+			if (window.mint && window.mint.Verify) {
+				try {
+					result = window.mint.Verify(bytes, signature, publicKey)
+				} catch (e) {
+					result = null;
+				}
+			} else {
+				result = null;
+			}
+
+			return sendQuestion('verifySignature', { result });
+		}
+	}
+
+	window.GoldMint = new GoldMint;
+
+}();

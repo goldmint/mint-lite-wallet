@@ -84,7 +84,7 @@
 </div>
 
 <div class="tx-content">
-    <div class="trs-container" [ngClass]="{'no-scroll': !transactionList || transactionList.length <= 6, 'full-height': !banner || !banner.image}">
+    <div class="trs-container" [ngClass]="{'no-scroll': !transactionList || transactionList.length <= 6, 'full-height': !(banner && banner.image)}">
         <div *ngIf="transactionList && transactionList.length && isDataLoaded; else noTx">
             <div *ngFor="let t of transactionList" class="trs-item">
                 <a class="d-flex align-items-center justify-content-between"

@@ -4,7 +4,6 @@ import {Wallet} from "../../../interfaces/wallet";
 import * as CryptoJS from 'crypto-js';
 import {Subscription} from "rxjs/index";
 import {CommonService} from "../../../services/common.service";
-import {MessageBoxService} from "../../../services/message-box.service";
 
 @Component({
   selector: 'app-details-account',

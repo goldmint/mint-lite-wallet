@@ -1,1 +1,270 @@
-"use strict";const config={networkUrl:{main:"https://service.goldmint.io/mint/mainnet/v1",test:"https://service.goldmint.io/mint/testnet/v1"},api:{getBalance:"/wallet/"},forbiddenDomains:["google.com"]};var isLoggedIn=!1,isFirefox="undefined"!=typeof InstallTrigger,brows=isFirefox?browser:chrome;function injectInpageJs(){let e=!0;if(config.forbiddenDomains.forEach(n=>{window.location.href.indexOf(n)>=0&&(e=!1)}),e){var n=document.createElement("script");n.setAttribute("type","text/javascript"),n.setAttribute("src",brows.extension.getURL("inpage.js")),document.documentElement.insertBefore(n,document.head)}else console.log("Goldmint Lite Wallet library not used")}function http(e,n,t=""){let s=new XMLHttpRequest,o="GET"===e.toUpperCase()?n+t:n;return s.open(e.toUpperCase(),o,!0),s.setRequestHeader("Content-Type","application/json"),"GET"===e.toUpperCase()?s.send():s.send(JSON.stringify(t)),new Promise((e,n)=>{s.onload=(()=>{if(s.status>=200&&s.status<300)try{e(JSON.parse(s.responseText))}catch(n){e(null)}else e(null)})})}function generateId(){return Math.random().toString(36).substr(2,9)}injectInpageJs(),brows.runtime.onMessage.addListener((e,n,t)=>{e.hasOwnProperty("loginStatus")&&isLoggedIn!==e.loginStatus&&(isLoggedIn=e.loginStatus),e.hasOwnProperty("login")&&(isLoggedIn=e.login)}),brows.runtime.sendMessage({checkLoginStatus:!0}),window.addEventListener("message",e=>{if(e&&e.data&&"question"===e.data.type&&e.data.resource in actions){let n=void 0;try{n=JSON.parse(e.data.data)}catch(e){}window.postMessage&&actions[e.data.resource](n).then(n=>{try{window.postMessage({type:"answer",id:e.data.id,isSuccess:!0,data:n},"*")}catch(e){}},n=>{try{window.postMessage({type:"answer",id:e.data.id,isSuccess:!1,data:n},"*")}catch(e){}})}});var actions={getAccount:e=>new Promise((e,n)=>{brows.runtime.onMessage.addListener(function n(t,s,o){brows.runtime.onMessage.removeListener(n),t.hasOwnProperty("loginStatus")&&(isLoggedIn=t.loginStatus,brows.storage.local.get(null,n=>{e(isLoggedIn?[n.wallets[n.currentWallet].publicKey]:[])}))}),brows.runtime.sendMessage({checkLoginStatus:!0})}),getCurrentNetwork:e=>new Promise((e,n)=>{brows.runtime.onMessage.addListener(function n(t,s,o){brows.runtime.onMessage.removeListener(n),t.hasOwnProperty("loginStatus")&&(isLoggedIn=t.loginStatus,brows.storage.local.get(null,n=>{e(isLoggedIn?n.currentNetwork||"main":null)}))}),brows.runtime.sendMessage({checkLoginStatus:!0})}),getBalance:e=>new Promise((n,t)=>{brows.runtime.onMessage.addListener(function t(s,o,r){brows.runtime.onMessage.removeListener(t),s.hasOwnProperty("loginStatus")&&(isLoggedIn=s.loginStatus,brows.storage.local.get(null,t=>{let s=config.networkUrl[t.currentNetwork||"main"];isLoggedIn?http("GET",s+config.api.getBalance,e.address).then(e=>{n(e?{gold:e.res.balance.gold,mint:e.res.balance.mint}:null)}):n(null)}))}),brows.runtime.sendMessage({checkLoginStatus:!0})}),sendTransaction:e=>new Promise((n,t)=>{brows.runtime.onMessage.addListener(function t(s,o,r){if(brows.runtime.onMessage.removeListener(t),s.hasOwnProperty("loginStatus")){if(!(isLoggedIn=s.loginStatus))return n(null);brows.storage.local.get(null,t=>{const s=generateId(),o=t.wallets[t.currentWallet].publicKey;let r={id:s,from:o,to:e.to,token:e.token,amount:e.amount,network:t.currentNetwork||"main"},i=[];t.unconfirmedTx&&(i=t.unconfirmedTx),i.push(r),brows.storage.local.set({unconfirmedTx:i},()=>{brows.runtime.sendMessage({sendTransaction:s})}),brows.runtime.onMessage.addListener(function e(t,o,r){brows.runtime.onMessage.removeListener(e),t.hasOwnProperty("sendTxResultContent")&&t.sendTxResultContent.id===s&&n(t.sendTxResultContent.hash)})})}}),brows.runtime.sendMessage({checkLoginStatus:!0})}),openSendTokenPage:e=>new Promise((n,t)=>{brows.runtime.onMessage.addListener(function t(s,o,r){if(brows.runtime.onMessage.removeListener(t),s.hasOwnProperty("loginStatus")){if(!(isLoggedIn=s.loginStatus))return n(null);const t={address:e.address,token:e.token,amount:e.amount};brows.storage.local.set({openSendTokenPage:t},()=>{brows.runtime.sendMessage({openSendTokenPage:e}),n(!0)})}}),brows.runtime.sendMessage({checkLoginStatus:!0})}),signMessage:e=>new Promise((n,t)=>{brows.runtime.onMessage.addListener(function t(s,o,r){if(brows.runtime.onMessage.removeListener(t),s.hasOwnProperty("loginStatus")){if(!(isLoggedIn=s.loginStatus))return n(null);if(!e.bytes||"object"!=typeof e.bytes)return n(null);brows.storage.local.get(null,t=>{const s=generateId(),o=e.publicKey||t.wallets[t.currentWallet].publicKey,r=window.location.host;let i,a=document.querySelectorAll("link");[].forEach.call(a,e=>{e.rel.indexOf("icon")>=0&&(i=e.href)});let g={id:s,bytes:e.bytes,publicKey:o,host:r,iconUrl:i||null},l=[];t.messagesForSign&&(l=t.messagesForSign),l.push(g),brows.storage.local.set({messagesForSign:l},()=>{brows.runtime.sendMessage({signMessage:s})}),brows.runtime.onMessage.addListener(function e(t,o,r){brows.runtime.onMessage.removeListener(e),t.hasOwnProperty("sendSignResultContent")&&t.sendSignResultContent.id===s&&n(t.sendSignResultContent.result)})})}}),brows.runtime.sendMessage({checkLoginStatus:!0})}),verifySignature:e=>new Promise((n,t)=>{n(e.result)}),getGoWasmJsPath:e=>new Promise((e,n)=>{e(brows.extension.getURL("assets/libs/mint/gowasm.js"))}),getMintWasmPath:e=>new Promise((e,n)=>{e(brows.extension.getURL("assets/libs/mint/mint.wasm"))})};
+"use strict"
+
+!function() {
+	if (window['GoldMint']) {
+		return;
+	}
+	
+	const config = {
+		networkUrl: {
+			main: 'https://service.goldmint.io/mint/mainnet/v1',
+			test: 'https://service.goldmint.io/mint/testnet/v1'
+		},
+		api: {
+			getBalance: '/wallet/'
+		}
+	};
+
+	var isLoggedIn = false;
+	var isFirefox = typeof InstallTrigger !== 'undefined';
+	var brows = isFirefox ? browser : chrome;
+
+	injectInpageJs();
+
+	brows.runtime.onMessage.addListener((request, sender, sendResponse) => {
+		request.hasOwnProperty('loginStatus') && isLoggedIn !== request.loginStatus && (isLoggedIn = request.loginStatus);
+		request.hasOwnProperty('login') && (isLoggedIn = request.login);
+	});
+	brows.runtime.sendMessage({ checkLoginStatus: true });
+
+	window.addEventListener("message", (data) => {
+		if (data && data.data && data.data.type === 'question' && data.data.resource in actions) {
+			let resourceData = undefined;
+			try {
+				resourceData = JSON.parse(data.data.data);
+			} catch (e) {
+			}
+
+			window.postMessage && actions[data.data.resource](resourceData).then(r => {
+				try {
+					window.postMessage({ type: 'answer', id: data.data.id, isSuccess: true, data: r }, "*");
+				} catch (e) {
+				}
+			}, r => {
+				try {
+					window.postMessage({ type: 'answer', id: data.data.id, isSuccess: false, data: r }, "*");
+				} catch (e) {
+				}
+			});
+		}
+	});
+
+	function injectInpageJs() {
+		var script = document.createElement('script');
+		script.setAttribute('type', 'text/javascript');
+		script.setAttribute('src', brows.extension.getURL('inpage.js'));
+		document.documentElement.insertBefore(script, document.head);
+	}
+
+	function http(method, url, params = '') {
+		let xhr = new XMLHttpRequest(),
+			currentUrl = method.toUpperCase() === "GET" ? url + params : url;
+		xhr.open(method.toUpperCase(), currentUrl, true);
+		xhr.setRequestHeader('Content-Type', 'application/json');
+		method.toUpperCase() === "GET" ? xhr.send() : xhr.send(JSON.stringify(params));
+
+		return new Promise((resolve, reject) => {
+			xhr.onload = () => {
+				if (xhr.status >= 200 && xhr.status < 300) {
+					try {
+						resolve(JSON.parse(xhr.responseText));
+					} catch (e) {
+						resolve(null);
+					}
+				} else {
+					resolve(null);
+				}
+			};
+		});
+	};
+
+	function generateId() {
+		return Math.random().toString(36).substr(2, 9);
+	}
+
+	var actions = {
+		getAccount: data => new Promise((resolve, reject) => {
+			brows.runtime.onMessage.addListener(function checkLogin(request, sender, sendResponse) {
+				brows.runtime.onMessage.removeListener(checkLogin);
+
+				if (request.hasOwnProperty('loginStatus')) {
+					isLoggedIn = request.loginStatus;
+
+					brows.storage.local.get(null, (result) => {
+						resolve(isLoggedIn ? [result.wallets[result.currentWallet].publicKey] : []);
+					});
+				}
+			});
+			brows.runtime.sendMessage({ checkLoginStatus: true });
+		}),
+
+		getCurrentNetwork: data => new Promise((resolve, reject) => {
+			brows.runtime.onMessage.addListener(function checkLogin(request, sender, sendResponse) {
+				brows.runtime.onMessage.removeListener(checkLogin);
+
+				if (request.hasOwnProperty('loginStatus')) {
+					isLoggedIn = request.loginStatus;
+
+					brows.storage.local.get(null, (result) => {
+						resolve(isLoggedIn ? (result.currentNetwork || 'main') : null);
+					});
+				}
+			});
+			brows.runtime.sendMessage({ checkLoginStatus: true });
+		}),
+
+		getBalance: data => new Promise((resolve, reject) => {
+			brows.runtime.onMessage.addListener(function checkLogin(request, sender, sendResponse) {
+				brows.runtime.onMessage.removeListener(checkLogin);
+
+				if (request.hasOwnProperty('loginStatus')) {
+					isLoggedIn = request.loginStatus;
+
+					brows.storage.local.get(null, (result) => {
+						let currentNetwork = config.networkUrl[result.currentNetwork || 'main'];
+						if (isLoggedIn) {
+							http('GET', currentNetwork + config.api.getBalance, data.address).then(result => {
+								if (result) {
+									resolve({
+										gold: result.res.balance.gold,
+										mint: result.res.balance.mint
+									});
+								} else {
+									resolve(null);
+								}
+							});
+						} else {
+							resolve(null);
+						}
+					});
+				}
+			});
+			brows.runtime.sendMessage({ checkLoginStatus: true });
+		}),
+
+		sendTransaction: data => new Promise((resolve, reject) => {
+			brows.runtime.onMessage.addListener(function checkLogin(request, sender, sendResponse) {
+				brows.runtime.onMessage.removeListener(checkLogin);
+
+				if (request.hasOwnProperty('loginStatus')) {
+					isLoggedIn = request.loginStatus;
+
+					if (!isLoggedIn) {
+						return resolve(null);
+					}
+					brows.storage.local.get(null, (storage) => {
+						const id = generateId();
+						const from = storage.wallets[storage.currentWallet].publicKey;
+
+						let tx = { id, from, to: data.to, token: data.token, amount: data.amount, network: (storage.currentNetwork || 'main') },
+							unconfirmedTx = [];
+
+						storage.unconfirmedTx && (unconfirmedTx = storage.unconfirmedTx);
+						unconfirmedTx.push(tx);
+
+						brows.storage.local.set({ 'unconfirmedTx': unconfirmedTx }, () => {
+							brows.runtime.sendMessage({ sendTransaction: id });
+						});
+
+						brows.runtime.onMessage.addListener(function answer(request, sender, sendResponse) {
+							brows.runtime.onMessage.removeListener(answer);
+
+							if (request.hasOwnProperty('sendTxResultContent') && request.sendTxResultContent.id === id) {
+								resolve(request.sendTxResultContent.hash);
+							}
+						});
+					});
+				}
+			});
+			brows.runtime.sendMessage({ checkLoginStatus: true });
+		}),
+
+		openSendTokenPage: data => new Promise((resolve, reject) => {
+			brows.runtime.onMessage.addListener(function checkLogin(request, sender, sendResponse) {
+				brows.runtime.onMessage.removeListener(checkLogin);
+
+				if (request.hasOwnProperty('loginStatus')) {
+					isLoggedIn = request.loginStatus;
+
+					if (!isLoggedIn) {
+						return resolve(null);
+					}
+					const dataObj = {
+						address: data.address,
+						token: data.token,
+						amount: data.amount
+					};
+					brows.storage.local.set({ 'openSendTokenPage': dataObj }, () => {
+						brows.runtime.sendMessage({ openSendTokenPage: data });
+						resolve(true);
+					});
+				}
+			});
+			brows.runtime.sendMessage({ checkLoginStatus: true });
+		}),
+
+		signMessage: data => new Promise((resolve, reject) => {
+			brows.runtime.onMessage.addListener(function checkLogin(request, sender, sendResponse) {
+				brows.runtime.onMessage.removeListener(checkLogin);
+
+				if (request.hasOwnProperty('loginStatus')) {
+					isLoggedIn = request.loginStatus;
+
+					if (!isLoggedIn) {
+						return resolve(null);
+					}
+
+					if (!data.bytes || typeof data.bytes !== 'object') {
+						return resolve(null);
+					}
+
+					brows.storage.local.get(null, (storage) => {
+						const id = generateId();
+						const publicKey = data.publicKey || storage.wallets[storage.currentWallet].publicKey;
+						const host = window.location.host;
+						let iconUrl;
+
+						let icons = document.querySelectorAll('link');
+						[].forEach.call(icons, icon => {
+							if (icon.rel.indexOf('icon') >= 0) {
+								iconUrl = icon.href;
+							}
+						});
+
+						let message = { id, bytes: data.bytes, publicKey, host, iconUrl: iconUrl || null },
+							messagesForSign = [];
+
+						storage.messagesForSign && (messagesForSign = storage.messagesForSign);
+						messagesForSign.push(message);
+
+						brows.storage.local.set({ 'messagesForSign': messagesForSign }, () => {
+							brows.runtime.sendMessage({ signMessage: id });
+						});
+
+						brows.runtime.onMessage.addListener(function answer(request, sender, sendResponse) {
+							brows.runtime.onMessage.removeListener(answer);
+
+							if (request.hasOwnProperty('sendSignResultContent') && request.sendSignResultContent.id === id) {
+								resolve(request.sendSignResultContent.result);
+							}
+						});
+					});
+				}
+			});
+			brows.runtime.sendMessage({ checkLoginStatus: true });
+		}),
+
+		verifySignature: data => new Promise((resolve, reject) => {
+			resolve(data.result);
+		}),
+
+		getGoWasmJsPath: data => new Promise((resolve, reject) => {
+			resolve(brows.extension.getURL('assets/libs/mint/gowasm.js'));
+		}),
+
+		getMintWasmPath: data => new Promise((resolve, reject) => {
+			resolve(brows.extension.getURL('assets/libs/mint/mint.wasm'));
+		})
+	};
+
+}();
