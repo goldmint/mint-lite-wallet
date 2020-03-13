@@ -1,12 +1,131 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Example</title>
-  <base href="/">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  
-  <body>
-  </body>
+<head>
+	<meta charset="utf-8">
+	<title>Example</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body style="font-family: monospace; font-size: 1.5em;">
+
+	<h5>Click on Goldmint Lite Wallet extension &UpperRightArrow;</h5>
+	<ul>
+		<li>Injected: <span id="lw_injected">?</span></li>
+		<li>Network: <span id="lw_net">?</span></li>
+		<li>Address: <span id="lw_address">?</span></li>
+		<li>Balance: <span id="lw_balance">?</span></li>
+		<li><a href="#" onclick="openSendToken()">Send token popup</a></li>
+		<li><a href="#" onclick="sendToken()">Send token (strict)</a></li>
+		<li><a href="#" onclick="signMessage()">Sign message</a></li>
+	</ul>
+
+
+	<script>
+		class LiteWalletChecker extends EventTarget {
+			
+			constructor() {
+				super();
+				this.goldmint = null;
+				this.lastNet = null;
+				this.lastAddr = null;
+				
+				let tid = setInterval(_ => {
+					if (window['GoldMint']) {
+						clearInterval(tid);
+						this.goldmint = window['GoldMint'];
+						this.dispatchEvent(new CustomEvent('injected', { detail: true }));
+						this.enqueueCheck(0);
+					}
+				}, 750);
+			}
+
+			enqueueCheck(timeout) {
+				setTimeout(_ => this.checkChanges().then().catch(err => console.log(err)), timeout);
+			}
+
+			async checkChanges() {
+				let res = await Promise.all([
+					this.goldmint.getCurrentNetwork(),
+					this.goldmint.getAccount(),
+				]);
+				let net = res[0];
+				let addr = res[1][0];
+
+				if (net !== this.lastNet) {
+					this.dispatchEvent(new CustomEvent('network', { detail: net }));
+					this.lastNet = net;
+				}
+
+				if (addr !== this.lastAddr) {
+					this.dispatchEvent(new CustomEvent('address', { detail: addr }));
+					this.lastAddr = addr;
+				}
+
+				this.enqueueCheck(750);
+			}
+		}
+
+		let ready = false;
+		let curAddr = null;
+		let curDest = "2KHP6T28wQWZctGNfRnfnbHmPE96UgGc1Q6ydaPm9rvLRSYsdF";
+
+		let chk = new LiteWalletChecker();
+
+		chk.addEventListener('injected', (e) => {
+			document.querySelector('#lw_injected').innerHTML = e.detail;
+			ready = true;
+		});
+
+		chk.addEventListener('network', (e) => {
+			document.querySelector('#lw_net').innerHTML = e.detail;
+		});
+
+		chk.addEventListener('address', (e) => {
+			let addr = e.detail;
+			curAddr = addr;
+
+			document.querySelector('#lw_address').innerHTML = addr;
+
+			// check balance
+			chk.goldmint.getBalance(addr)
+				.then((balance) => {
+					document.querySelector('#lw_balance').innerHTML = balance.gold + ' GOLD, ' + balance.mint + ' MNT';
+				})
+				.catch((err) => {
+					document.querySelector('#lw_balance').innerHTML = err;
+				})
+			;
+		});
+
+		// ---
+
+		async function openSendToken() {
+			if (ready && await window['GoldMint'].openSendTokenPage(curDest, "MNT", "0.1")) {
+				// ok
+			}
+		}
+
+		async function sendToken() {
+			if (!ready) return;
+			let digest = await window['GoldMint'].sendTransaction(curDest, "MNT", "0.1");
+			if (digest !== null) alert("Transaction digest: " + digest);
+		}
+		
+		async function signMessage() {
+			if (!ready) return;
+
+			let message = new Uint8Array([ 0xDE, 0xAD, 0xBE, 0xEF ]);
+			let signature = await window['GoldMint'].signMessage(message);
+			let verified = await window['GoldMint'].verifySignature(message, signature, curAddr);
+			
+			if (verified !== null) {
+				if (!verified) alert("Message verification failed");
+				else alert("OK, message is signed and verified");
+			}
+		}
+
+	</script>
+</body>
+
 </html>
