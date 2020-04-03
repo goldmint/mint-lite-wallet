@@ -145,5 +145,8 @@
       }
     }
   },
-  "defaultProject": "sumwal"
+  "defaultProject": "sumwal",
+  "cli": {
+    "analytics": false
+  }
 }

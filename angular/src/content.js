@@ -18,8 +18,13 @@
 	var isLoggedIn = false;
 	var isFirefox = typeof InstallTrigger !== 'undefined';
 	var brows = isFirefox ? browser : chrome;
+    var isScriptInjected = false;
 
 	injectInpageJs();
+
+    if (isScriptInjected) {
+        return;
+    }
 
 	brows.runtime.onMessage.addListener((request, sender, sendResponse) => {
 		request.hasOwnProperty('loginStatus') && isLoggedIn !== request.loginStatus && (isLoggedIn = request.loginStatus);
@@ -50,10 +55,19 @@
 	});
 
 	function injectInpageJs() {
-		var script = document.createElement('script');
-		script.setAttribute('type', 'text/javascript');
-		script.setAttribute('src', brows.extension.getURL('inpage.js'));
-		document.documentElement.insertBefore(script, document.head);
+        const nodes = document.querySelectorAll('script');
+        [].forEach.call(nodes, node => {
+            if (node.getAttribute('src') === brows.extension.getURL('inpage.js')) {
+                isScriptInjected = true;
+            }
+        });
+
+        if (!isScriptInjected) {
+            let script = document.createElement('script');
+            script.setAttribute('type', 'text/javascript');
+            script.setAttribute('src', brows.extension.getURL('inpage.js'));
+            document.documentElement.insertBefore(script, document.head);
+        }
 	}
 
 	function http(method, url, params = '') {
