@@ -11,6 +11,7 @@ import {BackupComponent} from "./components/home/backup/backup.component";
 import {AuthGuard} from "./services/auth.guard";
 import {NewWalletComponent} from "./components/auth/new-wallet/new-wallet.component";
 import {ConfirmTransactionComponent} from "./components/auth/confirm-transaction/confirm-transaction.component";
+import {ApproveAddressComponent} from "./components/home/approve-address/approve-address.component";
 
 const routes: Routes = [
   {
@@ -28,7 +29,8 @@ const routes: Routes = [
       { path: 'send-tokens/:id', component: SendTokensComponent },
       { path: 'send-tokens/:id/:address', component: SendTokensComponent },
       { path: 'send-tokens/:id/:address/:amount', component: SendTokensComponent },
-      { path: 'backup', component: BackupComponent }
+      { path: 'backup', component: BackupComponent },
+      { path: 'approve-address', component: ApproveAddressComponent }
     ]
   }
 ];

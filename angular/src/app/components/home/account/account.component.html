@@ -19,10 +19,12 @@
                   <use xlink:href="#approved"></use>
                 </svg>
               </div>
-              <div class="wallet-status not-approved" *ngIf="!isWalletApproved" title="This address isn't approved. GOLD transactions are forbidden">
-                <svg width="20" height="20">
-                  <use xlink:href="#not-approved"></use>
-                </svg>
+              <div class="wallet-status not-approved pointer" *ngIf="!isWalletApproved"
+                   routerLink="/home/approve-address"
+                   title="This address isn't approved. Click to approve">
+                  <svg width="20" height="20">
+                      <use xlink:href="#not-approved"></use>
+                  </svg>
               </div>
             </div>
 
@@ -77,9 +79,9 @@
           </ng-container>
           <span class="service-error-message" *ngIf="isServiceUnavailable">Updating...</span>
         </div>
-        <button type="button" class="btn btn-sm btn-primary send-btn" routerLink="/home/send-tokens/gold"
-                [disabled]="loading || !isWalletApproved"
-                [title]="!isWalletApproved ? 'This address isn\'t approved. GOLD transactions are forbidden' : ''">Send</button>
+        <button type="button" class="btn btn-sm btn-primary send-btn" [routerLink]="isWalletApproved ? '/home/send-tokens/gold' : '/home/approve-address'"
+                [disabled]="loading"
+                [title]="!isWalletApproved ? 'This address isn\'t approved. Click to approve.' : ''">Send</button>
     </div>
 </div>
 

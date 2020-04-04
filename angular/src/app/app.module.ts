@@ -37,6 +37,7 @@ import { ReplaceZero } from "./pipes/replace-zero";
 import { ConfirmTransactionComponent } from './components/auth/confirm-transaction/confirm-transaction.component';
 import { PrivacyPolicyComponent } from './blocks/privacy-policy/privacy-policy.component';
 import { ContentInjectorService } from './services/content-injector';
+import { ApproveAddressComponent } from './components/home/approve-address/approve-address.component';
 
 @NgModule({
 	declarations: [
@@ -59,7 +60,8 @@ import { ContentInjectorService } from './services/content-injector';
 		BackupComponent,
 		NewWalletComponent,
 		ConfirmTransactionComponent,
-		PrivacyPolicyComponent
+		PrivacyPolicyComponent,
+		ApproveAddressComponent
 	],
 	imports: [
 		BrowserModule,
