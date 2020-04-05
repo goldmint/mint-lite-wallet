@@ -2,12 +2,14 @@
     <h4>Approve address</h4>
 
     <div class="mt-3 mb-4">
-        Address <b>{{ wallet | reduction }}</b> should be approved in order to send or receive GOLD.
+		In order to send and receive GOLD, address <b>{{ wallet | reduction }}</b> should be approved.
+		<br/>
+		Please follow the link below to get more information.
     </div>
 
     <div class="mb-3">
-        <a href="https://app.cyberbridge.ee/#/how_to_approve_address" class="d-block" target="_blank">
-            <button type="button" class="btn btn-sm btn-primary w-100">Go to cyberbridge.ee</button>
+        <a href="https://goldmint.io/howto_approve_mint_address" class="d-block" target="_blank">
+            <button type="button" class="btn btn-sm btn-primary w-100">Approve address</button>
         </a>
     </div>
     <button type="button" class="btn btn-sm btn-primary w-100" routerLink="/home/account">Back</button>
