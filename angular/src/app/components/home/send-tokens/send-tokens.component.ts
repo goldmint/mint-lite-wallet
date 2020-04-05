@@ -32,7 +32,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   public txId = '';
   public detailsLink: string = environment.detailsTxInfoLink;
   public nonce: number;
-  public fee: number = 0;
+  public fee: string = '0';
   public accountName: string;
   public isEmissionWallet: boolean = false;
   public isWalletApproved: boolean;
@@ -110,9 +110,9 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   }
 
   checkAmount() {
-    this.fee = this.sumusTransactionService.feeCalculate(this.sendData.amount, this.sendData.token);
+    this.fee = this.sumusTransactionService.feeCalculate(this.balance.mnt, this.sendData.amount.toString(), this.sendData.token);
     const tokenBalance = this.balance[this.sendData.token];
-    const balance = (+tokenBalance - this.fee) > 0 ? new BigNumber(tokenBalance).minus(this.fee) : new BigNumber(0);
+    const balance = (+tokenBalance - +this.fee) > 0 ? new BigNumber(tokenBalance).minus(this.fee) : new BigNumber(0);
 
     if (!this.isEmissionWallet && (!+this.sendData.amount || balance.isLessThan(new BigNumber(this.sendData.amount)))) {
       this.invalidBalance = true;
@@ -126,9 +126,9 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     event.target.value = this.substrValue(event.target.value);
     this.sendData.amount = event.target.value;
 
-    this.fee = this.sumusTransactionService.feeCalculate(this.sendData.amount, this.sendData.token);
+    this.fee = this.sumusTransactionService.feeCalculate(this.balance.mnt, this.sendData.amount, this.sendData.token);
     const tokenBalance = this.balance[this.sendData.token];
-    const balance = (+tokenBalance - this.fee) > 0 ? new BigNumber(tokenBalance).minus(this.fee) : new BigNumber(0);
+    const balance = (+tokenBalance - +this.fee) > 0 ? new BigNumber(tokenBalance).minus(this.fee) : new BigNumber(0);
 
     if (!this.isEmissionWallet && (!+this.sendData.amount || balance.isLessThan(new BigNumber(this.sendData.amount)))) {
       this.invalidBalance = true;
@@ -140,14 +140,18 @@ export class SendTokensComponent implements OnInit, OnDestroy {
 
   setAllValue() {
     const tokenBalance = this.balance[this.sendData.token];
-    this.fee = this.sumusTransactionService.feeCalculate(tokenBalance, this.sendData.token);
-    const allValue = (+tokenBalance - this.fee) > 0 ? new BigNumber(tokenBalance).minus(this.fee) : new BigNumber(0);
+    this.fee = this.sumusTransactionService.feeCalculate(this.balance.mnt, tokenBalance, this.sendData.token);
+    const allValue = (+tokenBalance - +this.fee) > 0 ? new BigNumber(tokenBalance).minus(this.fee) : new BigNumber(0);
     const valueStr = this.substrValue(allValue.toString(10));
 
     this.tokenAmount = valueStr;
     this.sendData.amount = valueStr;
     this.checkAmount();
     this.ref.detectChanges();
+  }
+
+  commonSubstrValue(value: string) {
+      return this.commonService.substrValue(value);
   }
 
   substrValue(value: number|string) {
@@ -174,7 +178,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   sendTransaction() {
     this.loading = true;
     this.apiService.getWalletBalance(this.currentWallet.publicKey).subscribe(data => {
-      this.fee = this.sumusTransactionService.feeCalculate(this.sendData.amount, this.sendData.token);
+      this.fee = this.sumusTransactionService.feeCalculate(this.balance.mnt, this.sendData.amount, this.sendData.token);
       this.tokenResult = new BigNumber(this.sendData.amount).toString(10);
       this.nonce = +data['res'].approved_nonce + 1;
 

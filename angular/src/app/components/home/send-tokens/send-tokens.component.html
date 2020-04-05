@@ -42,7 +42,7 @@
 
                 <div class="col-12">
                     <div class="form-group">
-                        <label class="amount-label mb-0" for="amount">Amount <span *ngIf="!isEmissionWallet">(Fee: {{ fee | noexp }} {{ sendData.token | uppercase }})</span>
+                        <label class="amount-label mb-0" for="amount">Amount <span *ngIf="!isEmissionWallet">(Fee: {{ commonSubstrValue(fee) }} {{ sendData.token | uppercase }})</span>
                           <a class="send-all-btn" (click)="setAllValue()">Send all</a></label>
                         <input type="text" class="form-control" id="amount" placeholder='Amount' name="amount"
                                #amount="ngModel"
@@ -94,7 +94,7 @@
             </div>
             <div class="text-center mt-2">
                 {{ tokenResult }} {{ sendData.token | uppercase }}
-                <div class="trs-fee">Fee: {{ fee | noexp }} {{ sendData.token | uppercase }}</div>
+                <div class="trs-fee">Fee: {{ fee }} {{ sendData.token | uppercase }}</div>
                 <div class="nonce-info">
                     nonce: #{{ nonce }}
                 </div>

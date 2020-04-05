@@ -262,6 +262,7 @@
 					http('GET', config.networkUrl[network] + config.api.getBalance, tx.from).then(result => {
 						if (result) {
 							nonce = +result['res'].approved_nonce + 1;
+                            const mintBalance = result['res'].balance.mint;
 
 							try {
 								let encryptedKey;
@@ -279,7 +280,7 @@
 								domElements.infoFrom.textContent = reduction(tx.from);
 								domElements.infoTo.textContent = reduction(tx.to);
 								domElements.infoAmount.textContent = tx.amount + ' ' + tx.token.toUpperCase();
-								domElements.infoFee.textContent = feeCalculate(tx.amount, tx.token) + ' ' + tx.token.toUpperCase();
+								domElements.infoFee.textContent = feeCalculate(mintBalance, tx.amount, tx.token) + ' ' + tx.token.toUpperCase();
 								domElements.infoNonce.textContent = nonce;
 								domElements.accountName.textContent = accountName;
 
@@ -304,10 +305,14 @@
 		const singer = window.mint.Signer.FromPK(signerPrivateKey);
 		let tx;
 		try {
-			tx = singer.SignTransferAssetTx(nonce, toAddress, token, amount);
+			tx = singer.SignTransferAssetTx(nonce, toAddress, token, amount.toString());
 		} catch (e) {
 			return failedTx();
 		}
+
+		if (!tx) {
+            return failedTx();
+        }
 
 		return {
 			txData: tx.Data,
@@ -470,7 +475,7 @@
 		const amount = getNoExpValue(value);
 		const position = amount.toString().indexOf('.');
 		if (position >= 0) {
-			return (amount.toString().substr(0, position + 9)).replace(/0+$/, '');
+			return (amount.toString().substr(0, position + 19)).replace(/0+$/, '');
 		} else {
 			return amount;
 		}
@@ -494,33 +499,67 @@
 		}
 	}
 
-	function feeCalculate(amount, token) {
-		let fee;
+    function feeCalculate(mnt = '0', gold = '0', token) {
+        if (token.toUpperCase() === 'MNT') {
+            return '0.02';
+        }
 
-		if (token.toUpperCase() === 'MNT') {
-			fee = 0.02;
-			return noExp(fee);
-		}
+        const BigInt = window['BigInt'];
+        const _gold = BigInt ? toBigInt(gold.toString()) : +gold;
+        const _mnt = BigInt ? toBigInt(mnt.toString()) : +mnt;
+        let fee;
 
-		if (amount < 10) {
-			fee = 1 * amount / 100;
-		} else if (amount >= 10 && amount < 1000) {
-			fee = 0.3 * amount / 100;
-		} else if (amount >= 1000 && amount < 10000) {
-			fee = 0.03 * amount / 100;
-		} else if (amount >= 10000) {
-			const value = 0.03 * amount / 100;
+        const mnt10 = BigInt ? BigInt("10000000000000000000") : 10;
+        const mnt1000 = BigInt ? BigInt("1000000000000000000000") : 1000;
+        const mnt10000 = BigInt ? BigInt("10000000000000000000000") : 10000;
+        const maxFeeFor10k = BigInt ? BigInt("2000000000000000") : 0.002;
+        const minFee = BigInt ? BigInt("20000000000000") : 0.00002;
 
-			if (value >= 0.002) {
-				fee = 0.002
-			} else if (value <= 0.0002) {
-				fee = 0.0002
-			} else {
-				fee = value;
-			}
-		}
-		return noExp(fee);
-	}
+        if (_gold == 0) return '0';
+
+        if (_mnt < mnt10) {
+            fee = _gold / (BigInt ? BigInt(1000) : 1000); // 0.1%
+        }
+        else if (_mnt >= mnt10 && _mnt < mnt1000) {
+            fee = (BigInt ? BigInt(3) : 3) * _gold / (BigInt ? BigInt(10000) : 10000); // 0.03%
+        }
+        else if (_mnt >= mnt1000 && _mnt < mnt10000) {
+            fee = (BigInt ? BigInt(3) : 3) * _gold / (BigInt ? BigInt(100000) : 100000); // 0.003%
+        }
+        else if (_mnt >= mnt10000) {
+            fee = (BigInt ? BigInt(3) : 3) * _gold / (BigInt ? BigInt(100000) : 100000); // 0.003%
+
+            if (fee > maxFeeFor10k) {
+                fee = maxFeeFor10k;
+            }
+        }
+
+        if (fee < minFee) {
+            fee = minFee;
+        }
+
+        return noExp(BigInt ? (+fee.toString() / Math.pow(10, 18)) : +fee);
+    }
+
+    function toBigInt(value) {
+        let parts = value.toString().split('.');
+        let result;
+
+        if (parts.length > 1) {
+            let rightPart = parts[1];
+            for (let i = parts[1].length; i < 18; i++) {
+                rightPart += '0';
+            }
+            result = parts[0] + rightPart.slice(0, 18);
+        } else {
+            let leftPart = parts[0];
+            for (let i = 0; i < 18; i++) {
+                leftPart += '0';
+            }
+            result = leftPart;
+        }
+        return window['BigInt'](result);
+    }
 
 	function chooseDomElement(id) {
 		domElements[id] = document.getElementById(id);

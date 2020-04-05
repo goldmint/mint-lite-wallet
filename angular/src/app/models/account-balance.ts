@@ -1,4 +1,4 @@
 export class AccountBalance {
-  gold = 0;
-  mnt = 0;
+  gold: any = 0;
+  mnt: any = 0;
 }

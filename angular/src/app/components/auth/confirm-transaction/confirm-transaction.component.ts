@@ -24,7 +24,7 @@ export class ConfirmTransactionComponent implements OnInit {
   public currentWalletIndex: number;
   public loading: boolean = false;
   public nonce: number;
-  public fee: number = 0;
+  public fee: string = '0';
   public unconfirmedTx: UnconfirmedTx[];
   public currentTx: UnconfirmedTx;
   public network: string;
@@ -45,6 +45,8 @@ export class ConfirmTransactionComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    BigNumber.config({ EXPONENTIAL_AT: 1e+9 });
+
     this.chrome.storage.local.get(null, (result) => {
       this.unconfirmedTx = result.unconfirmedTx;
       this.allWallets = result.wallets;
@@ -77,7 +79,8 @@ export class ConfirmTransactionComponent implements OnInit {
     });
 
     this.apiService.getWalletBalance(this.currentTx.from).subscribe(data => {
-      this.fee = this.sumusTransactionService.feeCalculate(this.currentTx.amount, this.currentTx.token)
+      const mintBalance = data['res'].balance.mint;
+      this.fee = this.sumusTransactionService.feeCalculate(mintBalance, this.currentTx.amount.toString(), this.currentTx.token);
       this.nonce = +data['res'].approved_nonce + 1;
 
       this.loading = false;

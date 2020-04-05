@@ -30,4 +30,12 @@ export class CommonService {
     return this.http.get('../../../manifest.json');
   }
 
+  substrValue(value: number|string, roundingLength: number = 6) {
+    return value.toString()
+          .replace(',', '.')
+          .replace(/([^\d.])|(^\.)/g, '')
+          .replace(new RegExp(`^(\\d{1,6})\\d*(?:(\\.\\d{0,${roundingLength}})[\\d.]*)?`), '$1$2')
+          .replace(/^0+(\d)/, '$1');
+   }
+
 }
