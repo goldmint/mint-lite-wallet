@@ -14,18 +14,16 @@
     <div>
         <div class="account-name">
             <div [ngStyle]="{'visibility': loading ? 'hidden' : 'visible'}">
-              <div class="wallet-status approved" *ngIf="isWalletApproved" title="This address is approved to send GOLD">
-                <svg width="20" height="20">
-                  <use xlink:href="#approved"></use>
-                </svg>
-              </div>
-              <div class="wallet-status not-approved pointer" *ngIf="!isWalletApproved"
-                   routerLink="/home/approve-address"
-                   title="This address isn't approved. Click to approve">
-                  <svg width="20" height="20">
-                      <use xlink:href="#not-approved"></use>
-                  </svg>
-              </div>
+                <div class="wallet-status approved" *ngIf="isWalletApproved" title="This address is approved to send GOLD">
+                    <svg width="20" height="20">
+                        <use xlink:href="#approved"></use>
+                    </svg>
+                </div>
+                <div class="wallet-status not-approved pointer" *ngIf="!isWalletApproved" routerLink="/home/approve-address" title="This address isn't approved. Click to approve">
+                    <svg width="20" height="20">
+                        <use xlink:href="#not-approved"></use>
+                    </svg>
+                </div>
             </div>
 
             <div *ngIf="!isEditing" class="account-name-text">
@@ -60,28 +58,26 @@
 <div class="mt-3">
     <div class="d-flex justify-content-between align-items-center mb-2">
         <div>
-          <span class="token-name">MNT</span>
-          <ng-container *ngIf="!isServiceUnavailable">
-            {{ balance.mnt | replaceZero }}
-            <span class="usd-balance" *ngIf="usdRate.mnt">(${{ usdBalance.mnt }})</span>
-          </ng-container>
-          <span class="service-error-message" *ngIf="isServiceUnavailable">Updating...</span>
+            <span class="token-name">MNT</span>
+            <ng-container *ngIf="!isServiceUnavailable">
+                {{ balance.mnt | replaceZero }}
+                <span class="usd-balance" *ngIf="usdRate.mnt">(${{ usdBalance.mnt }})</span>
+            </ng-container>
+            <span class="service-error-message" *ngIf="isServiceUnavailable">Updating...</span>
         </div>
         <button type="button" class="btn btn-sm btn-primary send-btn" routerLink="/home/send-tokens/mnt" [disabled]="loading">Send</button>
     </div>
 
     <div class="d-flex justify-content-between align-items-center">
         <div>
-          <span class="token-name">GOLD</span>
-          <ng-container *ngIf="!isServiceUnavailable">
-            {{ balance.gold | replaceZero }}
-            <span class="usd-balance" *ngIf="usdRate.gold">(${{ usdBalance.gold }})</span>
-          </ng-container>
-          <span class="service-error-message" *ngIf="isServiceUnavailable">Updating...</span>
+            <span class="token-name">GOLD</span>
+            <ng-container *ngIf="!isServiceUnavailable">
+                {{ balance.gold | replaceZero }}
+                <span class="usd-balance" *ngIf="usdRate.gold">(${{ usdBalance.gold }})</span>
+            </ng-container>
+            <span class="service-error-message" *ngIf="isServiceUnavailable">Updating...</span>
         </div>
-        <button type="button" class="btn btn-sm btn-primary send-btn" [routerLink]="isWalletApproved ? '/home/send-tokens/gold' : '/home/approve-address'"
-                [disabled]="loading"
-                [title]="!isWalletApproved ? 'This address isn\'t approved. Click to approve.' : ''">Send</button>
+        <button type="button" class="btn btn-sm btn-primary send-btn" [routerLink]="isWalletApproved ? '/home/send-tokens/gold' : '/home/approve-address'" [disabled]="loading" [title]="!isWalletApproved ? 'This address isn\'t approved. Click to approve.' : ''">Send</button>
     </div>
 </div>
 
@@ -89,8 +85,7 @@
     <div class="trs-container" [ngClass]="{'no-scroll': !transactionList || transactionList.length <= 6, 'full-height': !(banner && banner.image)}">
         <div *ngIf="transactionList && transactionList.length && isDataLoaded; else noTx">
             <div *ngFor="let t of transactionList" class="trs-item">
-                <a class="d-flex align-items-center justify-content-between"
-                   [href]="detailsLink + t.transaction.digest + (currentNetwork == 'test' ? '?network=testnet' : '')" target="_blank">
+                <a class="d-flex align-items-center justify-content-between" [href]="detailsLink + t.transaction.digest + (currentNetwork == 'test' ? '?network=testnet' : '')" target="_blank">
                     <div>
                         <svg width="15" height="15" class="icon-gold mr-2">
                             <use xlink:href="#export" *ngIf="t.transaction.from === currentWallet.publicKey; else incoming"></use>
@@ -113,9 +108,10 @@
         </ng-template>
     </div>
 
-    <div class="img-container" *ngIf="banner && banner.image">
-        <a [href]="banner.url" target="_blank">
-            <img [src]="banner.image" alt="img">
-        </a>
+    <div class="img-container" *ngIf="banner != null">
+        <img [src]="banner.image" alt="img" width="268" height="88" usemap="#banner_clicks_map">
+        <map name="banner_clicks_map">
+            <area *ngFor="let v of banner.areas" shape="rect" coords="{{ v.x1 }},0,{{ v.x2 }},88" href="{{ v.url }}" target="_blank">
+        </map>
     </div>
 </div>

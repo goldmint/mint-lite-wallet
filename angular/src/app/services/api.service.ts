@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import {environment} from "../../environments/environment";
-import {HttpClient} from "@angular/common/http";
-import {Subject} from "rxjs/index";
+import { environment } from "../../environments/environment";
+import { HttpClient } from "@angular/common/http";
+import { Subject } from "rxjs/index";
 
 @Injectable()
 export class ApiService {
@@ -44,7 +44,7 @@ export class ApiService {
   postWalletTransaction(txdata: string, name: string) {
     return this.http.post(
       `${this.networkUrl}/tx`,
-      { 'name': name, 'data': txdata},
+      { 'name': name, 'data': txdata },
       { headers: { 'Content-Type': 'application/json' } }
     );
   }
@@ -68,7 +68,15 @@ export class ApiService {
   }
 
   getBanner() {
-    return this.http.get('https://www.goldmint.io/lite-wallet-banner.json');
+    return this.http.get('https://www.goldmint.io/lite-wallet-banner.json',
+      {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate, post-check=0, pre-check=0',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      }
+    );
   }
 
   getBlockChainStatus() {

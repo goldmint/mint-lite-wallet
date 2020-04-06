@@ -17,6 +17,8 @@ import { BigNumber } from 'bignumber.js';
 })
 export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
 
+
+
 	public detailsLink: string = environment.detailsTxInfoLink;
 	public webWalletLink: string = environment.webWallet;
 	public storageData: StorageData;
@@ -38,7 +40,7 @@ export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
 	public transactionList = [];
 	public isEditing: boolean = false;
 	public accountName: string;
-	public banner: any = null;
+	public banner: Banner = null;
 	public currentNetwork: string;
 	public isServiceUnavailable: boolean;
 	public isWalletApproved: boolean;
@@ -75,7 +77,49 @@ export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
 		});
 
 		this.apiService.getBanner().subscribe(data => {
-			this.banner = data;
+			if (data && data.hasOwnProperty('url') && data.hasOwnProperty('image')) {
+
+				const width = 268;
+				let ban = new Banner();
+				ban.areas = new Array();
+
+				// image is valid url
+				try {
+					new URL(data['image']);
+					ban.image = data['image'];
+				} catch (_) {
+					return;
+				}
+
+				try {
+					// single url
+					new URL(data['url']);
+					ban.areas.push({
+						url: data['url'],
+						x1: 0,
+						x2: width,
+					});
+				} catch (_) {
+					// try to parse json array of urls
+					try {
+						let arr: Array<string> = JSON.parse(data['url']);
+						if (arr.length == 0) return;
+						let w = width / arr.length;
+						for (let i = 0; i < arr.length; i++) {
+							new URL(arr[i]);
+							ban.areas.push({
+								url: arr[i],
+								x1: i * w,
+								x2: (i + 1) * w,
+							});
+						}
+					} catch (_) {
+						return;
+					}
+				}
+
+				this.banner = ban;
+			}
 		});
 	}
 
@@ -172,4 +216,13 @@ export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.sub2 && this.sub2.unsubscribe();
 		clearInterval(this.interval);
 	}
+}
+
+class Banner {
+	image: string;
+	areas: {
+		url: string;
+		x1: number;
+		x2: number
+	}[];
 }
