@@ -10,14 +10,7 @@
                 <div class="col-12">
                     <div class="form-group">
                         <label class="mb-0" for="to">To</label>
-                        <input type="text" class="form-control" id="to" placeholder='Wallet address' name="to"
-                               #to="ngModel"
-                               [ngClass]="{'is-invalid': (to.invalid && to.dirty) || isAddressMatch}"
-                               [(ngModel)]="sendData.to"
-                               (ngModelChange)="checkAddressMatch()"
-                               [disabled]="loading"
-                               sumusAddress
-                               required>
+                        <input type="text" class="form-control" id="to" placeholder='Wallet address' name="to" #to="ngModel" [ngClass]="{'is-invalid': (to.invalid && to.dirty) || isAddressMatch}" [(ngModel)]="sendData.to" (ngModelChange)="checkAddressMatch()" [disabled]="loading" sumusAddress required>
                         <div class="invalid-feedback invalid-feedback--abs" *ngIf="to?.errors?.required">
                             Field is required
                         </div>
@@ -33,7 +26,7 @@
                 <div class="col-12">
                     <div class="form-group">
                         <label class="mb-0" for="token">Token</label>
-                        <select class="form-control custom-select mb-0" id="token" name="token" (change)="checkAmount()" [(ngModel)]="sendData.token" [disabled]="loading">
+                        <select class="form-control custom-select mb-0" id="token" name="token" (change)="changeToken()" [(ngModel)]="sendData.token" [disabled]="loading">
                             <option value='gold'>GOLD</option>
                             <option value='mnt'>MNT</option>
                         </select>
@@ -42,22 +35,22 @@
 
                 <div class="col-12">
                     <div class="form-group">
-                        <label class="amount-label mb-0" for="amount">Amount <span *ngIf="!isEmissionWallet">(Fee: {{ commonSubstrValue(fee) }} {{ sendData.token | uppercase }})</span>
-                          <a class="send-all-btn" (click)="setAllValue()">Send all</a></label>
-                        <input type="text" class="form-control" id="amount" placeholder='Amount' name="amount"
-                               #amount="ngModel"
-                               [ngClass]="{'is-invalid': (amount.invalid || invalidBalance) && amount.dirty}"
-                               ngModel
-                               (input)="changeValue($event)"
-                               [(ngModel)]="tokenAmount"
-                               [disabled]="loading"
-                               required
-                               autocomplete="off">
+                        <label class="amount-label mb-0" for="amount">
+                            Amount
+                            <a class="send-all-btn" (click)="setAllValue()">Send all</a>
+                        </label>
+                        <input type="text" class="form-control" id="amount" placeholder='Amount' name="amount" #amount="ngModel" [ngClass]="{'is-invalid': (amount.invalid || invalidBalance) && amount.dirty}" ngModel (input)="changeValue($event)" [(ngModel)]="tokenAmount" [disabled]="loading" required autocomplete="off">
+
                         <div class="invalid-feedback invalid-feedback--abs" *ngIf="amount?.errors?.required">
                             Field is required
                         </div>
                         <div class="invalid-feedback invalid-feedback--abs" *ngIf="!amount?.errors?.required && invalidBalance">
                             Insufficient funds
+                        </div>
+                        <div class="fee" *ngIf="!(amount?.errors?.required || invalidBalance) && !isEmissionWallet">
+                            <a href="https://app.cyberbridge.ee/#/buy-mntp#fee" target="_blank">
+                                Fee: {{ commonSubstrValue(fee) }} {{ sendData.token | uppercase }}
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -65,11 +58,13 @@
                 <div class="col-12 text-center mt-3">
                     <div class="d-flex">
                         <button type="button" class="btn btn-sm btn-primary w-50 mr-1" routerLink="/home/account">Cancel</button>
-                        <button type="button" class="btn btn-sm btn-primary w-50 ml-1" (click)="sendTransaction()"
-                                [disabled]="form.invalid || loading || invalidBalance || isAddressMatch || !+sendData.amount || (!isWalletApproved && sendData.token == 'gold')"
-                                [title]="(!isWalletApproved && sendData.token == 'gold') ? 'This address isn\'t approved. GOLD transactions are forbidden' : ''">
-                          Send
+                        <button type="button" class="btn btn-sm btn-primary w-50 ml-1" (click)="sendTransaction()" [disabled]="form.invalid || loading || invalidBalance || isAddressMatch || !+sendData.amount || (!isWalletApproved && sendData.token == 'gold')" [title]="(!isWalletApproved && sendData.token == 'gold') ? 'This address isn\'t approved. GOLD transactions are forbidden' : ''">
+                            Send
                         </button>
+                    </div>
+
+                    <div class="mt-3">
+                        <a class="howto-link" href="https://app.cyberbridge.ee/#/buy-mntp" target="_blank">How to decrease fee?</a>
                     </div>
                 </div>
             </div>

@@ -33,7 +33,7 @@ import { AuthGuard } from "./services/auth.guard";
 import { NewWalletComponent } from './components/auth/new-wallet/new-wallet.component';
 import { SubstrPipe } from "./pipes/substr.pipe";
 import { NoexpPipe } from "./pipes/noexp.pipe";
-import { ReplaceZero } from "./pipes/replace-zero";
+import { FormatTokenAmount } from "./pipes/format-token-amount";
 import { ConfirmTransactionComponent } from './components/auth/confirm-transaction/confirm-transaction.component';
 import { PrivacyPolicyComponent } from './blocks/privacy-policy/privacy-policy.component';
 import { ContentInjectorService } from './services/content-injector';
@@ -56,7 +56,7 @@ import { ApproveAddressComponent } from './components/home/approve-address/appro
 		AccountReductionPipe,
 		SubstrPipe,
 		NoexpPipe,
-		ReplaceZero,
+		FormatTokenAmount,
 		BackupComponent,
 		NewWalletComponent,
 		ConfirmTransactionComponent,

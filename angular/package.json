@@ -1,6 +1,6 @@
 {
-  "name": "sumwal",
-  "version": "1.0.9",
+  "name": "mint_lite_wallet",
+  "version": "1.0.10",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

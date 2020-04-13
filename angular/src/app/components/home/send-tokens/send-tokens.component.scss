@@ -1,16 +1,27 @@
 .amount-label {
   position: relative;
   width: 100%;
-  font-size: 15px;
-  letter-spacing: -0.3px;
 
   .send-all-btn {
     position: absolute;
     right: 0;
     color: #0093e5;
+    cursor: pointer;
 
     &:hover {
       text-decoration: underline;
     }
   }
+}
+
+.fee {
+  position: absolute;
+  bottom: -7px;
+  font-size: 14px;
+  
+  color: #0093e5;
+}
+
+.howto-link {
+  color: #0093e5;
 }

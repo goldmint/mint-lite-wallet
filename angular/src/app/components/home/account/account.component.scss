@@ -29,6 +29,13 @@
   &-date {
     color: $color-gray-2;
   }
+
+  .amount {
+    color: #962c38;
+    &.incoming {
+      color: #207229;
+    }
+  }
 }
 .no-tx {
   font-size: 14px;
@@ -100,18 +107,26 @@
   text-overflow: ellipsis;
 }
 
-.token-name {
-  min-width: 50px;
-  display: inline-block;
+.token-amount {
+  font-size: 15px;
+
+  .token-name {
+    min-width: 50px;
+    display: inline-block;
+  }
+
+  .usd-balance {
+    font-size: 12px;
+    color: $color-gray-2;
+  }
 }
 
-.tx-status-text::first-letter {
-  text-transform: uppercase;
-}
+.tx-status-text {
+  color: darkgrey;
 
-.usd-balance {
-  font-size: 13px;
-  color: $color-gray-2;
+  &::first-letter {
+    text-transform: uppercase;
+  }
 }
 
 .service-error-message {

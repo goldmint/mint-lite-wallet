@@ -122,6 +122,12 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     this.ref.detectChanges();
   }
 
+  changeToken() {
+    this.tokenAmount = "";
+    this.sendData.amount = "";
+    this.checkAmount();
+  }
+
   changeValue(event) {
     event.target.value = this.substrValue(event.target.value);
     this.sendData.amount = event.target.value;
