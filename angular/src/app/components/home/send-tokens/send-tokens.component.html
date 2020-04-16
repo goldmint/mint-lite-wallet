@@ -2,19 +2,21 @@
     <div class="container"></div>
 </div>
 
-<div class="mt-2">
+<div class="text-center">
+
     <div *ngIf="currentPage === page[0]">
-        <h4 class="mb-2">Send tokens</h4>
+        <h5 class="mb-4">Send tokens</h5>
+
         <form #form="ngForm">
             <div class="row">
-                <div class="col-12">
+                <div class="col-12 text-left">
                     <div class="form-group">
-                        <label class="mb-0" for="to">To</label>
-                        <input type="text" class="form-control" id="to" placeholder='Wallet address' name="to" #to="ngModel" [ngClass]="{'is-invalid': (to.invalid && to.dirty) || isAddressMatch}" [(ngModel)]="sendData.to" (ngModelChange)="checkAddressMatch()" [disabled]="loading" sumusAddress required>
+                        <!-- <label class="mb-0" for="to">To</label> -->
+                        <input type="text" class="form-control" id="to" placeholder='Destination address' name="to" #to="ngModel" [ngClass]="{'is-invalid': (to.invalid && to.dirty) || isAddressMatch}" [(ngModel)]="sendData.to" (ngModelChange)="checkAddressMatch()" [disabled]="loading" validMintAddress required>
                         <div class="invalid-feedback invalid-feedback--abs" *ngIf="to?.errors?.required">
                             Field is required
                         </div>
-                        <div class="invalid-feedback invalid-feedback--abs" *ngIf="!to?.errors?.required && to?.errors?.sumus">
+                        <div class="invalid-feedback invalid-feedback--abs" *ngIf="!to?.errors?.required && to?.errors?.address">
                             Invalid address
                         </div>
                         <div class="invalid-feedback invalid-feedback--abs" *ngIf="!to?.errors && isAddressMatch">
@@ -23,9 +25,9 @@
                     </div>
                 </div>
 
-                <div class="col-12">
+                <div class="col-12 mt-4">
                     <div class="form-group">
-                        <label class="mb-0" for="token">Token</label>
+                        <!-- <label class="mb-0" for="token">Token</label> -->
                         <select class="form-control custom-select mb-0" id="token" name="token" (change)="changeToken()" [(ngModel)]="sendData.token" [disabled]="loading">
                             <option value='gold'>GOLD</option>
                             <option value='mnt'>MNT</option>
@@ -33,10 +35,10 @@
                     </div>
                 </div>
 
-                <div class="col-12">
+                <div class="col-12 text-left">
                     <div class="form-group">
-                        <label class="amount-label mb-0" for="amount">
-                            Amount
+                        <label class="amount-label mb-0 text-right" for="amount">
+                            <!-- Amount -->
                             <a class="send-all-btn" (click)="setAllValue()">Send all</a>
                         </label>
                         <input type="text" class="form-control" id="amount" placeholder='Amount' name="amount" #amount="ngModel" [ngClass]="{'is-invalid': (amount.invalid || invalidBalance) && amount.dirty}" ngModel (input)="changeValue($event)" [(ngModel)]="tokenAmount" [disabled]="loading" required autocomplete="off">
@@ -55,7 +57,7 @@
                     </div>
                 </div>
 
-                <div class="col-12 text-center mt-3">
+                <div class="col-12 text-center mt-4">
                     <div class="d-flex">
                         <button type="button" class="btn btn-sm btn-primary w-50 mr-1" routerLink="/home/account">Cancel</button>
                         <button type="button" class="btn btn-sm btn-primary w-50 ml-1" (click)="sendTransaction()" [disabled]="form.invalid || loading || invalidBalance || isAddressMatch || !+sendData.amount || (!isWalletApproved && sendData.token == 'gold')" [title]="(!isWalletApproved && sendData.token == 'gold') ? 'This address isn\'t approved. GOLD transactions are forbidden' : ''">
@@ -72,7 +74,9 @@
     </div>
 
     <div *ngIf="currentPage === page[1]">
-        <h4 class="mb-3">Confirm transaction</h4>
+
+        <h5 class="mb-4">Confirm transaction</h5>
+
         <div class="bd-top bd-bottom py-2">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="confirm-item name">
@@ -103,12 +107,13 @@
     </div>
 
     <div *ngIf="currentPage === page[2]">
-        <h4 class="mb-3 text-center">Checking transaction</h4>
+        <h5 class="mb-4 text-center">Checking transaction</h5>
     </div>
 
     <div *ngIf="currentPage === page[3]">
-        <h4 class="mb-2">Failed to send</h4>
+        <h5 class="mb-4">Failed to send</h5>
         <div>{{ errorMessage }}</div>
+
         <div class="text-center mt-4">
             <svg class="icon-gold" width="50" height="50">
                 <use xlink:href="#error"></use>
@@ -123,14 +128,14 @@
     </div>
 
     <div *ngIf="currentPage === page[4]">
-        <h4 class="mb-3 text-center">Transaction is sent</h4>
+        <h5 class="mb-4 text-center">Transaction is sent</h5>
         <div class="text-center">
             <svg class="icon-gold" width="50" height="50">
                 <use xlink:href="#done"></use>
             </svg>
         </div>
-        <div class="mt-4">Your transaction id is:
-            <div class="sent-tx-id mt-1" tooltip="Copy to clipboard" (click)="copyText(txId)">{{ txId }}</div>
+        <div class="mt-4">Your transaction ID is:
+            <div class="sent-tx-id mt-1 p-2" tooltip="Copy to clipboard" (click)="copyText(txId)">{{ txId | reduction }}</div>
         </div>
 
         <div class="mt-4">

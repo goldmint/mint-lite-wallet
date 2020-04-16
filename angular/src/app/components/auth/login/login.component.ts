@@ -1,13 +1,13 @@
-import {AfterViewInit, ChangeDetectorRef, Component, NgZone, OnInit, ViewChild} from '@angular/core';
-import {ChromeStorageService} from "../../../services/chrome-storage.service";
-import {Router} from "@angular/router";
-import {GenerateWalletService} from "../../../services/generate-wallet.service";
+import { AfterViewInit, ChangeDetectorRef, Component, NgZone, OnInit, ViewChild } from '@angular/core';
+import { ChromeStorageService } from "../../../services/chrome-storage.service";
+import { Router } from "@angular/router";
+import { GenerateWalletService } from "../../../services/generate-wallet.service";
 import * as CryptoJS from 'crypto-js';
-import {Wallet} from "../../../interfaces/wallet";
-import {CommonService} from "../../../services/common.service";
-import {UnconfirmedTx} from "../../../interfaces/unconfirmed-tx";
-import {StorageData} from "../../../interfaces/storage-data";
-import {ApiService} from "../../../services/api.service";
+import { Wallet } from "../../../interfaces/wallet";
+import { CommonService } from "../../../services/common.service";
+import { UnconfirmedTx } from "../../../interfaces/unconfirmed-tx";
+import { StorageData } from "../../../interfaces/storage-data";
+import { ApiService } from "../../../services/api.service";
 
 @Component({
   selector: 'app-login',
@@ -17,6 +17,10 @@ import {ApiService} from "../../../services/api.service";
 export class LoginComponent implements OnInit, AfterViewInit {
 
   @ViewChild('passwordRef') passwordRef;
+
+  public currentPage: {
+    type: 'login' | 'backup'
+  };
 
   public userPassword: string;
   public invalidPass: boolean = false;
@@ -38,7 +42,9 @@ export class LoginComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit() {
-    this.chrome.storage.local.get(null, (result) => {
+    this.currentPage = { type: "login" };
+
+    this.chrome.storage.local.get(null, (result: StorageData) => {
       this.result = result;
       this.wallets = result.wallets;
       this.unconfirmedTx = result.unconfirmedTx ? result.unconfirmedTx : [];
@@ -61,9 +67,18 @@ export class LoginComponent implements OnInit, AfterViewInit {
     }
     if (decrypted) {
       this.commonService.isLoggedIn = true;
-      this.chrome.runtime.sendMessage({identify: this.userPassword});
+      this.chrome.runtime.sendMessage({ identify: this.userPassword });
       this.zone.run(() => {
-        this.unconfirmedTx.length ? this.router.navigate(['/confirm-transaction']) : this.router.navigate(['/home/account']);
+        if (this.unconfirmedTx.length) {
+          this.router.navigate(['/confirm-transaction']);
+        } else {
+          if (this.needToBackup()) {
+            this.currentPage = { type: "backup" };
+            this.ref.detectChanges();
+          } else {
+            this.router.navigate(['/home/account']);
+          }
+        }
       });
     } else {
       this.invalidPass = true;
@@ -73,9 +88,23 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
   acceptPolicy() {
     this.isPolicyAccepted = true;
-    this.chrome.storage.local.set({['isPolicyAccepted']: this.isPolicyAccepted}, () => { });
+    this.chrome.storage.local.set({ ['isPolicyAccepted']: this.isPolicyAccepted }, () => { });
     setTimeout(() => this.passwordRef.nativeElement.focus(), 0);
     this.ref.detectChanges();
+  }
+
+  backupNow() {
+    this.chrome.storage.local.set({ ['backupOfferStamp']: (new Date().getTime() / 1000) }, () => { });
+    this.router.navigate(['/home/backup']);
+  }
+
+  backupLater() {
+    this.chrome.storage.local.set({ ['backupOfferStamp']: (new Date().getTime() / 1000) }, () => { });
+    this.router.navigate(['/home/account']);
+  }
+
+  private needToBackup(): boolean {
+    return !this.result.backedUp && (new Date().getTime() / 1000 - (this.result.backupOfferStamp || 0)) >= 2 * 24 * 60 * 60;
   }
 
   clear() {

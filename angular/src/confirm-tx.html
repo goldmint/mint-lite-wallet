@@ -3,18 +3,27 @@
 
 <head>
 	<meta charset="UTF-8">
-	<title>Goldmint Lite Wallet Notification</title>
+	<title>Mint Lite Wallet Notification</title>
+
+	<style>
+		button {
+			text-transform: uppercase !important;
+			font-weight: bold !important;
+			letter-spacing: 0.5px !important;
+		}
+	</style>
 </head>
 
 <body>
-	<header> <svg class="icon-gold" width="25" height="25">
+	<header>
+		<svg class="icon-gold" width="25" height="25">
 			<use xlink:href="#logo"></use>
 		</svg>
 		<div><span id="accountName"></span></div>
 	</header>
 	<div class="confirm-container">
 		<div class="confirm-block">
-			<h4 class="mb-3">Confirm transaction</h4>
+			<h4 class="mb-3 text-center">Confirm transaction</h4>
 			<div class="confirm-info-block">
 				<div class="confirm-address-block">
 					<div class="confirm-item name" id="infoFrom"></div>
@@ -33,7 +42,7 @@
 	</div>
 	<div class="failed-container">
 		<div class="confirm-block">
-			<h4 class="failed-text">Failed to send</h4>
+			<h5 class="failed-text">Failed to send</h5>
 			<div id="errorMessage"></div>
 			<div class="failed-icon"> <svg class="icon-gold" width="50" height="50">
 					<use xlink:href="#error"></use>

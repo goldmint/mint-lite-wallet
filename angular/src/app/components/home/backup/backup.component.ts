@@ -1,13 +1,12 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import * as CryptoJS from 'crypto-js';
-import {Wallet} from "../../../interfaces/wallet";
-import {ChromeStorageService} from "../../../services/chrome-storage.service";
-import {Router} from "@angular/router";
-import {CommonService} from "../../../services/common.service";
-import {MessageBoxService} from "../../../services/message-box.service";
-import {GenerateWalletService} from "../../../services/generate-wallet.service";
-import {Backup} from "../../../models/backup";
-import {Nonce} from "../../../models/nonce";
+import { Wallet } from "../../../interfaces/wallet";
+import { ChromeStorageService } from "../../../services/chrome-storage.service";
+import { Router } from "@angular/router";
+import { CommonService } from "../../../services/common.service";
+import { MessageBoxService } from "../../../services/message-box.service";
+import { GenerateWalletService } from "../../../services/generate-wallet.service";
+import { Backup } from "../../../models/backup";
 
 @Component({
   selector: 'app-backup',
@@ -17,7 +16,7 @@ import {Nonce} from "../../../models/nonce";
 export class BackupComponent implements OnInit {
 
   public switchModel: {
-    type: 'backup'|'restore'
+    type: 'backup' | 'restore'
   };
   public currentTub: string;
   public isInvalidFile: boolean = false;
@@ -79,8 +78,8 @@ export class BackupComponent implements OnInit {
     this.wallets.forEach(wallet => {
       try {
         const key = CryptoJS.AES.decrypt(wallet.privateKey, this.identify).toString(CryptoJS.enc.Utf8);
-        wallets.push({name: wallet.name, key: key});
-      } catch(e) {
+        wallets.push({ name: wallet.name, key: key });
+      } catch (e) {
         this.messageBox.alert('Something went wrong');
         return;
       }
@@ -89,11 +88,15 @@ export class BackupComponent implements OnInit {
     const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(wallets), this.identify).toString();
     data.data = encryptedData;
     this.downloadFile(JSON.stringify(data));
+
+    this.chrome.storage.local.set({ ['backedUp']: true }, () => { });
+    this.chrome.storage.local.set({ ['backupOfferStamp']: (new Date().getTime() / 1000) }, () => { });
+
     this.router.navigate(['/home/account']);
   }
 
   downloadFile(data: string) {
-    let blob = new Blob(['\ufeff' + data], {type: 'application/json;charset=utf-8;'});
+    let blob = new Blob(['\ufeff' + data], { type: 'application/json;charset=utf-8;' });
     let link = document.createElement('a');
     let url = URL.createObjectURL(blob);
     let isSafariBrowser = navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1;
@@ -101,7 +104,8 @@ export class BackupComponent implements OnInit {
       link.setAttribute('target', '_blank');
     }
     link.setAttribute('href', url);
-    link.setAttribute('download', `sumus-wallet-backup.json`);
+    let date = new Date().toISOString().substr(0, 10);
+    link.setAttribute('download', `mint-lite-wallet-backup-` + date + `.json`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -116,9 +120,9 @@ export class BackupComponent implements OnInit {
         return () => {
           const contents = JSON.parse(reader.result);
           try {
-            const decrypted  = CryptoJS.AES.decrypt(contents.data, this.restorePassword).toString(CryptoJS.enc.Utf8);
+            const decrypted = CryptoJS.AES.decrypt(contents.data, this.restorePassword).toString(CryptoJS.enc.Utf8);
             this.keyStoreFile = JSON.parse(decrypted);
-          } catch(e) {
+          } catch (e) {
             this.incorrectRestorePass = true;
             this.ref.detectChanges();
             return;

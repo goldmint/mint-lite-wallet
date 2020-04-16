@@ -10,7 +10,7 @@ import (
 	"gm.mint.js/h"
 )
 
-// Generate ():Signer - generates a random private key
+// Generate (): Signer;
 func Generate(this js.Value, args []js.Value) interface{} {
 	defer h.Recover()
 
@@ -22,7 +22,7 @@ func Generate(this js.Value, args []js.Value) interface{} {
 	return newSigner(sig.PrivateKey(), sig.PublicKey())
 }
 
-// FromPK (privateKey:string):Signer - creates signer from Base58 private key
+// FromPK (privateKey: string): Signer;
 func FromPK(this js.Value, args []js.Value) interface{} {
 	defer h.Recover()
 

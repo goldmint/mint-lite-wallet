@@ -1,0 +1,82 @@
+<div class="text-center">
+
+	<h5 class="mb-3">New account</h5>
+
+	<!-- SEED PHRASE -->
+	<div *ngIf="currentTab === 'seedPhrase'">
+	
+		<div class="explanation">
+			Write down the <span class="text-info">seed phrase</span> to the paper to be able to recover an access to you funds even if you lose your device.
+		</div>
+
+		<div class="seed-phrase mt-3">{{ seedPhrase }}</div>
+		<div class="copy-phrase text-right"><a (click)="copySeedPhrase()">{{ copied? "Copied": "Copy" }}</a></div>
+
+		<div class="mt-4 explanation text-left">
+			Optional security extra-word:
+		</div>
+		<div class="row mt-1">
+			<div class="col-12">
+				<div class="form-group">
+					<input type="text" class="form-control" placeholder='Extra word (optional)' [(ngModel)]="extraWord" maxlength="64">
+				</div>
+			</div>
+		</div>
+
+		<div class="row mt-2">
+			<div class="col-6 text-center">
+				<div class="d-flex">
+					<button type="button" class="btn btn-sm btn-primary btn-block" (click)="cancel()">
+						Cancel
+					</button>
+				</div>
+			</div>
+			<div class="col-6 text-center">
+				<div class="d-flex">
+					<button type="button" class="btn btn-sm btn-primary btn-block" (click)="generate()">
+						Create
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- GENERATE -->
+	<div *ngIf="currentTab === 'generate'">
+	
+		<div class="explanation">
+			New account is created. Print <span class="text-info">seed phrase</span> in case you didn't write it out yet.
+		</div>
+
+		<div class="text-center mt-3">{{ newPair.publicKey | reduction }}</div>
+
+		<div class="qr-code text-center mt-1">
+			<img 
+				src='https://chart.googleapis.com/chart?cht=qr&chs=175x175&chld=M&chl={{ newPair.publicKey }}' 
+				alt="Address QR"
+				height="175"
+				width="175"
+			>
+		</div>
+		
+		<div class="printer text-center mt-1">
+			<a class="a-link" (click)="print()">
+				<svg width="12" height="12">
+					<use xlink:href="#printer"></use>
+				</svg>
+				Print seed phrase
+			</a>
+		</div>
+
+		<div class="row mt-3">
+			<div class="col-12 text-center">
+				<div class="d-flex">
+					<button type="button" class="btn btn-sm btn-primary btn-block" (click)="complete()">
+						Done
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>

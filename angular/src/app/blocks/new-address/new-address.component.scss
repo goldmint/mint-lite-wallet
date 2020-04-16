@@ -1,0 +1,44 @@
+div.copy-phrase {
+	position: absolute;
+	right: 18px;
+	
+	a {
+		font-size: 12px;
+		cursor: pointer;
+		color: #0093e5;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+}
+
+.seed-phrase {
+	display: block;
+    width: 100%;
+    height: 115px;
+    max-height: 110px;
+    border: 2px dashed #ddd;
+    font-size: 15px;
+    padding: 5px;
+    font-family: monospace;
+    overflow-y: scroll;
+}
+
+.qr-code {
+	img {
+		border: 2px dashed #eee;
+	}
+}
+
+.printer {
+	font-size: 14px;
+	a {
+		cursor: pointer;
+		color: #0093e5;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+}

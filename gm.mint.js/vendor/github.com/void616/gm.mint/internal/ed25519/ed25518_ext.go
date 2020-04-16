@@ -3,7 +3,7 @@ package ed25519
 import (
 	"crypto/sha512"
 
-	"github.com/void616/gm.mint/signer/ed25519/internal/edwards25519"
+	"github.com/void616/gm.mint/internal/ed25519/internal/edwards25519"
 )
 
 // Prehash returns pre-hashed version of the private key.

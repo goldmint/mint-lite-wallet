@@ -47,6 +47,7 @@ app-root {
 
 a {
   color: inherit;
+  cursor: pointer;
 
   &:hover {
     text-decoration: none;
@@ -60,6 +61,12 @@ a {
       text-decoration: underline;
     }
   }
+}
+
+button {
+  text-transform: uppercase !important;
+  font-weight: bold !important;
+  letter-spacing: 0.5px !important;
 }
 
 .pointer {
@@ -89,4 +96,8 @@ a {
   display: flex;
   align-items: center;
   cursor: pointer;
+}
+
+.explanation {
+  font-size: 13px;
 }

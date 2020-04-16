@@ -1,0 +1,72 @@
+<div class="text-center">
+	<h5>Import account</h5>
+
+	<div class="col-auto btn-group p-0 mn-tabs w-100 mt-3">
+		<label class="btn btn-primary btn-sm active wrap w-50" [(ngModel)]="switchModel.type" btnRadio="seed">SEED PHRASE</label>
+		<label class="btn btn-primary btn-sm active wrap w-50" [(ngModel)]="switchModel.type" btnRadio="private">PRIVATE KEY</label>
+	</div>
+
+	<!-- SEED PHRASE -->
+	<div *ngIf="switchModel.type === 'seed'">
+		<div class="mt-4">
+			<div class="row">
+				<form #seedForm="ngForm">
+					<div class="col-12 text-left">
+						<div class="form-group">
+							<input type="text" class="form-control" id="seed-phrase" name="seed-phrase" placeholder='Seed Phrase' #phrase="ngModel" [ngClass]="{'is-invalid': invalidSeedPhrase && phrase.dirty}" [(ngModel)]="seedPhrase" (ngModelChange)="checkSeedPhrase()" required>
+							<div class="invalid-feedback" *ngIf="phrase?.errors?.required">
+								Field is required
+							</div>
+							<div class="invalid-feedback" *ngIf="!phrase?.errors?.required && invalidSeedPhrase">
+								Invalid seed phrase
+							</div>
+						</div>
+						<div class="form-group">
+							<input type="text" class="form-control" id="extra-word" name="extra-word" placeholder='Extra Word' [(ngModel)]="extraWord">
+						</div>
+					</div>
+
+					<div class="col-12 explanation text-center">
+						Specify extra word <span class="text-danger">only</span> if you did specify it upon account creation. Leave it empty otherwise.
+					</div>
+
+					<div class="col-12 text-center mt-3">
+						<div class="d-flex">
+							<button type="button" class="btn btn-sm btn-primary w-50 mr-1" routerLink="/home/account">Cancel</button>
+							<button type="button" class="btn btn-sm btn-primary w-50 ml-1" (click)="importPhrase()" [disabled]="seedForm?.invalid">Import</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<!-- PRIVATE KEY -->
+	<div *ngIf="switchModel.type === 'private'">
+		<div class="mt-4">
+			<form #privateForm="ngForm">
+				<div class="row">
+					<div class="col-12 text-left">
+						<div class="form-group">
+							<input type="text" class="form-control" id="private-key" name="private-key" placeholder='Private Key' #key="ngModel" [ngClass]="{'is-invalid': key.invalid && key.dirty}" [(ngModel)]="privateKey" validMintPrivateKey required>
+							<div class="invalid-feedback invalid-feedback--abs" *ngIf="key?.errors?.required">
+								Field is required
+							</div>
+							<div class="invalid-feedback invalid-feedback--abs" *ngIf="!key?.errors?.required && key?.errors?.privateKey">
+								Invalid private key
+							</div>
+						</div>
+					</div>
+
+					<div class="col-12 text-center mt-3">
+						<div class="d-flex">
+							<button type="button" class="btn btn-sm btn-primary w-50 mr-1" routerLink="/home/account">Cancel</button>
+							<button type="button" class="btn btn-sm btn-primary w-50 ml-1" (click)="importKey()" [disabled]="privateForm?.invalid">Import</button>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+
+</div>

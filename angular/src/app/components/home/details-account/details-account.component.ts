@@ -16,11 +16,13 @@ export class DetailsAccountComponent implements OnInit, OnDestroy {
 
   public storageData: StorageData;
   public currentWallet: Wallet;
-  public view = ['public', 'private'];
+  public view = ['public', 'private', 'show_private'];
   public currentView = this.view[0];
   public privateKey: string = null;
   public password: string = '';
   public incorrectPass: boolean = false;
+  public addressCopied: boolean = false;
+  public privateKeyCopied: boolean = false;
 
   private chrome = window['chrome'];
   private sub1: Subscription;
@@ -39,11 +41,24 @@ export class DetailsAccountComponent implements OnInit, OnDestroy {
   }
 
   getStorageData() {
-    this.chrome.storage.local.get(null, (result) => {
+    this.chrome.storage.local.get(null, (result:StorageData) => {
       this.storageData = result;
       this.currentWallet = this.storageData.wallets[this.storageData.currentWallet];
+      this.back();
       this.ref.detectChanges();
     });
+  }
+
+  copyAddress() {
+    this.commonService.copyText(this.currentWallet.publicKey);
+    this.addressCopied = true;
+    this.ref.detectChanges();
+  }
+
+  copyPrivateKey() {
+    this.commonService.copyText(this.privateKey);
+    this.privateKeyCopied = true;
+    this.ref.detectChanges();
   }
 
   showPrivateKey() {
@@ -59,6 +74,7 @@ export class DetailsAccountComponent implements OnInit, OnDestroy {
       let result = CryptoJS.AES.decrypt(this.currentWallet.privateKey, this.password).toString(CryptoJS.enc.Utf8);
       this.privateKey = (result && result.length > 50) ? result : '';
       this.incorrectPass = false;
+      this.currentView = this.view[2];
     } catch (e) {
       this.incorrectPass = true;
     }
@@ -70,6 +86,8 @@ export class DetailsAccountComponent implements OnInit, OnDestroy {
     this.password = '';
     this.incorrectPass = false;
     this.currentView = this.view[0];
+    this.addressCopied = false;
+    this.privateKeyCopied = false;
     this.ref.detectChanges();
   }
 

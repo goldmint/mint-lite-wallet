@@ -42,7 +42,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 	}
 
 	getStorageData() {
-		this.chrome.storage.local.get(null, (result) => {
+		this.chrome.storage.local.get(null, (result:StorageData) => {
 			this.storageData = result;
 			this.selectedAccount = this.storageData.currentWallet;
 			this.selectedNetwork = result.currentNetwork || 'main';
@@ -76,8 +76,14 @@ export class HomeComponent implements OnInit, OnDestroy {
 		this.ref.detectChanges();
 	}
 
+	createAccount() {
+		this.router.navigate(['/home/create-account']);
+		this.isOpenSettingModal = false;
+		this.ref.detectChanges();
+	}
+
 	goToImportAccount() {
-		this.router.navigate(['/home/new-account/import']);
+		this.router.navigate(['/home/import-account']);
 		this.isOpenSettingModal = false;
 		this.ref.detectChanges();
 	}
@@ -102,12 +108,6 @@ export class HomeComponent implements OnInit, OnDestroy {
 
 	clearStorage() {
 		this.chromeStorage.clear();
-	}
-
-	createAccount() {
-		this.router.navigate(['/home/new-account/create']);
-		this.isOpenSettingModal = false;
-		this.ref.detectChanges();
 	}
 
 	ngOnDestroy() {

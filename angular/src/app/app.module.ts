@@ -11,7 +11,7 @@ import { ChromeStorageService } from "./services/chrome-storage.service";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { GenerateWalletService } from "./services/generate-wallet.service";
 import { AccountComponent } from './components/home/account/account.component';
-import { NewAccountComponent } from "./components/home/new-account/new-account.component";
+import { CreateAccountComponent } from "./components/home/create-account/create-account.component";
 import { AuthComponent } from './components/auth/auth.component';
 import { CommonService } from "./services/common.service";
 import { DetailsAccountComponent } from './components/home/details-account/details-account.component';
@@ -26,7 +26,7 @@ import { MessageBoxService } from "./services/message-box.service";
 import { MessageBoxComponent } from "./common/message-box/message-box.component";
 import { APIHttpInterceptor } from "./common/interceptor/api-http.interceptor";
 import { SendTokensComponent } from "./components/home/send-tokens/send-tokens.component";
-import { SumusAddressValidator } from "./directives/check-sumus.directive";
+import { MintAddressValidator, MintPrivateKeyValidator } from "./directives/base58.directive";
 import { AccountReductionPipe } from "./pipes/account-reduction.pipe";
 import { BackupComponent } from './components/home/backup/backup.component';
 import { AuthGuard } from "./services/auth.guard";
@@ -38,6 +38,8 @@ import { ConfirmTransactionComponent } from './components/auth/confirm-transacti
 import { PrivacyPolicyComponent } from './blocks/privacy-policy/privacy-policy.component';
 import { ContentInjectorService } from './services/content-injector';
 import { ApproveAddressComponent } from './components/home/approve-address/approve-address.component';
+import { NewAddressComponent } from './blocks/new-address/new-address.component';
+import { ImportAccountComponent } from './components/home/import-account/import-account.component';
 
 @NgModule({
 	declarations: [
@@ -47,12 +49,13 @@ import { ApproveAddressComponent } from './components/home/approve-address/appro
 		LoginComponent,
 		SpriteComponent,
 		AccountComponent,
-		NewAccountComponent,
+		CreateAccountComponent,
 		AuthComponent,
 		DetailsAccountComponent,
 		MessageBoxComponent,
 		SendTokensComponent,
-		SumusAddressValidator,
+		MintAddressValidator,
+		MintPrivateKeyValidator,
 		AccountReductionPipe,
 		SubstrPipe,
 		NoexpPipe,
@@ -61,7 +64,9 @@ import { ApproveAddressComponent } from './components/home/approve-address/appro
 		NewWalletComponent,
 		ConfirmTransactionComponent,
 		PrivacyPolicyComponent,
-		ApproveAddressComponent
+		ApproveAddressComponent,
+		NewAddressComponent,
+		ImportAccountComponent
 	],
 	imports: [
 		BrowserModule,

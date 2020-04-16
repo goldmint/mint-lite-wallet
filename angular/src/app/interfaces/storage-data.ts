@@ -7,4 +7,7 @@ export interface StorageData {
   unconfirmedTx: UnconfirmedTx[],
   currentNetwork: string;
   openSendTokenPage: { address: string, token: string };
+  isPolicyAccepted: boolean;
+  backedUp: boolean;
+  backupOfferStamp: number;
 }

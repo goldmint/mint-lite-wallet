@@ -17,8 +17,6 @@ import { BigNumber } from 'bignumber.js';
 })
 export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
 
-
-
 	public detailsLink: string = environment.detailsTxInfoLink;
 	public webWalletLink: string = environment.webWallet;
 	public storageData: StorageData;
@@ -179,7 +177,7 @@ export class AccountComponent implements OnInit, AfterViewInit, OnDestroy {
 	}
 
 	getStorageData(loadBalance: boolean) {
-		this.chrome.storage.local.get(null, (result) => {
+		this.chrome.storage.local.get(null, (result: StorageData) => {
 			this.storageData = result;
 			this.currentWallet = this.storageData.wallets[this.storageData.currentWallet];
 			loadBalance && this.getBalanceAndTx(this.currentWallet.publicKey);

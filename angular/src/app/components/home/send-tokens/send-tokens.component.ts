@@ -1,13 +1,13 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
-import {SendData} from "../../../models/send-data";
-import {Subscription} from "rxjs/index";
-import {ActivatedRoute, Router} from "@angular/router";
-import {CommonService} from "../../../services/common.service";
-import {ApiService} from "../../../services/api.service";
-import {AccountBalance} from "../../../models/account-balance";
-import {environment} from "../../../../environments/environment";
-import {SumusTransactionService} from "../../../services/sumus-transaction.service";
-import {Tx, Wallet} from "../../../interfaces/wallet";
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { SendData } from "../../../models/send-data";
+import { Subscription } from "rxjs/index";
+import { ActivatedRoute, Router } from "@angular/router";
+import { CommonService } from "../../../services/common.service";
+import { ApiService } from "../../../services/api.service";
+import { AccountBalance } from "../../../models/account-balance";
+import { environment } from "../../../../environments/environment";
+import { SumusTransactionService } from "../../../services/sumus-transaction.service";
+import { Tx, Wallet } from "../../../interfaces/wallet";
 import * as CryptoJS from 'crypto-js';
 import { BigNumber } from 'bignumber.js';
 
@@ -69,7 +69,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     this.sendData.token = id ? id : 'gold';
     if (address) {
       this.sendData.to = address;
-      this.chrome.storage.local.remove('openSendTokenPage', () => {});
+      this.chrome.storage.local.remove('openSendTokenPage', () => { });
     }
 
     this.sub1 = this.commonService.chooseAccount$.subscribe(() => {
@@ -157,10 +157,10 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   }
 
   commonSubstrValue(value: string) {
-      return this.commonService.substrValue(value);
+    return this.commonService.substrValue(value);
   }
 
-  substrValue(value: number|string) {
+  substrValue(value: number | string) {
     return value.toString()
       .replace(',', '.')
       .replace(/([^\d.])|(^\.)/g, '')
@@ -246,8 +246,8 @@ export class SendTokensComponent implements OnInit, OnDestroy {
           this.allWallets[this.currentWalletIndex].tx = [tx];
         }
 
-        this.chrome.storage.local.set({['wallets']: this.allWallets}, () => {
-          this.chrome.runtime.sendMessage({newTransaction: true});
+        this.chrome.storage.local.set({ ['wallets']: this.allWallets }, () => {
+          this.chrome.runtime.sendMessage({ newTransaction: true });
         });
 
         this.txId = result.txDigest;
@@ -256,6 +256,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
         this.ref.detectChanges();
 
       }, (error) => {
+        debugger;
         let skip = false;
         if (error && error.error && error.error.res) {
           const res = error.error.res;
@@ -264,7 +265,7 @@ export class SendTokensComponent implements OnInit, OnDestroy {
           } else if (res.code == 42 || res.code == 43) {
             this.errorMessage = 'Transaction pool overflow'
           } else if (res.code && res.wallet_inconsistency) {
-            this.errorMessage = 'Not enough funds'
+            this.errorMessage = 'Not enough funds or destination is unable to receive tokens'
           } else if (res.code && res.nonce_ahead) {
             this.errorMessage = 'Transaction is out of range'
           } else if (res.code && res.nonce_behind) {

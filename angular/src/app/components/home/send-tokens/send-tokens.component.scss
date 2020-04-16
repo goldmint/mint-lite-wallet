@@ -3,8 +3,7 @@
   width: 100%;
 
   .send-all-btn {
-    position: absolute;
-    right: 0;
+    font-size: 14px;
     color: #0093e5;
     cursor: pointer;
 
@@ -24,4 +23,8 @@
 
 .howto-link {
   color: #0093e5;
+}
+
+.sent-tx-id {
+  border: 2px dashed #eee;
 }

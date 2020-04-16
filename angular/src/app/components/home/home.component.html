@@ -39,18 +39,18 @@
           </div>
         </div>-->
 
-        <div class="d-flex align-items-center pointer" (click)="createAccount()">
-            <svg class="icon-gold" width="15" height="15">
-                <use xlink:href="#amount-plus"></use>
-            </svg>
-            <span class="ml-2">Create Account</span>
-        </div>
-
-        <div class="d-flex align-items-center pointer mt-2" (click)="goToAccountDetails()">
+        <div class="d-flex align-items-center pointer" (click)="goToAccountDetails()">
             <svg class="icon-gold" width="15" height="15">
                 <use xlink:href="#information"></use>
             </svg>
             <span class="ml-2">Account Details</span>
+        </div>
+
+        <div class="d-flex align-items-center pointer mt-2" (click)="createAccount()">
+            <svg class="icon-gold" width="15" height="15">
+                <use xlink:href="#amount-plus"></use>
+            </svg>
+            <span class="ml-2">Create Account</span>
         </div>
 
         <div class="d-flex align-items-center pointer mt-2" (click)="goToImportAccount()">

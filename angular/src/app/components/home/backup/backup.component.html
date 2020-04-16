@@ -1,32 +1,27 @@
-<div class="mt-3">
-    <h4 class="mb-3">Backup / Restore</h4>
+<div class="text-center">
 
-    <div class="col-auto btn-group p-0 mn-tabs w-100">
-        <label class="btn btn-primary btn-sm active wrap w-50"
-               name="limitsSwitchModel.type"
-               [(ngModel)]="switchModel.type"
-               (click)="changeTab('backup')"
-               btnRadio="backup">Backup</label>
-        <label class="btn btn-primary btn-sm active wrap w-50"
-               name="limitsSwitchModel.type"
-               [(ngModel)]="switchModel.type"
-               (click)="changeTab('restore')"
-               btnRadio="restore">Restore</label>
+    <h5>Backup / Restore</h5>
+
+    <div class="mt-4">
+        <div class="col-auto btn-group p-0 mn-tabs w-100">
+            <label class="btn btn-primary btn-sm active wrap w-50" name="limitsSwitchModel.type" [(ngModel)]="switchModel.type" (click)="changeTab('backup')" btnRadio="backup">BACKUP</label>
+            <label class="btn btn-primary btn-sm active wrap w-50" name="limitsSwitchModel.type" [(ngModel)]="switchModel.type" (click)="changeTab('restore')" btnRadio="restore">RESTORE</label>
+        </div>
     </div>
 
     <div *ngIf="switchModel.type === 'backup'">
-        <div class="mt-4">
+
+        <div class="explanation mt-3">
+            Backup all your accounts into a single file. 
+            Your private keys will be encrypted with your current <span class="text-danger">master password</span>.
+        </div>
+
+        <div class="mt-3">
             <form #backupForm="ngForm">
                 <div class="row">
-                    <div class="col-12">
+                    <div class="col-12 text-left">
                         <div class="form-group">
-                            <input type="password" class="form-control" placeholder='Password' name="backup-password"
-                                   #backupPass="ngModel"
-                                   [ngClass]="{'is-invalid': (backupPass.invalid || incorrectBackupPass) && backupPass.dirty}"
-                                   [(ngModel)]="backupPassword"
-                                   (ngModelChange)="incorrectBackupPass = false"
-                                   (keyup.enter)="backupForm.valid && !incorrectBackupPass && backupPassword.length >= 6 && backup()"
-                                   required>
+                            <input type="password" class="form-control" placeholder='Master Password' name="backup-password" #backupPass="ngModel" [ngClass]="{'is-invalid': (backupPass.invalid || incorrectBackupPass) && backupPass.dirty}" [(ngModel)]="backupPassword" (ngModelChange)="incorrectBackupPass = false" (keyup.enter)="backupForm.valid && !incorrectBackupPass && backupPassword.length >= 6 && backup()" required>
                             <div class="invalid-feedback invalid-feedback--abs" *ngIf="backupPass?.errors?.required">
                                 Field is required
                             </div>
@@ -39,8 +34,7 @@
                     <div class="col-12 text-center mt-3">
                         <div class="d-flex">
                             <button type="button" class="btn btn-sm btn-primary w-50 mr-1" routerLink="/home/account">Cancel</button>
-                            <button type="button" class="btn btn-sm btn-primary w-50 ml-1" (click)="backup()"
-                                    [disabled]="backupForm.invalid || incorrectBackupPass || backupPassword.length < 6">Backup</button>
+                            <button type="button" class="btn btn-sm btn-primary w-50 ml-1" (click)="backup()" [disabled]="backupForm.invalid || incorrectBackupPass || backupPassword.length < 6">Backup</button>
                         </div>
                     </div>
                 </div>
@@ -49,25 +43,23 @@
     </div>
 
     <div *ngIf="switchModel.type === 'restore'">
-        <div class="mt-4">
+        <div class="explanation mt-3">
+            Restore your accounts from an encrypted backup file. 
+            Specify decryption password <span class="text-danger">related to the file you'll choose</span>.
+        </div>
+
+        <div class="mt-3">
             <form #restoreForm="ngForm">
                 <div class="row">
-                    <div class="col-12">
+                    <div class="col-12 text-left">
                         <div class="form-group hidden">
-                            <label for="json-file">Select your encrypted json file</label>
                             <input type="file" name="json-file" id="json-file" (change)="onChangeFile($event)">
                         </div>
                     </div>
 
-                    <div class="col-12">
+                    <div class="col-12 text-left">
                         <div class="form-group">
-                            <input type="password" class="form-control" id="password" placeholder='Password' name="password"
-                                   #restorePass="ngModel"
-                                   [ngClass]="{'is-invalid': (restorePass.invalid || isInvalidFile || incorrectRestorePass) && restorePass.dirty}"
-                                   [(ngModel)]="restorePassword"
-                                   (ngModelChange)="isInvalidFile = incorrectRestorePass = false"
-                                   (keyup.enter)="selectedFile !== null && restorePassword.length >= 6 && restore()"
-                                   required>
+                            <input type="password" class="form-control" id="password" placeholder='Backup Password' name="password" #restorePass="ngModel" [ngClass]="{'is-invalid': (restorePass.invalid || isInvalidFile || incorrectRestorePass) && restorePass.dirty}" [(ngModel)]="restorePassword" (ngModelChange)="isInvalidFile = incorrectRestorePass = false" (keyup.enter)="selectedFile !== null && restorePassword.length >= 6 && restore()" required>
                             <div class="invalid-feedback invalid-feedback--abs" *ngIf="restorePass?.errors?.required">
                                 Field is required
                             </div>
@@ -83,8 +75,7 @@
                     <div class="col-12 text-center mt-3">
                         <div class="d-flex">
                             <button type="button" class="btn btn-sm btn-primary w-50 mr-1" routerLink="/home/account">Cancel</button>
-                            <button type="button" class="btn btn-sm btn-primary w-50 ml-1" (click)="restore()"
-                                    [disabled]="selectedFile === null || restorePassword.length < 6">Restore</button>
+                            <button type="button" class="btn btn-sm btn-primary w-50 ml-1" (click)="restore()" [disabled]="selectedFile === null || restorePassword.length < 6">Restore</button>
                         </div>
                     </div>
                 </div>
@@ -92,4 +83,3 @@
         </div>
     </div>
 </div>
-

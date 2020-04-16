@@ -5,14 +5,13 @@ package signer
 import (
 	"syscall/js"
 
-	"gm.mint.js/h"
-
 	mint "github.com/void616/gm.mint"
 	"github.com/void616/gm.mint/amount"
 	"github.com/void616/gm.mint/transaction"
+	"gm.mint.js/h"
 )
 
-// SignMessage (message:Uint8Array):string - signs a message, returns signature as Base58 string
+// SignMessage (message: Uint8Array): string;
 func SignMessage(this js.Value, args []js.Value) interface{} {
 	defer h.Recover()
 
@@ -26,7 +25,7 @@ func SignMessage(this js.Value, args []js.Value) interface{} {
 	return sig.Sign(msg).String()
 }
 
-// SignTransferAssetTx (nonce:number, address:string, token:string, tokenAmount:string):Transaction - signs transfer asset tx
+// SignTransferAssetTx (nonce: number, address: string, token: string, tokenAmount: string): Transaction;
 func SignTransferAssetTx(this js.Value, args []js.Value) interface{} {
 	defer h.Recover()
 

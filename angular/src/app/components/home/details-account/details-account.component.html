@@ -1,34 +1,59 @@
 <div class="text-center">
-    <div [hidden]="currentView !== view[0]">
-        <div>
-            <img src='https://chart.googleapis.com/chart?cht=qr&chs=175x175&chl={{ currentWallet?.publicKey }}' alt="">
+    <h5>Account details</h5>
+
+    <div class="mt-3">
+        <div [hidden]="currentView !== view[0]">
+
+            <div class="qr-code text-center">
+                <img 
+                    src='https://chart.googleapis.com/chart?cht=qr&chs=175x175&chl={{ currentWallet?.publicKey }}' 
+                    height="175"
+                    width="175"
+                    alt="Address QR">
+            </div>
+
+            <div class="copy-phrase text-right mt-1"><a (click)="copyAddress()">{{ addressCopied? "Copied": "Copy" }}</a></div>
+            <div class="address p-1">{{ currentWallet?.publicKey }}</div>
+
+            <div class="mt-4">
+                <button type="button" class="btn btn-sm btn-primary btn-block" (click)="showPrivateKey()">Show Private Key</button>
+                <button type="button" class="btn btn-sm btn-primary btn-block mt-3" routerLink="/home/account">Back</button>
+            </div>
         </div>
 
-        <div class="mb-3">
-            <label for="public">Public Key</label>
-            <input type="text" class="form-control" id="public" [value]="currentWallet?.publicKey" readonly>
+        <div [hidden]="currentView !== view[1]">
+
+            <div class="explanation">
+                Keep your private key in secret and <span class="text-danger">do not share it</span> with anyone.
+            </div>
+
+            <div class="mt-3 mb-3">
+                <input type="password" class="form-control" id="private"
+                    #passwordRef
+                    [(ngModel)]="password"
+                    [ngClass]="{'is-invalid': incorrectPass}"
+                    placeholder="Master password"
+                    (keyup.enter)="password.length >= 6 && confirm()">
+            </div>
+
+            <div class="mt-4">
+                <button type="button" class="btn btn-sm btn-primary btn-block" (click)="confirm()" [disabled]="password.length < 6">Show private key</button>
+                <button type="button" class="btn btn-sm btn-primary btn-block mt-3" (click)="back()">Back</button>
+            </div>
         </div>
-        <div class="mb-3">
-            <button type="button" class="btn btn-sm btn-primary w-100" (click)="showPrivateKey()">Show Private Key</button>
+        
+        <div [hidden]="currentView !== view[2]">
+
+            <div class="explanation">
+                Keep your private key in secret and <span class="text-danger">do not share it</span> with anyone.
+            </div>
+
+            <div class="copy-phrase text-right mt-1"><a (click)="copyPrivateKey()">{{ privateKeyCopied? "Copied": "Copy" }}</a></div>
+            <div class="address p-1">{{ privateKey }}</div>
+
+            <div class="mt-4">
+                <button type="button" class="btn btn-sm btn-primary btn-block" (click)="back()">Back</button>
+            </div>
         </div>
-        <button type="button" class="btn btn-sm btn-primary w-100" routerLink="/home/account">Back</button>
     </div>
-
-    <div [hidden]="currentView !== view[1]">
-        <div class="mb-3">
-            <label for="private">Private Key</label>
-            <input type="password" class="form-control" id="private" *ngIf="!privateKey"
-                   #passwordRef
-                   [(ngModel)]="password"
-                   [ngClass]="{'is-invalid': privateKey == '' || incorrectPass}"
-                   placeholder="Type Your Password"
-                   (keyup.enter)="password.length >= 6 && confirm()">
-            <input type="text" class="form-control" id="private" *ngIf="privateKey" [value]="privateKey" readonly>
-        </div>
-        <div class="mb-3">
-            <button type="button" class="btn btn-sm btn-primary w-100" (click)="confirm()" [disabled]="password.length < 6 || privateKey">Confirm</button>
-        </div>
-        <button type="button" class="btn btn-sm btn-primary w-100" (click)="back()">Back</button>
-    </div>
-
 </div>

@@ -1,7 +1,10 @@
 github.com/mr-tron/base58 v1.1.0 h1:Y51FGVJ91WBqCEabAi5OPUz38eAx8DakuAm5svLcsfQ=
 github.com/mr-tron/base58 v1.1.0/go.mod h1:xcD2VGqlgYjBdcBLw+TuYLr8afG+Hj8g2eTVqeSzSU8=
-github.com/void616/gm.mint v1.2.2 h1:NZ/eI2mGkgs8Ag6DJe6TRTQd8WUQAzP6jU0LOAYYTEg=
+github.com/tyler-smith/go-bip39 v1.0.2 h1:+t3w+KwLXO6154GNJY+qUtIxLTmFjfUmpguQT1OlOT8=
+github.com/tyler-smith/go-bip39 v1.0.2/go.mod h1:sJ5fKU0s6JVwZjjcUEX2zFOnvq0ASQ2K9Zr6cf67kNs=
 github.com/void616/gm.mint v1.2.2/go.mod h1:YENF7YQIuRVYvT5umh514ITcu5CEu9mHSrKPDHy2qQ8=
+github.com/void616/gm.mint v1.2.3 h1:IuC+YxO8N7keMUyCnLxZT23Fkza2aGyelBinAzd90bc=
+github.com/void616/gm.mint v1.2.3/go.mod h1:jAjh9x0y1MARz2/6jHPXhHgWYgAcS9mORI3PNfM05zM=
 golang.org/x/crypto v0.0.0-20190123085648-057139ce5d2b h1:Elez2XeF2p9uyVj0yEUDqQ56NFcDtcBNkYP7yv8YbUE=
 golang.org/x/crypto v0.0.0-20190123085648-057139ce5d2b/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2 h1:VklqNMn3ovrHsnt90PveolxSbWFaJdECFbxSq0Mqo2M=

@@ -1,7 +1,7 @@
-import {Component, NgZone, OnInit} from '@angular/core';
-import {Router} from "@angular/router";
-import {ChromeStorageService} from "../../services/chrome-storage.service";
-import {CommonService} from "../../services/common.service";
+import { Component, NgZone, OnInit } from '@angular/core';
+import { Router } from "@angular/router";
+import { ChromeStorageService } from "../../services/chrome-storage.service";
+import { CommonService } from "../../services/common.service";
 
 @Component({
   selector: 'app-auth',
@@ -48,6 +48,6 @@ export class AuthComponent implements OnInit {
   }
 
   openInTab() {
-    this.chrome.tabs.create({'url': this.chrome.extension.getURL('index.html')}, () => {});
+    this.chrome.tabs.create({ 'url': this.chrome.extension.getURL('index.html') }, () => { });
   }
 }

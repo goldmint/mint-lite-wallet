@@ -1,4 +1,4 @@
-JS implementation of GM Mint Blockchain Library (WASM)
+WASM implementation of Mint blockchain core library.
 
 ## Build
 ```sh
@@ -8,28 +8,59 @@ JS implementation of GM Mint Blockchain Library (WASM)
 ## Usage
 Load `/dist/mint.wasm` (see `dist/index.html`) and access library with `mint` global variable.
 
+## JS Methods
+For sake of clarity, described API is in TypeScript form (probably). \
+Public keys (addresses), private keys, digests and signatures are in form of Base58 string. \
+Valid `token` is "GOLD" or "MNT".
+
 ```ts
 
-// Base58
-mint.Pack(bytes:Uint8Array, length:number):string // packs bytes into Base58
-mint.Valid(base58:string):boolean // checks Base58 string
-mint.Unpack(base58:string):Uint8Array // unpacks Base58 string into bytes array
+// Global methods via `mint` global variable:
 
-// Signer creation
-mint.Signer.Generate():Signer // generates a random private key
-mint.Signer.FromPK(privateKey:string):Signer // creates signer from Base58 private key
+// Packs bytes into Base58 string
+mint.Base58.Pack(bytes: Uint8Array, length: number):string;
+// Checks Base58 string
+mint.Base58.Valid(base58: string): boolean;
+// Unpacks Base58 string into bytes array
+mint.Base58.Unpack(base58: string): Uint8Array;
 
-// Signer's methods
-Signer.PrivateKey():string // returns signer's private key
-Signer.PublicKey():string // returns signer's public key
-Signer.SignMessage(message:Uint8Array):string // signs a message, returns signature as Base58 string
-Signer.SignTransferAssetTx(nonce:number, address:string, token:string, tokenAmount:string):Transaction // signs transfer asset tx
+// Generates signer with random private key
+mint.Signer.Generate(): Signer;
+// Creates signer from Base58 private key
+mint.Signer.FromPK(privateKey: string): Signer;
 
-// Signed transaction fields:
-Transaction.Data // hex-encoded data
-Transaction.Name // name
-Transaction.Digest // digest as Base58
+// Generates random seed phrase
+mint.Mnemonic.Generate(): string;
+// Checks seed phrase
+mint.Mnemonic.Valid(seedPhrase: string): boolean;
+// Returns private key from seed phrase salted with optional password (extra word)
+mint.Mnemonic.Recover(seedPhrase: string, extraWord?: string): string;
 
-// Signed message verification
-Verify(message:Uint8Array, signature:string, publicKey:string):boolean // verifies a signature
+// Verifies a signed message
+mint.Verify(message: Uint8Array, signature: string, publicKey: string): boolean;
+
+
+// Signer instance
+class Signer {
+	// Returns signer's private key as Base58 string
+	PrivateKey(): string;
+	// Returns signer's public key as Base58 string
+	PublicKey(): string;
+	// Signs a message, returns signature as Base58 string
+	SignMessage(message: Uint8Array): string;
+	// Signs "transfer asset" transaction
+	SignTransferAssetTx(nonce: number, address: string, token: string, tokenAmount: string): Transaction;
+};
+
+
+// Transaction instance
+class Transaction {
+	// Hex-encoded transaction data
+	Data: string;
+	// Transaction name
+	Name: string;
+	// Digest of the transaction
+	Digest: string;
+}
+
 ```

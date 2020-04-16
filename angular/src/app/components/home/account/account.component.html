@@ -14,12 +14,12 @@
     <div>
         <div class="account-name">
             <div [ngStyle]="{'visibility': loading ? 'hidden' : 'visible'}">
-                <div class="wallet-status approved" *ngIf="isWalletApproved" title="This address is approved to send GOLD">
+                <div class="wallet-status approved" *ngIf="isWalletApproved">
                     <svg width="20" height="20">
                         <use xlink:href="#approved"></use>
                     </svg>
                 </div>
-                <div class="wallet-status not-approved pointer" *ngIf="!isWalletApproved" routerLink="/home/approve-address" title="This address isn't approved. Click to approve">
+                <div class="wallet-status not-approved pointer" *ngIf="!isWalletApproved" routerLink="/home/approve-address" tooltip="This address is not approved. Click to approve" placement="bottom">
                     <svg width="20" height="20">
                         <use xlink:href="#not-approved"></use>
                     </svg>
@@ -77,7 +77,7 @@
             </ng-container>
             <span class="service-error-message" *ngIf="isServiceUnavailable">Updating...</span>
         </div>
-        <button type="button" class="btn btn-sm btn-primary send-btn" [routerLink]="isWalletApproved ? '/home/send-tokens/gold' : '/home/approve-address'" [disabled]="loading" [title]="!isWalletApproved ? 'This address isn\'t approved. Click to approve.' : ''">Send</button>
+        <button type="button" class="btn btn-sm btn-primary send-btn" [routerLink]="isWalletApproved ? '/home/send-tokens/gold' : '/home/approve-address'" [disabled]="loading" [tooltip]="!isWalletApproved ? 'This address is not approved. Click to approve.' : ''" placement="left">Send</button>
     </div>
 </div>
 
@@ -87,7 +87,7 @@
             <div *ngFor="let t of transactionList" class="trs-item">
                 <a class="d-flex align-items-center justify-content-between" [href]="detailsLink + t.transaction.digest + (currentNetwork == 'test' ? '?network=testnet' : '')" target="_blank">
                     <div title="{{ +t.transaction.amount_mnt? t.transaction.amount_mnt + ' MNT' : t.transaction.amount_gold + ' GOLD' }}">
-                        
+
                         <svg width="15" height="15" class="icon-gold mr-2">
                             <use xlink:href="#export" *ngIf="t.transaction.from === currentWallet.publicKey; else incoming"></use>
                             <ng-template #incoming>

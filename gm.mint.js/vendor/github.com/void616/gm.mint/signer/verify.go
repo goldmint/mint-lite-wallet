@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	mint "github.com/void616/gm.mint"
-	"github.com/void616/gm.mint/signer/ed25519"
+	"github.com/void616/gm.mint/internal/ed25519"
 )
 
 // Verify a message with a public key of a signer

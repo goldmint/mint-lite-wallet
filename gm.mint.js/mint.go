@@ -7,6 +7,7 @@ import (
 	"syscall/js"
 
 	"gm.mint.js/base58"
+	"gm.mint.js/mnemonic"
 	"gm.mint.js/signer"
 	"gm.mint.js/verify"
 )
@@ -23,6 +24,11 @@ func main() {
 			"Signer": map[string]interface{}{
 				"Generate": js.FuncOf(signer.Generate),
 				"FromPK":   js.FuncOf(signer.FromPK),
+			},
+			"Mnemonic": map[string]interface{}{
+				"Generate": js.FuncOf(mnemonic.Generate),
+				"Valid":    js.FuncOf(mnemonic.Valid),
+				"Recover":  js.FuncOf(mnemonic.Recover),
 			},
 			"Base58": map[string]interface{}{
 				"Pack":   js.FuncOf(base58.Pack),

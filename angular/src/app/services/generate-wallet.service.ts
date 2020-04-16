@@ -1,10 +1,14 @@
 import { Injectable } from '@angular/core';
 import * as CryptoJS from 'crypto-js';
 
+export interface GeneratedAddress {
+  publicKey: string;
+  privateKey: string;
+  //encPrivateKey: string;
+}
+
 @Injectable()
 export class GenerateWalletService {
-
-  private encryptedKey;
 
   constructor() {}
 
@@ -13,15 +17,24 @@ export class GenerateWalletService {
     return publicKey;
   }
 
-  createWallet(identify) {
-    let sig = window['mint'].Signer.Generate();
-    this.encryptedKey = CryptoJS.AES.encrypt(sig.PrivateKey(), identify).toString();
+  generateSeedPhrase(): string {
+    return window['mint'].Mnemonic.Generate();
+  }
+  
+  validateSeedPhrase(seedPhrase: string): boolean {
+    return window['mint'].Mnemonic.Valid(seedPhrase);
+  }
+  
+  recoverPrivateKey(seedPhrase: string, extraWord?: string): GeneratedAddress {
+    
+    let privateKey = window['mint'].Mnemonic.Recover(seedPhrase, extraWord);
+    let signer: any = window['mint'].Signer.FromPK(privateKey);
+    //let encPrivateKey = CryptoJS.AES.encrypt(signer.PrivateKey(), identify).toString();
 
-    const keys = {
-      publicKey: sig.PublicKey(),
-      encryptedKey: this.encryptedKey
-    }
-
-    return keys;
+    return {
+      publicKey: signer.PublicKey(),
+      privateKey: signer.PrivateKey(),
+      //encPrivateKey: encPrivateKey,
+    };
   }
 }

@@ -4,16 +4,25 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Goldmint Lite Wallet Notification</title>
+
+	<style>
+		button {
+			text-transform: uppercase !important;
+			font-weight: bold !important;
+			letter-spacing: 0.5px !important;
+		}
+	</style>
 </head>
 
 <body>
-	<header> <svg class="icon-gold" width="25" height="25">
+	<header>
+		<svg class="icon-gold" width="25" height="25">
 			<use xlink:href="#logo"></use>
 		</svg>
 		<div> <span id="accountName"></span> </div>
 	</header>
 	<div class="confirm-container">
-		<div class="confirm-block">
+		<div class="confirm-block text-center">
 			<h4>Sign a message</h4>
 			<div class="confirm-info-block">
 				<div class="source-block">
@@ -21,7 +30,7 @@
 					<div id="sourceHost" class="source-host">[hostname]</div>
 				</div>
 				<div class="confirm-text">asks you to sign a message (defined below) with a private key of your current account</div>
-				<div class="attention-text"><b>&#x26A0;</b> Don't sign messages from unknown sources!</div>
+				<div class="attention-text text-danger"><b>&#x26A0;</b> Don't sign messages from unknown sources!</div>
 			</div>
 			<div id="messageBlock" class="message-block">
 				<div class="message-view-btn">

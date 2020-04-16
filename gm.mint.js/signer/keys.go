@@ -8,13 +8,13 @@ import (
 	"gm.mint.js/h"
 )
 
-// PrivateKey ():string - returns signer's private key
+// PrivateKey (): string;
 func PrivateKey(this js.Value, args []js.Value) interface{} {
 	defer h.Recover()
 	return thisPrivateKey(this).String()
 }
 
-// PublicKey ():string - returns signer's public key
+// PublicKey (): string;
 func PublicKey(this js.Value, args []js.Value) interface{} {
 	defer h.Recover()
 	return thisPublicKey(this).String()

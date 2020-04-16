@@ -9,21 +9,21 @@ type WalletTag uint8
 
 const (
 	// WalletTagNode is node wallet
-	WalletTagNode WalletTag = iota + 1
+	WalletTagNode WalletTag = 1
 	// WalletTagGenesisNode is node wallet from genesis block
-	WalletTagGenesisNode
+	WalletTagGenesisNode WalletTag = 2
 	// WalletTagSupervisor is controller wallet who can tag other wallets
-	WalletTagSupervisor
+	WalletTagSupervisor WalletTag = 3
 	// WalletTagOwner is a fee accumulator
-	WalletTagOwner
+	WalletTagOwner WalletTag = 4
 	// WalletTagEmission emits token without a fee
-	WalletTagEmission
+	WalletTagEmission WalletTag = 5
 	// WalletTagNoFee can send transactions without a fee
-	WalletTagNoFee
+	WalletTagNoFee WalletTag = 6
 	// WalletTagApproved is approved user's wallet that is able to send or receive tokens
-	WalletTagApproved
+	WalletTagApproved WalletTag = 7
 	// WalletTagAuthority is certification authority wallet that is able to approve users' wallets
-	WalletTagAuthority
+	WalletTagAuthority WalletTag = 8
 )
 
 // WalletTagToString definition

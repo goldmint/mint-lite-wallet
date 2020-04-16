@@ -2,9 +2,10 @@
     <div class="container"></div>
 </div>
 
-<div class="mt-2">
+<div class="mt-2 text-center">
+
     <div *ngIf="currentPage === page[0]">
-        <h4 class="mb-3">Confirm transaction</h4>
+        <h5 class="mb-4">Confirm transaction</h5>
         <div class="bd-top bd-bottom py-2">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="confirm-item name">
@@ -35,7 +36,8 @@
     </div>
 
     <div *ngIf="currentPage === page[1]">
-        <h4 class="mb-2">Failed to send</h4>
+        <h5 class="mb-4">Failed to send</h5>
+        
         <div>{{ errorMessage }}</div>
         <div class="text-center mt-4">
             <svg class="icon-gold" width="50" height="50">
