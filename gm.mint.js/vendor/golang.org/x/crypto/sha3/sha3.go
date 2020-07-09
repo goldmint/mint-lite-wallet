@@ -33,7 +33,7 @@ type state struct {
 	// and "1111" for SHAKE, or 00000010b and 00001111b, respectively. Then the
 	// padding rule from section 5.1 is applied to pad the message to a multiple
 	// of the rate, which involves adding a "1" bit, zero or more "0" bits, and
-	// a final "1" bit. We merge the first "1" bit from the padding into dsbyte,
+	// a final "1" bit. We manifestMerge the first "1" bit from the padding into dsbyte,
 	// giving 00000110b (0x06) and 00011111b (0x1f).
 	// [1] http://csrc.nist.gov/publications/drafts/fips-202/fips_202_draft.pdf
 	//     "Draft FIPS 202: SHA-3 Standard: Permutation-Based Hash and

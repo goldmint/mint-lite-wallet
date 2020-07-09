@@ -5,11 +5,14 @@
     "ng": "ng",
     "live": "ng build --output-path ./live --watch",
     "build": "ng build --prod",
+    "build-chrome": "npm run-script manifest-merge -- chrome && ng build --prod",
+    "build-firefox": "npm run-script manifest-merge -- firefox && ng build --prod",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
     "sprites": "svg-sprite --config sprite.conf.json src/assets/icons/**/*.svg",
-    "postinstall": "node patch.js"
+    "postinstall": "node patch.js",
+    "manifest-merge": "node manifest-merge.js"
   },
   "private": true,
   "dependencies": {
