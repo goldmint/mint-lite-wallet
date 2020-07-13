@@ -90,6 +90,15 @@ func ParsePrivateKey(s string) (PrivateKey, error) {
 	return BytesToPrivateKey(b)
 }
 
+// MustParsePrivateKey parses an instance from Base58 string or panics
+func MustParsePrivateKey(s string) PrivateKey {
+	v, err := ParsePrivateKey(s)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // BytesToPrivateKey creates an instance from a bytes slice
 func BytesToPrivateKey(b []byte) (PrivateKey, error) {
 	var v PrivateKey
@@ -98,4 +107,13 @@ func BytesToPrivateKey(b []byte) (PrivateKey, error) {
 	}
 	copy(v[:], b)
 	return v, nil
+}
+
+// MustBytesToPrivateKey creates an instance from bytes slice or panics
+func MustBytesToPrivateKey(b []byte) PrivateKey {
+	v, err := BytesToPrivateKey(b)
+	if err != nil {
+		panic(err)
+	}
+	return v
 }

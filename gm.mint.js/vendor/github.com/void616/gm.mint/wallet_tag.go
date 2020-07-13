@@ -8,22 +8,26 @@ import (
 type WalletTag uint8
 
 const (
-	// WalletTagNode is node wallet
+	// WalletTagNode is a registered node (by "supervisor")
 	WalletTagNode WalletTag = 1
-	// WalletTagGenesisNode is node wallet from genesis block
+	// WalletTagGenesisNode is registered node (in genesis block)
 	WalletTagGenesisNode WalletTag = 2
-	// WalletTagSupervisor is controller wallet who can tag other wallets
+	// WalletTagSupervisor can set/unset tags, fee-free (system, singleton)
 	WalletTagSupervisor WalletTag = 3
-	// WalletTagOwner is a fee accumulator
+	// WalletTagOwner is a fee collector, fee-free (system, singleton)
 	WalletTagOwner WalletTag = 4
-	// WalletTagEmission emits token without a fee
+	// WalletTagEmission can emit/burn tokens, fee-free (system)
 	WalletTagEmission WalletTag = 5
-	// WalletTagNoFee can send transactions without a fee
+	// WalletTagNoFee sends transactions without a fee (system)
 	WalletTagNoFee WalletTag = 6
-	// WalletTagApproved is approved user's wallet that is able to send or receive tokens
+	// WalletTagApproved grants ability to a KYC-proved user to send/receive GOLD
 	WalletTagApproved WalletTag = 7
-	// WalletTagAuthority is certification authority wallet that is able to approve users' wallets
+	// WalletTagAuthority can set/unset "approved" tag
 	WalletTagAuthority WalletTag = 8
+	// WalletTagDeposital grants ability to an exchange to send/received GOLD
+	WalletTagDeposital WalletTag = 9
+	// WalletTagExchange can set/unset "deposital" tag
+	WalletTagExchange WalletTag = 10
 )
 
 // WalletTagToString definition
@@ -36,6 +40,8 @@ var WalletTagToString = map[WalletTag]string{
 	WalletTagNoFee:       "nofee",
 	WalletTagApproved:    "approved",
 	WalletTagAuthority:   "authority",
+	WalletTagDeposital:   "deposital",
+	WalletTagExchange:    "exchange",
 }
 
 // String representation

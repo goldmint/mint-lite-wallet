@@ -57,6 +57,15 @@ func ParseDigest(s string) (Digest, error) {
 	return BytesToDigest(b)
 }
 
+// MustParseDigest parses an instance from Base58 string or panics
+func MustParseDigest(s string) Digest {
+	v, err := ParseDigest(s)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // BytesToDigest creates an instance from a bytes slice
 func BytesToDigest(b []byte) (Digest, error) {
 	var v Digest
@@ -65,4 +74,13 @@ func BytesToDigest(b []byte) (Digest, error) {
 	}
 	copy(v[:], b)
 	return v, nil
+}
+
+// MustBytesToDigest creates an instance from bytes slice or panics
+func MustBytesToDigest(b []byte) Digest {
+	v, err := BytesToDigest(b)
+	if err != nil {
+		panic(err)
+	}
+	return v
 }

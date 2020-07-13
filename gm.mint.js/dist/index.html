@@ -1,9 +1,4 @@
 <!doctype html>
-<!--
-Copyright 2018 The Go Authors. All rights reserved.
-Use of this source code is governed by a BSD-style
-license that can be found in the LICENSE file.
--->
 <html>
 
 <head>
@@ -30,6 +25,11 @@ license that can be found in the LICENSE file.
 				let mod = result.module;
 				let inst = result.instance;
 				go.run(inst);
+				
+				let b = window.mint.Base58.Unpack(
+					window.mint.Base58.Pack(new Uint8Array([0xDE, 0xAD]), 2)
+				);
+				debugger;
 			})
 			.catch((err) => {
 				console.error(err);

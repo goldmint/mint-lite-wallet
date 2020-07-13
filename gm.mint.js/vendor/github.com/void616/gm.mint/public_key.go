@@ -57,6 +57,15 @@ func ParsePublicKey(s string) (PublicKey, error) {
 	return BytesToPublicKey(b)
 }
 
+// MustParsePublicKey parses an instance from Base58 string or panics
+func MustParsePublicKey(s string) PublicKey {
+	v, err := ParsePublicKey(s)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // BytesToPublicKey creates an instance from a bytes slice
 func BytesToPublicKey(b []byte) (PublicKey, error) {
 	var v PublicKey
@@ -65,4 +74,13 @@ func BytesToPublicKey(b []byte) (PublicKey, error) {
 	}
 	copy(v[:], b)
 	return v, nil
+}
+
+// MustBytesToPublicKey creates an instance from bytes slice or panics
+func MustBytesToPublicKey(b []byte) PublicKey {
+	v, err := BytesToPublicKey(b)
+	if err != nil {
+		panic(err)
+	}
+	return v
 }

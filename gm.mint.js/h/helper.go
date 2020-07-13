@@ -28,11 +28,6 @@ func Recover() {
 	}
 }
 
-// MakeUint8Array allocates Uint8Array
-func MakeUint8Array(len int) js.Value {
-	return js.Global().Call("eval", fmt.Sprintf("new Uint8Array(%v)", len))
-}
-
 // GetBytes copies Uint8Array to a new bytes buffer
 func GetBytes(v js.Value) ([]byte, error) {
 	len := v.Length()
@@ -51,7 +46,7 @@ func GetUint8Array(b []byte) (js.Value, error) {
 	if len(b) == 0 {
 		return js.Null(), errors.New("empty buffer")
 	}
-	arr := MakeUint8Array(len(b))
+	arr := js.Global().Get("Uint8Array").New(len(b))
 	if n := js.CopyBytesToJS(arr, b); n != len(b) {
 		return js.Null(), errors.New("failed to copy bytes")
 	}
