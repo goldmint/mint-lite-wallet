@@ -69,13 +69,13 @@ export class ImportAccountComponent implements OnInit, OnDestroy {
     // this.addAccount(keys.publicKey, keys.encPrivateKey, this.accountName);
   }
 
-  checkSeedPhrase() {
-    this.invalidSeedPhrase = !this.generateWallet.validateSeedPhrase(this.seedPhrase);
+  async checkSeedPhrase() {
+    this.invalidSeedPhrase = await !this.generateWallet.validateSeedPhrase(this.seedPhrase);
     this.ref.detectChanges();
   }
 
-  importPhrase() {
-    let g = this.generateWallet.recoverPrivateKey(this.seedPhrase, this.extraWord);
+  async importPhrase() {
+    let g = await this.generateWallet.recoverPrivateKey(this.seedPhrase, this.extraWord);
     this.addToStorage(g.privateKey);
     this.router.navigate(['/home/account']);
   }
@@ -85,10 +85,10 @@ export class ImportAccountComponent implements OnInit, OnDestroy {
     this.router.navigate(['/home/account']);
   }
 
-  private addToStorage(privateKey:string) {
+  private async addToStorage(privateKey:string) {
 
     // ensure doesn't exist yet
-    const publicKey = this.generateWallet.getPublicKeyFromPrivate(privateKey);
+    const publicKey = await this.generateWallet.getPublicKeyFromPrivate(privateKey);
     let isMatch = false;
     this.wallets.forEach(wallet => {
       wallet.publicKey === publicKey && (isMatch = true);

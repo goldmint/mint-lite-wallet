@@ -9,7 +9,8 @@
 	}
 	else {
 		// Global (browser)
-		root.CryptoJS = factory();
+		var global = root || window;
+		global.CryptoJS = factory();
 	}
 }(this, function () {
 

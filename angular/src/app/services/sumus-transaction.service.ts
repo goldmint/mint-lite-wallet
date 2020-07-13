@@ -1,20 +1,30 @@
 import { Injectable } from '@angular/core';
 import { BigNumber } from 'bignumber.js';
+import {ChromeStorageService} from "./chrome-storage.service";
+import {TransferAssetTx} from "../models/transfer-asset-tx";
 
 @Injectable()
 export class SumusTransactionService {
 
-  constructor() {}
+  private promiseResolve: any = {};
+  private methods = ['makeTransferAssetTransaction'];
 
-  makeTransferAssetTransaction(signerPrivateKey: string, toAddress: string, token: string, amount: string, nonce: number) {
-    const singer = window['mint'].Signer.FromPK(signerPrivateKey);
-    const tx = singer.SignTransferAssetTx(nonce, toAddress, token, amount);
+  constructor(
+    private chromeStorage: ChromeStorageService
+  ) {
+    const isFireFox = this.chromeStorage.isFireFox();
+    this.chromeStorage.chrome[isFireFox ? 'runtime' : 'extension'].onMessage.addListener(request => {
+      this.methods.forEach(method => {
+        request.hasOwnProperty(method) && this.promiseResolve[method](request[method]);
+      });
+    });
+  }
 
-    return {
-      txData: tx.Data,
-      txDigest: tx.Digest,
-      txName: tx.Name
-    }
+  makeTransferAssetTransaction(publicKey: string, toAddress: string, token: string, amount: string, nonce: number): Promise<TransferAssetTx> {
+    return new Promise(resolve => {
+      this.promiseResolve.makeTransferAssetTransaction = resolve;
+      this.chromeStorage.sendMessage({ makeTransferAssetTransaction: { publicKey, toAddress, token, amount, nonce, fromWallet: true } });
+    });
   }
 
   feeCalculate(mnt: string = '0', gold: string = '0', token: string): string {

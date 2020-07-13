@@ -38,7 +38,8 @@ export class LoginComponent implements OnInit, AfterViewInit {
     private ref: ChangeDetectorRef,
     private commonService: CommonService,
     private zone: NgZone,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private generateWalletService: GenerateWalletService
   ) { }
 
   ngOnInit() {
@@ -57,10 +58,10 @@ export class LoginComponent implements OnInit, AfterViewInit {
     setTimeout(() => this.passwordRef.nativeElement.focus(), 0);
   }
 
-  submit() {
+  async submit() {
     let decrypted;
     try {
-      decrypted = CryptoJS.AES.decrypt(this.wallets[0].privateKey, this.userPassword).toString(CryptoJS.enc.Utf8);
+      decrypted = await this.generateWalletService.getPrivateKey(this.wallets[0].publicKey, this.userPassword);
     } catch (e) {
       this.invalidPass = true;
       return;

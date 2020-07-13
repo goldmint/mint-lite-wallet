@@ -1,9 +1,9 @@
 import {ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {StorageData} from "../../../interfaces/storage-data";
 import {Wallet} from "../../../interfaces/wallet";
-import * as CryptoJS from 'crypto-js';
 import {Subscription} from "rxjs/index";
 import {CommonService} from "../../../services/common.service";
+import {GenerateWalletService} from "../../../services/generate-wallet.service";
 
 @Component({
   selector: 'app-details-account',
@@ -29,7 +29,8 @@ export class DetailsAccountComponent implements OnInit, OnDestroy {
 
   constructor(
     private ref: ChangeDetectorRef,
-    private commonService: CommonService
+    private commonService: CommonService,
+    private generateWalletService: GenerateWalletService
     ) { }
 
   ngOnInit() {
@@ -69,9 +70,9 @@ export class DetailsAccountComponent implements OnInit, OnDestroy {
     }, 0);
   }
 
-  confirm() {
+  async confirm() {
     try {
-      let result = CryptoJS.AES.decrypt(this.currentWallet.privateKey, this.password).toString(CryptoJS.enc.Utf8);
+      const result = await this.generateWalletService.getPrivateKey(this.currentWallet.publicKey, this.password);
       this.privateKey = (result && result.length > 50) ? result : '';
       this.incorrectPass = false;
       this.currentView = this.view[2];

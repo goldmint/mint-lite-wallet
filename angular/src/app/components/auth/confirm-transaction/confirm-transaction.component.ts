@@ -31,7 +31,6 @@ export class ConfirmTransactionComponent implements OnInit {
   public errorMessage: string = '';
 
   private chrome = window['chrome'];
-  private identify: string;
   private timeTxFailed = environment.timeTxFailed;
   private retrySendTxCount: number = 0;
 
@@ -52,10 +51,6 @@ export class ConfirmTransactionComponent implements OnInit {
       this.allWallets = result.wallets;
       this.network = result.currentNetwork || 'main';
       this.getTxData();
-    });
-
-    this.chrome.runtime.getBackgroundPage(page => {
-      this.identify = page.sessionStorage.identify;
     });
   }
 
@@ -108,19 +103,12 @@ export class ConfirmTransactionComponent implements OnInit {
     });
   }
 
-  confirmTransfer() {
+  async confirmTransfer() {
     this.loading = true;
-    let privateKey;
-    try {
-      privateKey = CryptoJS.AES.decrypt(this.currentWallet.privateKey, this.identify).toString(CryptoJS.enc.Utf8);
-    } catch (e) {
-      this.failedTx();
-      return;
-    }
 
     const amount = new BigNumber(this.currentTx.amount).toString(10);
-    const result = this.sumusTransactionService.makeTransferAssetTransaction(
-      privateKey, this.currentTx.to, this.currentTx.token.toUpperCase(), amount, this.nonce
+    const result = await this.sumusTransactionService.makeTransferAssetTransaction(
+      this.currentWallet.publicKey, this.currentTx.to, this.currentTx.token.toUpperCase(), amount, this.nonce
     );
 
     this.apiService.getBlockChainStatus().subscribe((data: any) => {

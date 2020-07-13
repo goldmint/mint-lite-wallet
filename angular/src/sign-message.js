@@ -225,8 +225,7 @@
 	let isFirefox = typeof InstallTrigger !== 'undefined',
 		brows = isFirefox ? browser : chrome,
 		accountName,
-		privateKey,
-		cryptoJS = CryptoJS,
+		publicKey,
 		id = queryParams.id,
 		tabId = queryParams.tabId,
 		identify,
@@ -242,11 +241,11 @@
 
 		if (isFirefox) {
 			brows.runtime.onMessage.addListener((request, sender, sendResponse) => {
-				getIdentifier(request);
+                actions(request);
 			});
 		} else {
 			brows.extension.onMessage.addListener((request, sender, sendResponse) => {
-				getIdentifier(request);
+                actions(request);
 			});
 		}
 		brows.runtime.sendMessage({ getIdentifier: true });
@@ -272,6 +271,33 @@
 		domElements.btnHex.addEventListener('click', displayHexMessage);
 	}
 
+    function actions(request) {
+        if (request.identifier) {
+            identify = request.identifier;
+            getMessage();
+        }
+
+        if (request.hasOwnProperty('getSignedMessage')) {
+            try {
+                const message = request.getSignedMessage;
+
+                brows.storage.local.get(null, (data) => {
+                    messages = data.messagesForSign;
+                    messages.forEach((message, index) => {
+                        if (message.id == id) messages.splice(index, 1);
+                    });
+
+                    brows.storage.local.set({ ['messagesForSign']: messages }, () => {
+                        brows.runtime.sendMessage({ sendSignResult: { result: message, id, tabId } });
+                        close();
+                    });
+                });
+            } catch (e) {
+                cancel();
+            }
+        }
+    }
+
 	function buf2hex(buffer) {
 		return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
 	}
@@ -289,30 +315,27 @@
 					for (let key in currentMessage.bytes) {
 						bytes.push(currentMessage.bytes[key]);
 					}
-					currentMessage.bytes = bytes;
 
 					if (bytes && bytes.length) {
-						currentMessage.utf8 = new TextDecoder('utf-8').decode(new Uint8Array(currentMessage.bytes));
+						currentMessage.utf8 = new TextDecoder('utf-8').decode(new Uint8Array(bytes));
 
-						const buffer = new Uint8Array(currentMessage.bytes).buffer;
+						const buffer = new Uint8Array(bytes).buffer;
 						currentMessage.hex = '0x' + buf2hex(buffer);
 
 						domElements.messageText.textContent = currentMessage.utf8;
 						domElements.messageHex.textContent = currentMessage.hex;
 					}
 
-					let encryptedKey;
 					for (let i = 0; i < wallets.length; i++) {
 						if (wallets[i].publicKey === message.publicKey) {
-							encryptedKey = wallets[i].privateKey;
+							publicKey = wallets[i].publicKey;
 							accountName = wallets[i].name;
 							break;
 						}
 					}
 
-					privateKey = cryptoJS.AES.decrypt(encryptedKey, identify).toString(cryptoJS.enc.Utf8);
 					domElements.sourceHost.textContent = message.host;
-					domElements.messageLength.textContent = currentMessage.bytes ? currentMessage.bytes.length : 0;
+					domElements.messageLength.textContent = bytes ? bytes.length : 0;
 					domElements.accountName.textContent = accountName || '';
 
 					if (message.iconUrl) {
@@ -326,34 +349,8 @@
 		});
 	}
 
-	function getIdentifier(request) {
-		if (request.identifier) {
-			identify = request.identifier;
-			getMessage();
-		}
-	}
-
 	function sign() {
-		let result;
-
-		try {
-			const singer = window.mint.Signer.FromPK(privateKey);
-			result = singer.SignMessage(new Uint8Array(currentMessage.bytes));
-		} catch (e) {
-			cancel();
-		}
-
-		brows.storage.local.get(null, (data) => {
-			messages = data.messagesForSign;
-			messages.forEach((message, index) => {
-				if (message.id == id) messages.splice(index, 1);
-			});
-
-			brows.storage.local.set({ ['messagesForSign']: messages }, () => {
-				brows.runtime.sendMessage({ sendSignResult: { result, id, tabId } });
-				close();
-			});
-		});
+        brows.runtime.sendMessage({ getSignedMessage: { publicKey, bytesObject: currentMessage.bytes } });
 	}
 
 	function cancel() {

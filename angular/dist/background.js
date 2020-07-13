@@ -15,7 +15,6 @@ const config = {
 
 let isFirefox = typeof InstallTrigger !== 'undefined';
 let brows = isFirefox ? browser : chrome;
-let xhr = new XMLHttpRequest();
 
 // receive messages
 let messageListener = (request, sender, sendResponse) => {
@@ -32,6 +31,9 @@ if (isFirefox) {
 	brows.extension.onMessage.addListener(messageListener);
 }
 
+injectMintWasm();
+injectCryptoJS();
+
 clearMessagesForSign();
 
 // after load page
@@ -45,7 +47,7 @@ function actions(request, sender) {
 	request.logout && logout();
 
 	// check login status
-	request.checkLoginStatus && sendMessage('loginStatus', window.sessionStorage.getItem('identify') ? true : false);
+	request.checkLoginStatus && sendMessage('loginStatus', getIdentify() ? true : false);
 
 	// after send tx from lib
 	request.sendTransaction && createConfirmWindow(request.sendTransaction, sender.tab.id);
@@ -66,18 +68,206 @@ function actions(request, sender) {
 	}
 
 	// pass password
-	request.getIdentifier && sendMessage('identifier', window.sessionStorage.getItem('identify'));
+	request.getIdentifier && sendMessage('identifier', getIdentify());
 
 	// open send gold page in wallet
 	request.openSendTokenPage && openSendTokenPage();
+
+	// get private key
+	request.getPrivateKey && getPrivateKey(request);
+
+	// make transfer asset transaction
+    request.makeTransferAssetTransaction && makeTransferAssetTransaction(request);
+
+    // get signed message
+    request.getSignedMessage && getSignedMessage(request);
+
+    // verify signature
+    request.verifySignature && verifySignature(request);
+
+    // get public key from private
+	request.getPublicKeyFromPrivate && getPublicKeyFromPrivate(request);
+
+	// generate seed phrase
+	request.generateSeedPhrase && generateSeedPhrase();
+
+	// validate seed phrase
+	request.validateSeedPhrase && validateSeedPhrase(request);
+
+	// recover private key
+	request.recoverPrivateKey && recoverPrivateKey(request);
+}
+
+function getIdentify() {
+    return window.sessionStorage.getItem('identify');
+}
+
+function decryptPrivateKey(publicKey, password = getIdentify()) {
+	return new Promise(resolve => {
+		brows.storage.local.get(null, (result) => {
+			const { wallets } = result;
+			if (wallets) {
+				wallets.forEach(wallet => {
+					if (wallet.publicKey === publicKey) {
+						try {
+							const privateKey = window.CryptoJS.AES.decrypt(wallet.privateKey, password).toString(window.CryptoJS.enc.Utf8);
+							resolve(privateKey);
+						} catch (e) {
+							resolve(null);
+						}
+					}
+				});
+			} else {
+				resolve(null);
+			}
+		});
+	});
+}
+
+function encryptPrivateKey(privateKey) {
+	return window.CryptoJS.AES.encrypt(privateKey, getIdentify()).toString();
+}
+
+async function makeTransferAssetTransaction(request) {
+    let tx, _fromWallet, result = {};
+
+    try {
+        const { publicKey, toAddress, token, amount, nonce, fromWallet } = request.makeTransferAssetTransaction;
+		_fromWallet = fromWallet;
+        const privateKey = await decryptPrivateKey(publicKey);
+        const singer = window.mint.Signer.FromPK(privateKey);
+
+        tx = singer.SignTransferAssetTx(nonce, toAddress, token, amount.toString());
+        if (tx) {
+            result = {
+                txData: tx.Data,
+                txDigest: tx.Digest,
+                txName: tx.Name
+            }
+        }
+    } catch (e) {
+        result = {};
+    }
+
+    sendMessage('makeTransferAssetTransaction', result, _fromWallet);
+}
+
+async function getSignedMessage(request) {
+    let result = null;
+
+    try {
+        const { publicKey, bytesObject } = request.getSignedMessage;
+        const privateKey = await decryptPrivateKey(publicKey);
+
+        const singer = window.mint.Signer.FromPK(privateKey);
+        result = singer.SignMessage(getUint8Array(bytesObject));
+    } catch (e) {
+        result = null;
+    }
+
+    sendMessage('getSignedMessage', result);
+}
+
+function verifySignature(request) {
+    let result = null;
+
+    try {
+        const { bytes, signature, publicKey } = request.verifySignature;
+        result = window.mint.Verify(getUint8Array(bytes), signature, publicKey);
+    } catch (e) {
+        result = null;
+    }
+
+	sendMessage('verifySignatureResult', result);
+}
+
+// Used in wallet app only
+
+async function getPrivateKey(request) {
+	const { publicKey, password } = request.getPrivateKey;
+	const privateKey = await decryptPrivateKey(publicKey, password);
+
+	sendMessage('getPrivateKey', privateKey, true);
+}
+
+function getPublicKeyFromPrivate(request) {
+	let result = null;
+
+	try {
+		const { privateKey } = request.getPublicKeyFromPrivate;
+		result = window.mint.Signer.FromPK(privateKey).PublicKey();
+	} catch (e) {
+		result = null;
+	}
+
+	sendMessage('getPublicKeyFromPrivate', result, true);
+}
+
+function generateSeedPhrase() {
+	let result = null;
+
+	try {
+		result = window.mint.Mnemonic.Generate();
+	} catch (e) {
+		result = null;
+	}
+
+	sendMessage('generateSeedPhrase', result, true);
+}
+
+function validateSeedPhrase(request) {
+	let result = null;
+
+	try {
+		const { seedPhrase } = request.validateSeedPhrase;
+		result = window.mint.Mnemonic.Valid(seedPhrase, true);
+	} catch (e) {
+		result = null;
+	}
+
+	sendMessage('validateSeedPhrase', result, true);
+}
+
+function recoverPrivateKey(request) {
+	let result = null;
+
+	try {
+		const { seedPhrase, extraWord } = request.recoverPrivateKey;
+		const privateKey = window.mint.Mnemonic.Recover(seedPhrase, extraWord);
+		const signer = window.mint.Signer.FromPK(privateKey);
+
+		result =  {
+			publicKey: signer.PublicKey(),
+			privateKey: signer.PrivateKey()
+		};
+	} catch (e) {
+		result = null;
+	}
+
+	sendMessage('recoverPrivateKey', result, true);
 }
 
 // ---
 
-function sendMessage(key, value) {
-	brows.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-		tabs[0] && brows.tabs.sendMessage(tabs[0].id, { [key]: value });
-	});
+function getUint8Array(bytes) {
+    let _bytes = [];
+    for (let key in bytes) {
+        _bytes.push(bytes[key]);
+    }
+    return new Uint8Array(_bytes);
+}
+
+// ---
+
+function sendMessage(key, value, fromWallet = false) {
+	if (fromWallet) {
+		// this method uses for send data in wallet app
+		brows.runtime.sendMessage(brows.runtime.id, { [key]: value });
+	} else {
+		brows.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+			tabs[0] && brows.tabs.sendMessage(tabs[0].id, { [key]: value });
+		});
+	}
 }
 
 function http(method, url, params = '') {
@@ -204,8 +394,7 @@ function checkTransactionStatus(hash, endTime, network, data, txBlockId, current
 }
 
 function clearMessagesForSign() {
-	brows.storage.local.set({ 'messagesForSign': [] }, () => {
-	});
+	brows.storage.local.set({ 'messagesForSign': [] }, () => {});
 }
 
 function finishTx(hash) {
@@ -244,8 +433,7 @@ function createConfirmWindow(id, tabId) {
 		type: "popup",
 		width: 320,
 		height: 551
-	}, (data) => {
-	});
+	}, (data) => {});
 }
 
 function createSignMessageWindow(id, tabId) {
@@ -254,8 +442,7 @@ function createSignMessageWindow(id, tabId) {
 		type: "popup",
 		width: 320,
 		height: 551
-	}, (data) => {
-	});
+	}, (data) => {});
 }
 
 function openSendTokenPage() {
@@ -274,4 +461,38 @@ function injectContent() {
 	} catch (e) {
 		console.log("Failed to inject")
 	}
+}
+
+async function injectMintWasm() {
+    const goWasmPath = brows.extension.getURL('assets/libs/mint/gowasm.js');
+    await import(goWasmPath);
+
+    const interval = setInterval(() => {
+        if (window.Go) {
+            clearInterval(interval);
+            const go = new Go();
+
+            // polyfill
+            if (!WebAssembly.instantiateStreaming) {
+                WebAssembly.instantiateStreaming = async (resp, importObject) => {
+                    const source = await (await resp).arrayBuffer();
+                    return await WebAssembly.instantiate(source, importObject);
+                };
+            }
+
+            const mintWasmPath = brows.extension.getURL('assets/libs/mint/mint.wasm');
+            WebAssembly.instantiateStreaming(fetch(mintWasmPath), go.importObject)
+                .then((result) => {
+                    go.run(result.instance);
+                })
+                .catch((err) => {
+                    console.error(err);
+                });
+        }
+    }, 50);
+}
+
+async function injectCryptoJS() {
+    const cryptoJsPath = brows.extension.getURL('assets/libs/crypto-js/crypto-js.js');
+    await import(cryptoJsPath);
 }

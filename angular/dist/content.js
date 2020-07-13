@@ -269,16 +269,14 @@
 		}),
 
 		verifySignature: data => new Promise((resolve, reject) => {
-			resolve(data.result);
-		}),
+            brows.runtime.sendMessage({ verifySignature: data });
 
-		getGoWasmJsPath: data => new Promise((resolve, reject) => {
-			resolve(brows.extension.getURL('assets/libs/mint/gowasm.js'));
-		}),
+            brows.runtime.onMessage.addListener(function answer(request, sender, sendResponse) {
+                brows.runtime.onMessage.removeListener(answer);
 
-		getMintWasmPath: data => new Promise((resolve, reject) => {
-			resolve(brows.extension.getURL('assets/libs/mint/mint.wasm'));
-		})
+                request.hasOwnProperty('verifySignatureResult') && resolve(request.verifySignatureResult);
+            });
+		}),
 	};
 
 }();

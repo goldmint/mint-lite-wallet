@@ -102,14 +102,6 @@ export class HomeComponent implements OnInit, OnDestroy {
 		}, 200);
 	}
 
-	getItem() {
-		this.chromeStorage.load(null);
-	}
-
-	clearStorage() {
-		this.chromeStorage.clear();
-	}
-
 	ngOnDestroy() {
 		this.sub1 && this.sub1.unsubscribe();
 		this.sub2 && this.sub2.unsubscribe();

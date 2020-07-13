@@ -19,39 +19,6 @@
 		}
 	});
 
-	Promise.all([
-		sendQuestion('getGoWasmJsPath'),
-		sendQuestion('getMintWasmPath')
-	]).then(res => {
-		let script = document.createElement('script');
-		script.setAttribute('type', 'text/javascript');
-		script.setAttribute('src', res[0]);
-		document.head && document.head.appendChild(script);
-
-		const interval = setInterval(() => {
-			if (window.Go) {
-				clearInterval(interval);
-				const go = new Go();
-
-				// polyfill
-				if (!WebAssembly.instantiateStreaming) {
-					WebAssembly.instantiateStreaming = async (resp, importObject) => {
-						const source = await (await resp).arrayBuffer();
-						return await WebAssembly.instantiate(source, importObject);
-					};
-				}
-
-				WebAssembly.instantiateStreaming(fetch(res[1]), go.importObject)
-					.then((result) => {
-						go.run(result.instance);
-					})
-					.catch((err) => {
-						console.error(err);
-					});
-			}
-		}, 50);
-	});
-
 	class GoldMint {
 
 		constructor() { }
@@ -81,22 +48,7 @@
 		}
 
 		verifySignature(bytes, signature, publicKey) {
-			let result;
-			if (!bytes || typeof bytes !== 'object' || !signature || !publicKey) {
-				result = null;
-			}
-
-			if (window.mint && window.mint.Verify) {
-				try {
-					result = window.mint.Verify(bytes, signature, publicKey)
-				} catch (e) {
-					result = null;
-				}
-			} else {
-				result = null;
-			}
-
-			return sendQuestion('verifySignature', { result });
+			return sendQuestion('verifySignature', { bytes, signature, publicKey });
 		}
 	}
 

@@ -38,7 +38,8 @@ export class BackupComponent implements OnInit {
     private router: Router,
     private commonService: CommonService,
     private ref: ChangeDetectorRef,
-    private messageBox: MessageBoxService
+    private messageBox: MessageBoxService,
+    private generateWalletService: GenerateWalletService
   ) { }
 
   ngOnInit() {
@@ -67,7 +68,7 @@ export class BackupComponent implements OnInit {
     this.router.navigate(['/home/account']);
   }
 
-  backup() {
+  async backup() {
     if (this.backupPassword !== this.identify) {
       this.incorrectBackupPass = true;
       this.ref.detectChanges();
@@ -75,15 +76,16 @@ export class BackupComponent implements OnInit {
     }
 
     let wallets = [];
-    this.wallets.forEach(wallet => {
+
+    for (const wallet of this.wallets) {
       try {
-        const key = CryptoJS.AES.decrypt(wallet.privateKey, this.identify).toString(CryptoJS.enc.Utf8);
+        const key = await this.generateWalletService.getPrivateKey(wallet.publicKey);
         wallets.push({ name: wallet.name, key: key });
       } catch (e) {
         this.messageBox.alert('Something went wrong');
         return;
       }
-    });
+    }
     let data = new Backup();
     const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(wallets), this.identify).toString();
     data.data = encryptedData;
@@ -117,7 +119,7 @@ export class BackupComponent implements OnInit {
     if (this.selectedFile.size > 0 && this.selectedFile.type === "application/json") {
       var reader = new FileReader();
       reader.onload = ((reader: any) => {
-        return () => {
+        return async () => {
           const contents = JSON.parse(reader.result);
           try {
             const decrypted = CryptoJS.AES.decrypt(contents.data, this.restorePassword).toString(CryptoJS.enc.Utf8);
@@ -129,7 +131,7 @@ export class BackupComponent implements OnInit {
           }
 
           let wallets = this.wallets.slice();
-          this.keyStoreFile.forEach(restoreData => {
+          for (const restoreData of this.keyStoreFile) {
             let restoreKey, accountName;
 
             if (contents.version === 1) {
@@ -140,7 +142,7 @@ export class BackupComponent implements OnInit {
               accountName = restoreData['name'];
             }
 
-            const publicKey = this.generateWallet.getPublicKeyFromPrivate(restoreKey);
+            const publicKey = await this.generateWallet.getPublicKeyFromPrivate(restoreKey);
             let isMatch = false;
 
             this.wallets.forEach(wallet => {
@@ -157,7 +159,7 @@ export class BackupComponent implements OnInit {
               };
               wallets.push(data);
             }
-          });
+          }
           this.addAccount(wallets);
         }
       })(reader);

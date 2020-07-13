@@ -40,7 +40,7 @@ export class NewAddressComponent implements OnInit {
     private commonService: CommonService
   ) { }
 
-  ngOnInit(): void {
+  async ngOnInit() {
     if (this.optionalIdentity) {
       this.identify = this.optionalIdentity;
     } else {
@@ -57,7 +57,7 @@ export class NewAddressComponent implements OnInit {
       this.ref.detectChanges();
     });
 
-    this.seedPhrase = this.generateWallet.generateSeedPhrase();
+    this.seedPhrase = await this.generateWallet.generateSeedPhrase();
     this.currentTab = 'seedPhrase';
   }
 
@@ -72,8 +72,8 @@ export class NewAddressComponent implements OnInit {
     this.ref.detectChanges();
   }
 
-  generate() {
-    this.newPair = this.generateWallet.recoverPrivateKey(this.seedPhrase, this.extraWord);
+  async generate() {
+    this.newPair = await this.generateWallet.recoverPrivateKey(this.seedPhrase, this.extraWord);
     this.changeTab('generate');
   }
 
@@ -93,10 +93,10 @@ export class NewAddressComponent implements OnInit {
 
   // ---
 
-  complete() {
+  async complete() {
 
     // ensure doesn't exist yet
-    const publicKey = this.generateWallet.getPublicKeyFromPrivate(this.newPair.privateKey);
+    const publicKey = await this.generateWallet.getPublicKeyFromPrivate(this.newPair.privateKey);
     let isMatch = false;
     this.wallets.forEach(wallet => {
       wallet.publicKey === publicKey && (isMatch = true);

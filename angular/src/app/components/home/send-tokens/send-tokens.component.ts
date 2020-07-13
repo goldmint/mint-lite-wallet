@@ -43,7 +43,6 @@ export class SendTokensComponent implements OnInit, OnDestroy {
 
   private sub1: Subscription;
   private chrome = window['chrome'];
-  private identify: string;
   private timeTxFailed = environment.timeTxFailed;
   private interval: any;
   private retrySendTxCount: number = 0;
@@ -82,10 +81,6 @@ export class SendTokensComponent implements OnInit, OnDestroy {
   getCurrentWallet() {
     this.loading = true;
     this.chrome.storage.local.get(null, (result) => {
-
-      this.chrome.runtime.getBackgroundPage(page => {
-        this.identify = page.sessionStorage.identify;
-      });
 
       this.currentWalletIndex = result.currentWallet;
       this.currentWallet = result.wallets[result.currentWallet];
@@ -197,21 +192,13 @@ export class SendTokensComponent implements OnInit, OnDestroy {
     this.ref.detectChanges();
   }
 
-  confirmTransfer() {
+  async confirmTransfer() {
     this.currentPage = this.page[2];
     this.loading = true;
 
-    let privateKey;
-    try {
-      privateKey = CryptoJS.AES.decrypt(this.currentWallet.privateKey, this.identify).toString(CryptoJS.enc.Utf8);
-    } catch (e) {
-      this.failedTx();
-      return;
-    }
-
     const amount = new BigNumber(this.sendData.amount).toString(10);
-    const result = this.sumusTransactionService.makeTransferAssetTransaction(
-      privateKey, this.sendData.to, this.sendData.token.toUpperCase(), amount, this.nonce
+    const result = await this.sumusTransactionService.makeTransferAssetTransaction(
+      this.currentWallet.publicKey, this.sendData.to, this.sendData.token.toUpperCase(), amount, this.nonce
     );
 
     this.apiService.getBlockChainStatus().subscribe((data: any) => {

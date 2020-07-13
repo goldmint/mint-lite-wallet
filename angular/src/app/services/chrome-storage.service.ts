@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 @Injectable()
 export class ChromeStorageService {
 
-  private chrome = window['chrome'];
+  public chrome = window['chrome'];
 
   constructor() { }
 
@@ -21,5 +21,13 @@ export class ChromeStorageService {
 
   public clear() {
     this.chrome.storage.local.clear(() => { });
+  }
+
+  public sendMessage(message: any) {
+    this.chrome.runtime.sendMessage(message);
+  }
+
+  public isFireFox() {
+    return typeof window['InstallTrigger'] !== 'undefined';
   }
 }

@@ -210,11 +210,10 @@
 		brows = isFirefox ? browser : chrome,
 		nonce,
 		accountName,
-		privateKey,
+		publicKey,
 		unconfirmedTx,
 		currentUnconfirmedTx,
 		wallets,
-		cryptoJS = CryptoJS,
 		id = queryParams.id,
 		tabId = queryParams.tabId,
 		network,
@@ -265,17 +264,15 @@
                             const mintBalance = result['res'].balance.mint;
 
 							try {
-								let encryptedKey;
 								for (let i = 0; i < wallets.length; i++) {
 									if (wallets[i].publicKey === tx.from) {
-										encryptedKey = wallets[i].privateKey;
+										publicKey = wallets[i].publicKey;
 										accountName = wallets[i].name;
 										break;
 									}
 								}
 
 								currentUnconfirmedTx = tx;
-								privateKey = cryptoJS.AES.decrypt(encryptedKey, identify).toString(cryptoJS.enc.Utf8);
 
 								domElements.infoFrom.textContent = reduction(tx.from);
 								domElements.infoTo.textContent = reduction(tx.to);
@@ -299,29 +296,22 @@
 
 	function actions(request) {
 		request.identifier && (identify = request.identifier);
-	}
 
-	function makeTransferAssetTransaction(signerPrivateKey, toAddress, token, amount, nonce) {
-		const singer = window.mint.Signer.FromPK(signerPrivateKey);
-		let tx;
-		try {
-			tx = singer.SignTransferAssetTx(nonce, toAddress, token, amount.toString());
-		} catch (e) {
-			return failedTx();
-		}
-
-		if (!tx) {
-            return failedTx();
+		if (request.hasOwnProperty('makeTransferAssetTransaction')) {
+		    try {
+                const { txData, txDigest, txName } = request.makeTransferAssetTransaction;
+                postWalletTransaction(txData, txDigest, txName);
+            } catch (e) {
+                failedTx();
+            }
         }
-
-		return {
-			txData: tx.Data,
-			txDigest: tx.Digest,
-			txName: tx.Name
-		}
 	}
 
-	function postWalletTransaction(data, name, hash) {
+	function makeTransferAssetTransaction(publicKey, toAddress, token, amount, nonce) {
+        brows.runtime.sendMessage({ makeTransferAssetTransaction: { publicKey, toAddress, token, amount, nonce } });
+	}
+
+	function postWalletTransaction(data, hash, name) {
 		http('GET', config.networkUrl[network] + config.api.blockChainStatus).then(result => {
 			if (!result || !result.res || !result.res.blockchain_state || !result.res.blockchain_state.block_count) {
 				failedTx();
@@ -440,9 +430,7 @@
 
 	function confirm() {
 		disabledBtn();
-
-		const txAsset = makeTransferAssetTransaction(privateKey, currentUnconfirmedTx.to, currentUnconfirmedTx.token.toUpperCase(), currentUnconfirmedTx.amount, nonce);
-		postWalletTransaction(txAsset.txData, txAsset.txName, txAsset.txDigest);
+		makeTransferAssetTransaction(publicKey, currentUnconfirmedTx.to, currentUnconfirmedTx.token.toUpperCase(), currentUnconfirmedTx.amount, nonce);
 	}
 
 	function cancel(isClose = true) {
