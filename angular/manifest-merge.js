@@ -3,6 +3,13 @@ const path = require('path');
 
 async function manifestMerge() {
     try {
+        // clear _where property from elliptic package.json
+        let ellipticPackage = await fs.readFile(path.join(__dirname, '/node_modules/elliptic/package.json'), {encoding: 'utf-8'});
+        ellipticPackage = JSON.parse(ellipticPackage || '{}');
+        ellipticPackage._where = '';
+        fs.writeFile(path.join(__dirname, '/node_modules/elliptic/package.json'), JSON.stringify(ellipticPackage));
+
+        // merge manifests
         const env = process.argv[2];
         const baseManifest = await fs.readFile(path.join(__dirname, '/src/manifests/manifest.json'), {encoding: 'utf-8'});
         const addManifest = await fs.readFile(path.join(__dirname, '/src/manifests/manifest.' + env + '.json'), {encoding: 'utf-8'});
