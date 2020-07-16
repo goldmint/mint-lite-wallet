@@ -57,6 +57,15 @@ func ParseSignature(s string) (Signature, error) {
 	return BytesToSignature(b)
 }
 
+// MustParseSignature parses an instance from Base58 string or panics
+func MustParseSignature(s string) Signature {
+	v, err := ParseSignature(s)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // BytesToSignature creates an instance from a bytes slice
 func BytesToSignature(b []byte) (Signature, error) {
 	var v Signature
@@ -65,4 +74,13 @@ func BytesToSignature(b []byte) (Signature, error) {
 	}
 	copy(v[:], b)
 	return v, nil
+}
+
+// MustBytesToSignature creates an instance from bytes slice or panics
+func MustBytesToSignature(b []byte) Signature {
+	v, err := BytesToSignature(b)
+	if err != nil {
+		panic(err)
+	}
+	return v
 }

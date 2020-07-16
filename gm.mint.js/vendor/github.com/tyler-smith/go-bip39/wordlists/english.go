@@ -1135,7 +1135,7 @@ memory
 mention
 menu
 mercy
-manifestMerge
+merge
 merit
 merry
 mesh

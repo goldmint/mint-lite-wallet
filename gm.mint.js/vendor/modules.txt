@@ -3,7 +3,7 @@ github.com/mr-tron/base58/base58
 # github.com/tyler-smith/go-bip39 v1.0.2
 github.com/tyler-smith/go-bip39
 github.com/tyler-smith/go-bip39/wordlists
-# github.com/void616/gm.mint v1.2.3
+# github.com/void616/gm.mint v1.2.5
 ## explicit
 github.com/void616/gm.mint
 github.com/void616/gm.mint/amount
@@ -13,10 +13,10 @@ github.com/void616/gm.mint/mnemonic
 github.com/void616/gm.mint/serializer
 github.com/void616/gm.mint/signer
 github.com/void616/gm.mint/transaction
-# golang.org/x/crypto v0.0.0-20200214034016-1d94cc7ab1c6
+# golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
 ## explicit
 golang.org/x/crypto/pbkdf2
 golang.org/x/crypto/sha3
-# golang.org/x/sys v0.0.0-20200217220822-9197077df867
+# golang.org/x/sys v0.0.0-20200625212154-ddb9806d33ae
 ## explicit
 golang.org/x/sys/cpu

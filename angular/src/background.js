@@ -456,7 +456,7 @@ function openSendTokenPage() {
 
 function injectContent() {
 	try {
-		console.log("Injecting mint")
+		console.log("Injecting content")
 		brows.tabs.executeScript(null, { file: 'content.js' });
 	} catch (e) {
 		console.log("Failed to inject")
