@@ -3,10 +3,11 @@ const path = require('path');
 
 async function manifestMerge() {
     try {
-        // clear _where property from elliptic package.json
+        // clear _where and _args properties from elliptic package.json
         let ellipticPackage = await fs.readFile(path.join(__dirname, '/node_modules/elliptic/package.json'), {encoding: 'utf-8'});
         ellipticPackage = JSON.parse(ellipticPackage || '{}');
         ellipticPackage._where = '';
+        ellipticPackage._args = [];
         fs.writeFile(path.join(__dirname, '/node_modules/elliptic/package.json'), JSON.stringify(ellipticPackage));
 
         // merge manifests
