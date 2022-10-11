@@ -37,7 +37,7 @@
     "rxjs": "6.6.0",
     "rxjs-compat": "6.6.0",
     "simple-scrollbar": "0.4.0",
-    "svg-sprite": "1.4.0",
+    "svg-sprite": "1.5.4",
     "tslib": "1.13.0"
   },
   "devDependencies": {
